@@ -1,9 +1,8 @@
-
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 from time import timezone
 
-class PlayerInfo(AbstractUser):
+class PlayerInfo(User):
 
     PLAYER_GENDER = [
         ('M', 'M'),
@@ -11,7 +10,6 @@ class PlayerInfo(AbstractUser):
         ('N', 'N'),
     ]
 
-    player_starting_date = models.DateTimeField()
     player_avatar = models.ImageField(upload_to = 'avatars/', null = True)
     player_gender = models.CharField(max_length=2, choices = PLAYER_GENDER, null = False, default = 'N')
 
@@ -22,7 +20,7 @@ class PlayerInfo(AbstractUser):
         verbose_name_plural = 'PlayerInfo'
     
     def __str__(self) -> str:
-        return f"{self.player_username}"
+        return f"{self.username}"
 
 class PlayerGameStats(models.Model):
 
@@ -36,7 +34,7 @@ class PlayerGameStats(models.Model):
         ('Ultimate', 'Ultimate'),
     ]
 
-    player_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False)
+    player_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'player_gme_stats')
     player_won_games = models.IntegerField(default = 0, null = False)
     player_level = models.IntegerField(default = 0, null = False)
     player_rank = models.CharField(max_length = 20, choices = RANK_CHOICES, default = 'Beginner', null = False)
@@ -53,7 +51,7 @@ class PlayerGameStats(models.Model):
         verbose_name_plural = 'PlayerGameStats'
     
     def __str__(self) -> str:
-        return f"{self.player_id.player_username}"
+        return f"{self.player_id.username}"
 
 
 class GameResults(models.Model):
@@ -75,7 +73,7 @@ class GameResults(models.Model):
         ]
     
     def __str__(self) -> str:
-        return f"{self.player_1_id.player_username}, {self.player_2_id.player_username}"
+        return f"{self.player_1_id.username}, {self.player_2_id.username}"
 
 class FriendRequests(models.Model):
 
@@ -103,7 +101,7 @@ class FriendRequests(models.Model):
             ]
     
     def __str__(self) -> str:
-        return f"{self.sender_id.player_username}, {self.receiver_id.player_username}"
+        return f"{self.sender_id.username}, {self.receiver_id.username}"
 
 class FriendshipList(models.Model):
 
@@ -125,7 +123,7 @@ class FriendshipList(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.player_id.player_username}, {self.friend_id.player_username}"
+        return f"{self.player_id.username}, {self.friend_id.username}"
 
 class BlockList(models.Model):
 
@@ -146,7 +144,7 @@ class BlockList(models.Model):
         ]
     
     def __str__(self) -> str:
-        return f"b{self.player_id.player_username}, {self.blocked_id.player_username}"
+        return f"b{self.player_id.username}, {self.blocked_id.username}"
 
 class Chat(models.Model):
 
@@ -171,7 +169,7 @@ class Chat(models.Model):
         ]
     
     def __str__(self) -> str:
-        return f"{self.player_1_id.player_username},{self.player_2_id.player_username}"
+        return f"{self.player_1_id.username},{self.player_2_id.username}"
     
     def create_conversation(self, sender_id: int, receiver_id: int, message_content: str) -> 'Conversation':
         if self.chat_status == 'not_chatted':
@@ -198,7 +196,7 @@ class Conversation(models.Model):
         ]
     
     def __str__(self) -> str:
-        return f"{self.sender_id.player_username}, {self.receiver_id.player_username}"
+        return f"{self.sender_id.username}, {self.receiver_id.username}"
 
 class Notification(models.Model):
 
@@ -224,4 +222,4 @@ class Notification(models.Model):
         verbose_name_plural = 'Notification'
     
     def __str__(self) -> str:
-        return f"{self.player_id.player_username}"
+        return f"{self.player_id.username}"

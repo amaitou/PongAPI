@@ -2,8 +2,7 @@ from django.contrib import admin
 from .models import *
 
 
-admin.site.register(PlayerBasicInfo)
-admin.site.register(PlayerDetailInfo)
+admin.site.register(PlayerInfo)
 admin.site.register(PlayerGameStats)
 admin.site.register(GameResults)
 admin.site.register(FriendRequests)

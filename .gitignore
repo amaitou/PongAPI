@@ -4,3 +4,4 @@
 pyvenv.*
 __pycache__
 lib64
+avatars/
