@@ -53,7 +53,7 @@ def Login(request):
 		user = authenticate(request, username=username, password=password)
 		if user is not None:
 			login(request, user)
-			return JsonResponse({'status': 'success', 'message': 'User logged in successfully!'})
+			return JsonResponse({'status': 'success', 'message': 'User logged in successfully!', 'username': request.user.username})
 
 @csrf_exempt
 def Logout(request):
@@ -62,8 +62,9 @@ def Logout(request):
 		if not request.user.is_authenticated:
 			return JsonResponse({'status': 'failed', 'message': 'User not logged in!'})
 
+		username = request.user.username
 		logout(request)
-		return JsonResponse({'status': 'success', 'message': 'User logged out successfully!'})			
+		return JsonResponse({'status': 'success', 'message': 'User logged out successfully!', 'username': username})			
 
 
 @csrf_exempt
