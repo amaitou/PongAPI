@@ -1,6 +1,7 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 from django.contrib.auth import login, authenticate, logout
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password, check_password
+from django.http import JsonResponse
 from .models import *
 
 @csrf_exempt
@@ -19,7 +20,7 @@ def Register(request):
 		if password == password2:
 			user = PlayerInfo.objects.create(username=username,
 							email=email,
-							password=password,
+							password=make_password(password),
 							date_joined=date_joined,
 							first_name=first_name,
 							last_name=last_name,
@@ -38,9 +39,22 @@ def Login(request):
 			return JsonResponse({'status': 'failed', 'message': 'User already logged in!'})
 		username = request.POST.get('username')
 		password = request.POST.get('password')
-		user = authenticate(request, username=username, password=password)
-		if user is not None:
-			login(request, user)
-			return JsonResponse({'status': 'success', 'message': 'User logged in successfully!'})
+		if check_password(password, PlayerInfo.objects.get(username=username).password):
+			user = authenticate(request, username=username, password=password)
+			if user is not None:
+				login(request, user)
+				return JsonResponse({'status': 'success', 'message': 'User logged in successfully!'})
+			else:
+				return JsonResponse({'status': 'failed', 'message': 'User not found!'})
 		else:
-			return JsonResponse({'status': 'failed', 'message': 'User not found!'})
+			return JsonResponse({'status': 'failed', 'message': 'Incorrect password!'})
+
+@csrf_exempt
+def Logout(request):
+	
+	if request.method == 'POST':
+		if request.user.is_authenticated:
+			logout(request)
+			return JsonResponse({'status': 'success', 'message': 'User logged out successfully!'})
+		else:
+			return JsonResponse({'status': 'failed', 'message': 'User not logged in!'})
