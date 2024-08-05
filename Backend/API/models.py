@@ -10,8 +10,8 @@ class PlayerInfo(User):
         ('N', 'N'),
     ]
 
-    player_avatar = models.ImageField(upload_to = 'avatars/', null = True)
-    player_gender = models.CharField(max_length=2, choices = PLAYER_GENDER, null = False, default = 'N')
+    avatar = models.ImageField(upload_to = 'avatars/', null = True)
+    gender = models.CharField(max_length=2, choices = PLAYER_GENDER, null = True, default = 'N')
 
     class Meta:
         
@@ -35,14 +35,14 @@ class PlayerGameStats(models.Model):
     ]
 
     player_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'player_gme_stats')
-    player_won_games = models.IntegerField(default = 0, null = False)
-    player_level = models.IntegerField(default = 0, null = False)
-    player_rank = models.CharField(max_length = 20, choices = RANK_CHOICES, default = 'Beginner', null = False)
-    player_lost_games = models.IntegerField(default = 0, null = False)
-    player_draw_games = models.IntegerField(default = 0, null = False)
-    player_won_tournaments = models.IntegerField(default = 0, null = False)
-    player_total_tournaments = models.IntegerField(default = 0, null = False)
-    player_experience_points = models.IntegerField(default = 0, null = False)
+    won_games = models.IntegerField(default = 0, null = False)
+    level = models.IntegerField(default = 0, null = False)
+    rank = models.CharField(max_length = 20, choices = RANK_CHOICES, default = 'Beginner', null = False)
+    lost_games = models.IntegerField(default = 0, null = False)
+    draw_games = models.IntegerField(default = 0, null = False)
+    won_tournaments = models.IntegerField(default = 0, null = False)
+    total_tournaments = models.IntegerField(default = 0, null = False)
+    experience_points = models.IntegerField(default = 0, null = False)
 
     class Meta:
         

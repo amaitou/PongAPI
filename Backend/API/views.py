@@ -1,40 +1,46 @@
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
+from django.contrib.auth import login, authenticate, logout
 from .models import *
-
-def Index(request):
-	return render(request, 'API/index.html', {})
 
 @csrf_exempt
 def Register(request):
-	if request.method == "POST":
-		check_user = PlayerBasicInfo.objects
-		if check_user.filter(player_username = request.POST.get("username")).exists()  or check_user.filter(player_email = request.POST.get("email")).exists():
-			return JsonResponse({"message": "User Already Exists"})
-		created_user = check_user.create(
-			player_username = request.POST.get("username"),
-			player_email = request.POST.get("email"),
-			player_password = make_password(request.POST.get("password")))
-		created_user.save()
-		return JsonResponse({"message": "User Created Successfully"})
-	else:
-		print("request.GET")
-		return render(request, 'API/register.html', {})
 
+	if request.method == 'POST':
+		first_name = request.POST.get('first_name')
+		last_name = request.POST.get('last_name')
+		username = request.POST.get('username')
+		email = request.POST.get('email')
+		password = request.POST.get('password1')
+		password2 = request.POST.get('password2')
+		date_joined = request.POST.get('date_joined')
+		gender = request.POST.get("gender")
+	
+		if password == password2:
+			user = PlayerInfo.objects.create(username=username,
+							email=email,
+							password=password,
+							date_joined=date_joined,
+							first_name=first_name,
+							last_name=last_name,
+							gender=gender)
+			user.save()
+			return JsonResponse({'status': 'success', 'message': 'User created successfully!'})
+		else:
+			return JsonResponse({'status': 'failed', 'message': 'Password does not match!'})
 
 @csrf_exempt
 def Login(request):
-	if request.method == "POST":
-		check_user = PlayerBasicInfo.objects
-		if check_user.filter(player_username = request.POST.get("username")).exists():
-			user = check_user.get(player_username = request.POST.get("username"))
-			if check_password(request.POST.get("password"), user.player_password):
-				return JsonResponse({"message": "Login Successful"})
-			else:
-				return JsonResponse({"message": "Invalid Password"})
+	
+	if request.method == 'POST':
+
+		if request.user.is_authenticated:
+			return JsonResponse({'status': 'failed', 'message': 'User already logged in!'})
+		username = request.POST.get('username')
+		password = request.POST.get('password')
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			login(request, user)
+			return JsonResponse({'status': 'success', 'message': 'User logged in successfully!'})
 		else:
-			return JsonResponse({"message": "User Not Found"})
-	else:
-		return render(request, 'API/login.html', {})
+			return JsonResponse({'status': 'failed', 'message': 'User not found!'})
