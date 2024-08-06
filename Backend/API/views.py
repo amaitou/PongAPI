@@ -20,19 +20,19 @@ def Register(request):
 		if PlayerInfo.objects.filter(username=username).exists():
 			return JsonResponse({'status': 'failed', 'message': 'Username already exists!'})
 
-		else:
-			if password1 != password2:
-				return JsonResponse({'status': 'failed', 'message': 'Password does not match!'})
+		if password1 != password2:
+			return JsonResponse({'status': 'failed', 'message': 'Password does not match!'})
 
-			user = PlayerInfo.objects.create(username=username,
-							email=email,
-							password=make_password(password1),
-							date_joined=date_joined,
-							first_name=first_name,
-							last_name=last_name,
-							gender=gender)
-			user.save()
+		user = PlayerInfo.objects.create(username=username,
+						email=email,
+						password=make_password(password1),
+						date_joined=date_joined,
+						first_name=first_name,
+						last_name=last_name,
+						gender=gender)
+		user.save()
 	return JsonResponse({'status': 'success', 'message': 'User created successfully!'})
+
 
 @csrf_exempt
 def Login(request):
