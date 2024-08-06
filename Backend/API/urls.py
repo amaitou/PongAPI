@@ -11,6 +11,7 @@ urlpatterns = [
     path('logout/', views.Logout, name='logout'),
     path('delete/', views.Delete, name='delete'),
     path('routes/', views.Routes, name='routes'),
+    path('user/', views.GetUser, name='players'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

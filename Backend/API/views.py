@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password, check_password
+from .serializers import *
 from django.http import JsonResponse
 from .models import *
 
@@ -78,24 +80,22 @@ def Login(request):
 		if not check_password(password, PlayerInfo.objects.get(username=username).password):
 			return Response({'status': 'failed', 'message': 'Incorrect password!'})
 		
-		user = authenticate(request, username=username, password=password)
-		if user is not None:
-			login(request, user)
-			return Response({'status': 'success', 'message': 'User logged in successfully!', 'username': request.user.username})
+		token = RefreshToken.for_user(PlayerInfo.objects.get(username=username))
+		login(request, PlayerInfo.objects.get(username=username))
+		return Response({'status': 'success', 'message': 'User logged in successfully!', 'token': str(token.access_token), 'refresh': str(token)})
 
 @api_view(['POST'])
 def Logout(request):
-	
-	if request.method == 'POST':
-		if not request.user.is_authenticated:
-			return JsonResponse({'status': 'failed', 'message': 'User not logged in!'})
+    try:
+        refresh_token = request.data["refresh"]
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({'status': 'success', 'message': 'User logged out successfully!'})
+    except Exception as e:
+        return Response({'status': 'failed', 'message': str(e)}, status=400)			
 
-		username = request.user.username
-		logout(request)
-		return JsonResponse({'status': 'success', 'message': 'User logged out successfully!', 'username': username})			
 
-
-@csrf_exempt
+@api_view(['POST'])
 def Delete(request):
 
 	if request.method == 'POST':
@@ -107,3 +107,9 @@ def Delete(request):
 		user = PlayerInfo.objects.get(username=username)
 		user.delete()
 		return JsonResponse({'status': 'success', 'message': 'User deleted successfully!'})
+
+@api_view(['POST'])
+def GetUser(request):
+	users = PlayerInfo.objects.get(username=request.data['username'])
+	__serializer = PlayerInfoSerializer(users)
+	return Response(__serializer.data)
