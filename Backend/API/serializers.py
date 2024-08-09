@@ -8,7 +8,6 @@ class PlayerInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
     
     password = serializers.CharField(write_only=True)
-    password = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
 
