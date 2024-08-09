@@ -1,8 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from time import timezone
 
-class PlayerInfo(User):
+class PlayerInfo(AbstractUser):
 
     PLAYER_GENDER = [
         ('M', 'M'),
@@ -12,12 +12,19 @@ class PlayerInfo(User):
 
     avatar = models.ImageField(upload_to = 'avatars/', null = True)
     gender = models.CharField(max_length=2, choices = PLAYER_GENDER, null = True, default = 'N')
+    email = models.EmailField(unique = True, null = False)
+    first_name = models.CharField(max_length = 30, null = False)
+    last_name = models.CharField(max_length = 30, null = False)
+    username = models.CharField(max_length = 30, unique = True, null = False)
 
     class Meta:
         
         db_table = 'PlayerInfo'
         verbose_name = 'PlayerInfo'
         verbose_name_plural = 'PlayerInfo'
+    
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
     
     def __str__(self) -> str:
         return f"{self.username}"

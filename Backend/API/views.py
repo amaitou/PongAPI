@@ -1,115 +1,88 @@
-from django.contrib.auth import login, authenticate, logout
-from django.views.decorators.csrf import csrf_exempt
+
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from .serializers import PlayerInfoSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.hashers import make_password, check_password
-from .serializers import *
-from django.http import JsonResponse
-from .models import *
+from rest_framework.views import APIView
+from rest_framework import status
+import time
+from .models import PlayerInfo
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+class RegisterView(APIView):
+    def post(self, request):
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
+        if request.data['password'] != request.data['re_password']:
+            return Response({'error': 'Passwords do not match'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = PlayerInfoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        token['username'] = user.username
+class LoginView(APIView):
+    def post(self, request):
+        try:
+            user = PlayerInfo.objects.get(username=request.data['username'])
+        except PlayerInfo.DoesNotExist:
+            raise AuthenticationFailed('User not found!')
 
-        return token
+        if not user.check_password(request.data['password']):
+            return Response({'error': 'Wrong password'}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def Routes(request):
-	# Routes
-	routes = [
-		'/api/register',
-		'/api/login',
-		'/api/logout',
-		'/api/delete',
-	]
-	return Response(routes)
-	
-@api_view(['POST'])
-def Register(request):
+        token = RefreshToken.for_user(user)
+        response = Response()
 
-	if request.method == 'POST':
-		first_name = request.POST.get('first_name')
-		last_name = request.POST.get('last_name')
-		username = request.POST.get('username')
-		email = request.POST.get('email')
-		password1 = request.POST.get('password1')
-		password2 = request.POST.get('password2')
-		date_joined = request.POST.get('date_joined')
-		gender = request.POST.get("gender")
+        response.set_cookie('access', str(token.access_token), httponly=True)
+        response.set_cookie('refresh', str(token), httponly=True)
+        response.status_code = status.HTTP_200_OK
+        response.data = {
+            'message': "Login successful"
+        }
+        return response
 
-		if PlayerInfo.objects.filter(username=username).exists():
-			return Response({'status': 'failed', 'message': 'Username already exists!'})
+class GetPlayer(APIView):
+    class TokenExpired(Exception):
+        pass
 
-		if password1 != password2:
-			return Response({'status': 'failed', 'message': 'Password does not match!'})
+    def get(self, request):
+        access_token = request.COOKIES.get('access')
+        refresh_token = request.COOKIES.get('refresh')
 
-		user = PlayerInfo.objects.create(username=username,
-						email=email,
-						password=make_password(password1),
-						date_joined=date_joined,
-						first_name=first_name,
-						last_name=last_name,
-						gender=gender)
-		user.save()
-	return Response({'status': 'success', 'message': 'User created successfully!'})
+        if not access_token or not refresh_token:
+            return Response({'error': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+        try:
+            access_token = AccessToken(access_token)
+        except InvalidToken:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        try:
+            expiration = access_token['exp']
+            if expiration < time.time():
+                raise self.TokenExpired
+        except self.TokenExpired:
+            return Response({'error': 'Token was expired'}, status=status.HTTP_401_UNAUTHORIZED)
 
-@api_view(['POST'])
-def Login(request):
-	
-	if request.method == 'POST':
+        player = PlayerInfo.objects.get(username=access_token['user_id'])
+        serializer = PlayerInfoSerializer(player)
+        return Response(serializer.data,
+                        status=status.HTTP_200_OK)
 
-		username = request.data['username']
-		print(username)
-		if not PlayerInfo.objects.filter(username=username).exists():
-			return Response({'status': 'failed', 'message': 'User not found!'})
+class LogoutView(APIView):
+    def post(self, request):
+        refresh = request.COOKIES.get('refresh')
+        if not refresh:
+            return Response({'error': 'No refresh token provided.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-		if request.user.is_authenticated:
-			return Response({'status': 'failed', 'message': 'User already logged in!'})
+        try:
+            token = RefreshToken(refresh)
+            token.blacklist()
+        except TokenError:
+            return Response({'error': 'Invalid token or error blacklisting token.'},status=status.HTTP_400_BAD_REQUEST)
 
-		password = request.data['password']
-		if not check_password(password, PlayerInfo.objects.get(username=username).password):
-			return Response({'status': 'failed', 'message': 'Incorrect password!'})
-		
-		token = RefreshToken.for_user(PlayerInfo.objects.get(username=username))
-		login(request, PlayerInfo.objects.get(username=username))
-		return Response({'status': 'success', 'message': 'User logged in successfully!', 'token': str(token.access_token), 'refresh': str(token)})
-
-@api_view(['POST'])
-def Logout(request):
-    try:
-        refresh_token = request.data["refresh"]
-        token = RefreshToken(refresh_token)
-        token.blacklist()
-        return Response({'status': 'success', 'message': 'User logged out successfully!'})
-    except Exception as e:
-        return Response({'status': 'failed', 'message': str(e)}, status=400)			
-
-
-@api_view(['POST'])
-def Delete(request):
-
-	if request.method == 'POST':
-
-		username = request.POST.get('username')
-		if not PlayerInfo.objects.filter(username=username).exists():
-			return JsonResponse({'status': 'failed', 'message': 'User not found!'})
-
-		user = PlayerInfo.objects.get(username=username)
-		user.delete()
-		return JsonResponse({'status': 'success', 'message': 'User deleted successfully!'})
-
-@api_view(['POST'])
-def GetUser(request):
-	users = PlayerInfo.objects.get(username=request.data['username'])
-	__serializer = PlayerInfoSerializer(users)
-	return Response(__serializer.data)
+        response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+        response.delete_cookie('access')
+        response.delete_cookie('refresh')
+        return response

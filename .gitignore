@@ -1,5 +1,6 @@
 
 __pycache__
+migrations
 lib64
 avatars/
 venv/
