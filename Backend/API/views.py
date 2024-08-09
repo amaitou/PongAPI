@@ -8,6 +8,9 @@ from rest_framework.views import APIView
 from rest_framework import status
 import time
 from .models import PlayerInfo
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate
+from rest_framework.authentication import BaseAuthentication
 
 class RegisterView(APIView):
     def post(self, request):
@@ -20,26 +23,45 @@ class RegisterView(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-class LoginView(APIView):
-    def post(self, request):
+class CookieTokenAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        # Retrieve the access token from the cookies
+        token = request.COOKIES.get('access')
+        if not token:
+            return None  # No token found, proceed with login
+
         try:
-            user = PlayerInfo.objects.get(username=request.data['username'])
-        except PlayerInfo.DoesNotExist:
-            raise AuthenticationFailed('User not found!')
+            # Validate the access token
+            validated_token = AccessToken(token)
+            user = PlayerInfo.objects.get(id=validated_token['user_id'])
+            return (user, None)  # Return the authenticated user
+        except Exception as e:
+            # Debugging: Print or log the exception
+            print(f"Authentication failed: {e}")
+            return None  # Token is invalid or expired
 
-        if not user.check_password(request.data['password']):
-            return Response({'error': 'Wrong password'}, status=status.HTTP_400_BAD_REQUEST)
+class LoginView(APIView):
+    authentication_classes = [CookieTokenAuthentication]
 
-        token = RefreshToken.for_user(user)
-        response = Response()
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return Response({"message": "User already logged in"}, status=200)
 
-        response.set_cookie('access', str(token.access_token), httponly=True)
-        response.set_cookie('refresh', str(token), httponly=True)
-        response.status_code = status.HTTP_200_OK
-        response.data = {
-            'message': "Login successful"
-        }
-        return response
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+
+            response = Response({"message": "User logged in successfully"})
+            response.set_cookie('access', access_token, httponly=True)
+            response.set_cookie('refresh', refresh_token, httponly=True)
+            return response
+        else:
+            return Response({"error": "Invalid credentials"}, status=400)
 
 class GetPlayer(APIView):
     class TokenExpired(Exception):
@@ -64,7 +86,7 @@ class GetPlayer(APIView):
         except self.TokenExpired:
             return Response({'error': 'Token was expired'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        player = PlayerInfo.objects.get(username=access_token['user_id'])
+        player = PlayerInfo.objects.get(id=access_token['user_id'])
         serializer = PlayerInfoSerializer(player)
         return Response(serializer.data,
                         status=status.HTTP_200_OK)

@@ -61,7 +61,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
-    'USER_ID_FIELD': 'username',
+    'USER_ID_FIELD': 'id',
 }
 
 DJOSER = {
