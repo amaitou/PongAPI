@@ -1,0 +1,22 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #201E43;
+    font-family: Arial, sans-serif;
+}
+
+.game-container {
+    border: 3px solid black;
+    margin: 100px auto;
+    width: fit-content;
+}
+
+.game-container #pong {
+    width: 1950px;
+    height: 1000px;
+    position: relative;
+}
