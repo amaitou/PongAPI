@@ -24,7 +24,7 @@ class PlayerInfo(AbstractUser):
         verbose_name_plural = 'PlayerInfo'
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    REQUIRED_FIELDS = []
     
     def __str__(self) -> str:
         return f"{self.username}"
