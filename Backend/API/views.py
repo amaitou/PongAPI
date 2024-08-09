@@ -1,16 +1,17 @@
 
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import IsAuthenticated
+from .authentication import CookieTokenAuthentication
 from .serializers import PlayerInfoSerializer
 from rest_framework.response import Response
+from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework import status
-import time
 from .models import PlayerInfo
-from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import authenticate
-from rest_framework.authentication import BaseAuthentication
+import time
 
 class RegisterView(APIView):
     def post(self, request):
@@ -22,23 +23,6 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-class CookieTokenAuthentication(BaseAuthentication):
-    def authenticate(self, request):
-        # Retrieve the access token from the cookies
-        token = request.COOKIES.get('access')
-        if not token:
-            return None  # No token found, proceed with login
-
-        try:
-            # Validate the access token
-            validated_token = AccessToken(token)
-            user = PlayerInfo.objects.get(id=validated_token['user_id'])
-            return (user, None)  # Return the authenticated user
-        except Exception as e:
-            # Debugging: Print or log the exception
-            print(f"Authentication failed: {e}")
-            return None  # Token is invalid or expired
 
 class LoginView(APIView):
     authentication_classes = [CookieTokenAuthentication]
