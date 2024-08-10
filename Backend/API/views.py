@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework import status
+from django.conf import settings
 from .models import PlayerInfo
 import time
 
@@ -41,8 +42,8 @@ class LoginView(APIView):
             refresh_token = str(refresh)
 
             response = Response({"message": "User logged in successfully"})
-            response.set_cookie('access', access_token, httponly=True)
-            response.set_cookie('refresh', refresh_token, httponly=True)
+            response.set_cookie(settings.ACCESS_TOKEN, access_token, httponly=True)
+            response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
             return response
         else:
             return Response({"error": "Invalid credentials"}, status=400)
@@ -52,8 +53,8 @@ class GetPlayer(APIView):
         pass
 
     def get(self, request):
-        access_token = request.COOKIES.get('access')
-        refresh_token = request.COOKIES.get('refresh')
+        access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
+        refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
 
         if not access_token or not refresh_token:
             return Response({'error': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -77,7 +78,7 @@ class GetPlayer(APIView):
 
 class LogoutView(APIView):
     def post(self, request):
-        refresh = request.COOKIES.get('refresh')
+        refresh = request.COOKIES.get(settings.REFRESH_TOKEN)
         if not refresh:
             return Response({'error': 'No refresh token provided.'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -89,6 +90,6 @@ class LogoutView(APIView):
             return Response({'error': 'Invalid token or error blacklisting token.'},status=status.HTTP_400_BAD_REQUEST)
 
         response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
-        response.delete_cookie('access')
-        response.delete_cookie('refresh')
+        response.delete_cookie(settings.ACCESS_TOKEN)
+        response.delete_cookie(settings.REFRESH_TOKEN)
         return response
