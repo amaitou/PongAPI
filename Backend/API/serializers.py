@@ -1,11 +1,13 @@
 
 from .models import PlayerInfo
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-class PlayerInfoSerializer(serializers.ModelSerializer):
+class PlayerRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerInfo
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'gender']
     
     password = serializers.CharField(write_only=True)
 
@@ -20,4 +22,19 @@ class PlayerInfoSerializer(serializers.ModelSerializer):
         if email is not None:
             instance.email = email.lower()
         instance.save()
+        return instance
+
+class PlayerUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlayerInfo
+        fields = ['username', 'first_name', 'last_name', 'email']
+    
+    def put(self, instance, validated_data):
+        
+        instance.username = validated_data.get('username', instance.username)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email)
+        instance.save()
+
         return instance

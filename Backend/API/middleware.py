@@ -12,12 +12,12 @@ class RefreshTokenMiddleware(MiddlewareMixin):
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
         refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
         
-        if access_token:
+        if access_token and refresh_token:
             try:
-                token = AccessToken(access_token)
+                access = AccessToken(access_token)
                 
-                expiry_time = token['exp']
-                remaining_time = expiry_time - time.time()
+                expired_time = access['exp']
+                remaining_time = expired_time - time.time()
                 
                 if remaining_time < 60 * 60:
                     
@@ -25,7 +25,7 @@ class RefreshTokenMiddleware(MiddlewareMixin):
                     refresh.blacklist()
 
                     try:
-                        user = PlayerInfo.objects.get(id=token['user_id'])
+                        user = PlayerInfo.objects.get(id=access['user_id'])
                     except PlayerInfo.DoesNotExist:
                         return self.get_response(request)
                     refresh = RefreshToken.for_user(user)
