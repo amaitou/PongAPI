@@ -19,11 +19,10 @@ class RefreshTokenMiddleware(MiddlewareMixin):
                 expiry_time = token['exp']
                 remaining_time = expiry_time - time.time()
                 
-                if remaining_time < 1 * 60:
+                if remaining_time < 60 * 60:
                     
                     refresh = RefreshToken(refresh_token)
                     refresh.blacklist()
-                    print('blacklisted')
 
                     try:
                         user = PlayerInfo.objects.get(id=token['user_id'])
