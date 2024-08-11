@@ -1,20 +1,23 @@
 
-from .models import UserInfo
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from .utils import password_validation
 from rest_framework import serializers
+from .models import UserInfo, UserGameStats
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'gender']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'gender', 'avatar']
     
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, validators=[password_validation])
 
     def create(self, validated_data):
 
         password = validated_data.pop('password', None)
         email = validated_data.pop('email', None)
+
         instance = self.Meta.model(**validated_data)
 
         if password is not None:
@@ -39,10 +42,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
         return instance
 
-class GetUseBasicInfoSerializer(serializers.ModelSerializer):
+class GetUserBasicInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'gender']
-    
-    def get(self, instance):
-        return instance
+
+class GetGameStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserGameStats
+        fields = "__all__"

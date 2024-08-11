@@ -6,13 +6,13 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from .authentication import CookieTokenAuthentication
-from .serializers import UserRegistrationSerializer, UserUpdateSerializer, GetUseBasicInfoSerializer
+from .serializers import UserRegistrationSerializer, UserUpdateSerializer, GetUserBasicInfoSerializer, GetGameStatsSerializer
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
-from .models import UserInfo
+from .models import UserInfo, UserGameStats
 import time
 
 class RegisterView(APIView):
@@ -35,7 +35,7 @@ class LoginView(APIView):
 
     def post(self, request):
         if request.user.is_authenticated:
-            return Response({"message": "User already logged in"}, status=200)
+            return Response({"message": "User already logged in"}, status=status.HTTP_200_OK)
 
         username = request.data.get("username")
         password = request.data.get("password")
@@ -60,18 +60,18 @@ class GetMe(APIView):
     def get(self, request):
 
         if not request.user.is_authenticated:
-            return Response({'error': 'User not logged in.'},
+            return Response({'error': 'Unauthenticated user.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
         if not access_token:
-            return Response({'error': 'No token provided.'},
+            return Response({'error': 'Could\'t find an access token.'},
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             access_token = AccessToken(access_token)
         except TokenError:
-            return Response({'error': 'Invalid token.'},
+            return Response({'error': 'Invalid or expired token.'},
                             status=InvalidToken.status_code)
         
         try:
@@ -117,12 +117,12 @@ class UpdateUser(APIView):
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
         if not access_token:
-            return Response({'error': 'No token provided.'},
+            return Response({'error': 'Could\'t find an access token.'},
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             access_token = AccessToken(access_token)
         except TokenError:
-            return Response({'error': 'Invalid token.'},
+            return Response({'error': 'Invalid or expired token.'},
                             status=InvalidToken.status_code)
 
         user = UserInfo.objects.get(id=access_token['user_id'])
@@ -143,12 +143,12 @@ class GetUser(APIView):
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
         if not access_token:
-            return Response({'error': 'No token provided.'},
+            return Response({'error': 'Could\'t find an access token.'},
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             access_token = AccessToken(access_token)
         except TokenError:
-            return Response({'error': 'Invalid token.'},
+            return Response({'error': 'Invalid or expired token.'},
                             status=InvalidToken.status_code)
         
         try:
@@ -156,6 +156,32 @@ class GetUser(APIView):
         except UserInfo.DoesNotExist:
             return Response({'error': 'Player not found.'},
                             status=status.HTTP_404_NOT_FOUND)
-        serializer = GetUseBasicInfoSerializer(user)
+        serializer = GetUserBasicInfoSerializer(user)
+        return Response(serializer.data,
+                        status=status.HTTP_200_OK)
+
+class GetGameStats(APIView):
+
+    authentication_classes = [CookieTokenAuthentication]
+
+    def get(self, request):
+        access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
+
+        if not access_token:
+            return Response({'error': 'Could\'t find an access token.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            access_token = AccessToken(access_token)
+        except TokenError:
+            return Response({'error': 'Invalid or expired token.'},
+                            status=InvalidToken.status_code)
+        
+        try:
+            user = UserInfo.objects.get(id=access_token['user_id'])
+            game_stats = UserGameStats.objects.get(user_id=user.id)
+        except UserGameStats.DoesNotExist:
+            return Response({'error': 'This player has no game stats.'},
+                            status=status.HTTP_404_NOT_FOUND)
+        serializer = GetGameStatsSerializer(game_stats)
         return Response(serializer.data,
                         status=status.HTTP_200_OK)

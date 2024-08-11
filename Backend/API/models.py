@@ -42,9 +42,9 @@ class UserGameStats(models.Model):
     ]
 
     user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_gme_stats')
-    won_games = models.IntegerField(default = 0, null = False)
     level = models.IntegerField(default = 0, null = False)
     rank = models.CharField(max_length = 20, choices = RANK_CHOICES, default = 'Beginner', null = False)
+    won_games = models.IntegerField(default = 0, null = False)
     lost_games = models.IntegerField(default = 0, null = False)
     draw_games = models.IntegerField(default = 0, null = False)
     won_tournaments = models.IntegerField(default = 0, null = False)
@@ -92,8 +92,8 @@ class FriendRequests(models.Model):
 
     sender_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_sender')
     receiver_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_receiver')
-    friend_request_id = models.AutoField(primary_key = True)
     request_status = models.CharField(max_length = 20, choices = REQUEST_STATUS, default = 'Pending', null = False)
+    friend_request_id = models.AutoField(primary_key = True)
     request_date = models.DateTimeField(auto_now_add = True)
 
     class Meta:
