@@ -19,7 +19,7 @@ class RefreshTokenMiddleware(MiddlewareMixin):
                 expired_time = access['exp']
                 remaining_time = expired_time - time.time()
                 
-                if remaining_time < 1 * 60:
+                if remaining_time < 60 * 60:
                     
                     refresh = RefreshToken(refresh_token)
                     refresh.blacklist()

@@ -38,3 +38,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class GetUseBasicInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInfo
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'gender']
+    
+    def get(self, instance):
+        return instance

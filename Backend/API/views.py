@@ -6,7 +6,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from .authentication import CookieTokenAuthentication
-from .serializers import UserRegistrationSerializer, UserUpdateSerializer
+from .serializers import UserRegistrationSerializer, UserUpdateSerializer, GetUseBasicInfoSerializer
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -53,7 +53,7 @@ class LoginView(APIView):
         else:
             return Response({"error": "Invalid credentials"}, status=400)
 
-class GetUser(APIView):
+class GetMe(APIView):
 
     authentication_classes = [CookieTokenAuthentication]
 
@@ -134,3 +134,28 @@ class UpdateUser(APIView):
             return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST) 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class GetUser(APIView):
+
+    authentication_classes = [CookieTokenAuthentication]
+
+    def get(self, request, username):
+        access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
+
+        if not access_token:
+            return Response({'error': 'No token provided.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            access_token = AccessToken(access_token)
+        except TokenError:
+            return Response({'error': 'Invalid token.'},
+                            status=InvalidToken.status_code)
+        
+        try:
+            user = UserInfo.objects.get(username=username)
+        except UserInfo.DoesNotExist:
+            return Response({'error': 'Player not found.'},
+                            status=status.HTTP_404_NOT_FOUND)
+        serializer = GetUseBasicInfoSerializer(user)
+        return Response(serializer.data,
+                        status=status.HTTP_200_OK)
