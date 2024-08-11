@@ -3,7 +3,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.tokens import AccessToken
 from django.utils.deprecation import MiddlewareMixin
-from .models import PlayerInfo
+from .models import UserInfo
 from django.conf import settings
 import time
 
@@ -19,14 +19,14 @@ class RefreshTokenMiddleware(MiddlewareMixin):
                 expired_time = access['exp']
                 remaining_time = expired_time - time.time()
                 
-                if remaining_time < 60 * 60:
+                if remaining_time < 1 * 60:
                     
                     refresh = RefreshToken(refresh_token)
                     refresh.blacklist()
 
                     try:
-                        user = PlayerInfo.objects.get(id=access['user_id'])
-                    except PlayerInfo.DoesNotExist:
+                        user = UserInfo.objects.get(id=access['user_id'])
+                    except UserInfo.DoesNotExist:
                         return self.get_response(request)
                     refresh = RefreshToken.for_user(user)
                     new_access_token = str(refresh.access_token)

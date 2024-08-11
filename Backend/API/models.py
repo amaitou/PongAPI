@@ -1,17 +1,17 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from time import timezone
 
-class PlayerInfo(AbstractUser):
+class UserInfo(AbstractUser):
 
-    PLAYER_GENDER = [
+    user_GENDER = [
         ('M', 'M'),
         ('F', 'F'),
         ('N', 'N'),
     ]
 
     avatar = models.ImageField(upload_to = 'avatars/', null = True)
-    gender = models.CharField(max_length=2, choices = PLAYER_GENDER, null = True, default = 'N')
+    gender = models.CharField(max_length=2, choices = user_GENDER, null = True, default = 'N')
     email = models.EmailField(unique = True, null = False)
     first_name = models.CharField(max_length = 30, null = False)
     last_name = models.CharField(max_length = 30, null = False)
@@ -19,9 +19,9 @@ class PlayerInfo(AbstractUser):
 
     class Meta:
         
-        db_table = 'PlayerInfo'
-        verbose_name = 'PlayerInfo'
-        verbose_name_plural = 'PlayerInfo'
+        db_table = 'UserInfo'
+        verbose_name = 'UserInfo'
+        verbose_name_plural = 'UserInfo'
     
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
@@ -29,7 +29,7 @@ class PlayerInfo(AbstractUser):
     def __str__(self) -> str:
         return f"{self.username}"
 
-class PlayerGameStats(models.Model):
+class UserGameStats(models.Model):
 
     RANK_CHOICES = [
         ('Beginner', 'Beginner'),
@@ -41,7 +41,7 @@ class PlayerGameStats(models.Model):
         ('Ultimate', 'Ultimate'),
     ]
 
-    player_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'player_gme_stats')
+    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_gme_stats')
     won_games = models.IntegerField(default = 0, null = False)
     level = models.IntegerField(default = 0, null = False)
     rank = models.CharField(max_length = 20, choices = RANK_CHOICES, default = 'Beginner', null = False)
@@ -53,20 +53,20 @@ class PlayerGameStats(models.Model):
 
     class Meta:
         
-        db_table = 'PlayerGameStats'
-        verbose_name = 'PlayerGameStats'
-        verbose_name_plural = 'PlayerGameStats'
+        db_table = 'UserGameStats'
+        verbose_name = 'UserGameStats'
+        verbose_name_plural = 'UserGameStats'
     
     def __str__(self) -> str:
-        return f"{self.player_id.username}"
+        return f"{self.user_id.username}"
 
 
 class GameResults(models.Model):
 
-    player_1_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'winner')
-    player_2_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'loser')
-    player_1_score = models.IntegerField(default = 0, null = False)
-    player_2_score = models.IntegerField(default = 0, null = False)
+    user_1_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'winner')
+    user_2_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'loser')
+    user_1_score = models.IntegerField(default = 0, null = False)
+    user_2_score = models.IntegerField(default = 0, null = False)
     game_date = models.DateTimeField(auto_now_add = True)
     game_id = models.AutoField(primary_key = True)
 
@@ -76,11 +76,11 @@ class GameResults(models.Model):
         verbose_name = 'GameResults'
         verbose_name_plural = 'GameResults'
         indexes = [
-            models.Index(fields = ['player_1_id', 'player_2_id'])
+            models.Index(fields = ['user_1_id', 'user_2_id'])
         ]
     
     def __str__(self) -> str:
-        return f"{self.player_1_id.username}, {self.player_2_id.username}"
+        return f"{self.user_1_id.username}, {self.user_2_id.username}"
 
 class FriendRequests(models.Model):
 
@@ -90,8 +90,8 @@ class FriendRequests(models.Model):
         ('Declined', 'Declined'),
     }
 
-    sender_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'request_sender')
-    receiver_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'request_receiver')
+    sender_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_sender')
+    receiver_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_receiver')
     friend_request_id = models.AutoField(primary_key = True)
     request_status = models.CharField(max_length = 20, choices = REQUEST_STATUS, default = 'Pending', null = False)
     request_date = models.DateTimeField(auto_now_add = True)
@@ -110,10 +110,10 @@ class FriendRequests(models.Model):
     def __str__(self) -> str:
         return f"{self.sender_id.username}, {self.receiver_id.username}"
 
-class FriendshipList(models.Model):
+class FriendshipLists(models.Model):
 
-    player_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'player')
-    friend_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'friend')
+    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user')
+    friend_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friend')
     friendship_date = models.DateTimeField(auto_now_add = True)
     friendship_id = models.AutoField(primary_key = True)
 
@@ -122,20 +122,20 @@ class FriendshipList(models.Model):
         db_table = 'FriendshipList'
         verbose_name = 'FriendshipList'
         verbose_name_plural = 'FriendshipList'
-        unique_together = ('player_id', 'friend_id')
+        unique_together = ('user_id', 'friend_id')
 
-        unique_together = ('player_id', 'friend_id')
+        unique_together = ('user_id', 'friend_id')
         indexes = [
-            models.Index(fields = ['player_id', 'friend_id'])
+            models.Index(fields = ['user_id', 'friend_id'])
         ]
     
     def __str__(self):
-        return f"{self.player_id.username}, {self.friend_id.username}"
+        return f"{self.user_id.username}, {self.friend_id.username}"
 
-class BlockList(models.Model):
+class BlockLists(models.Model):
 
-    player_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'blocker')
-    blocked_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'blocked')
+    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'blocker')
+    blocked_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'blocked')
     block_id = models.AutoField(primary_key = True)
     time_of_block = models.DateTimeField(auto_now_add = True)
 
@@ -144,23 +144,23 @@ class BlockList(models.Model):
         db_table = 'BlockList'
         verbose_name = 'BlockList'
         verbose_name_plural = 'BlockList'
-        unique_together = ('player_id', 'blocked_id')
+        unique_together = ('user_id', 'blocked_id')
 
         indexes = [
-            models.Index(fields = ['player_id', 'blocked_id'])
+            models.Index(fields = ['user_id', 'blocked_id'])
         ]
     
     def __str__(self) -> str:
-        return f"b{self.player_id.username}, {self.blocked_id.username}"
+        return f"b{self.user_id.username}, {self.blocked_id.username}"
 
-class Chat(models.Model):
+class Chats(models.Model):
 
     CHAT_STATUS = [
         ('chatted', 'chatted'),
         ('not_chatted', 'not_chatted'),
     ]
-    player_1_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'player_1_instance')
-    player_2_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'player_2_instance')
+    user_1_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_1_instance')
+    user_2_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_2_instance')
     chat_status = models.CharField(max_length = 20, choices = CHAT_STATUS, default = 'not_chatted', null = False)
     chat_id = models.AutoField(primary_key = True)
 
@@ -169,14 +169,14 @@ class Chat(models.Model):
         db_table = 'Chat'
         verbose_name = 'Chat'
         verbose_name_plural = 'Chat'
-        unique_together = ('player_1_id', 'player_2_id')
+        unique_together = ('user_1_id', 'user_2_id')
 
         indexes = [
-            models.Index(fields = ['player_1_id', 'player_2_id'])
+            models.Index(fields = ['user_1_id', 'user_2_id'])
         ]
     
     def __str__(self) -> str:
-        return f"{self.player_1_id.username},{self.player_2_id.username}"
+        return f"{self.user_1_id.username},{self.user_2_id.username}"
     
     def create_conversation(self, sender_id: int, receiver_id: int, message_content: str) -> 'Conversation':
         if self.chat_status == 'not_chatted':
@@ -186,9 +186,9 @@ class Chat(models.Model):
 
 
 
-class Conversation(models.Model):
-    sender_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'message_sender')
-    receiver_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'message_receiver')
+class Conversations(models.Model):
+    sender_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'message_sender')
+    receiver_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'message_receiver')
     message_content = models.TextField(null = False)
     message_date = models.DateTimeField(auto_now_add = True)
     message_id = models.AutoField(primary_key = True)
@@ -205,7 +205,7 @@ class Conversation(models.Model):
     def __str__(self) -> str:
         return f"{self.sender_id.username}, {self.receiver_id.username}"
 
-class Notification(models.Model):
+class Notifications(models.Model):
 
     NOTIFICATION_TYPE = [
         ('Friend Request', 'Friend Request'),
@@ -215,7 +215,7 @@ class Notification(models.Model):
         ('Tournament', 'Tournament'),
     ]
 
-    player_id = models.ForeignKey(PlayerInfo, on_delete = models.CASCADE, null = False, related_name = 'player_notification')
+    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_notification')
     notification_type = models.CharField(max_length = 20, choices = NOTIFICATION_TYPE, null = False)
     notification_content = models.TextField(null = False)
     notification_date = models.DateTimeField(auto_now_add = True)
@@ -229,4 +229,4 @@ class Notification(models.Model):
         verbose_name_plural = 'Notification'
     
     def __str__(self) -> str:
-        return f"{self.player_id.username}"
+        return f"{self.user_id.username}"

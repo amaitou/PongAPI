@@ -5,7 +5,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import AccessToken
 from django.conf import settings
-from .models import PlayerInfo
+from .models import UserInfo
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -22,7 +22,7 @@ class CookieTokenAuthentication(BaseAuthentication):
 
         try:
             validated_token = AccessToken(token)
-            user = PlayerInfo.objects.get(id=validated_token['user_id'])
+            user = UserInfo.objects.get(id=validated_token['user_id'])
             return (user, None)
         except Exception as e:
             return None

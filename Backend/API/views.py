@@ -6,13 +6,13 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from .authentication import CookieTokenAuthentication
-from .serializers import PlayerRegistrationSerializer, PlayerUpdateSerializer
+from .serializers import UserRegistrationSerializer, UserUpdateSerializer
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
-from .models import PlayerInfo
+from .models import UserInfo
 import time
 
 class RegisterView(APIView):
@@ -24,7 +24,7 @@ class RegisterView(APIView):
         if request.data['password'] != request.data['re_password']:
             return Response({'error': 'Passwords do not match'},
                             status=status.HTTP_400_BAD_REQUEST)
-        serializer = PlayerRegistrationSerializer(data=request.data)
+        serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -53,7 +53,7 @@ class LoginView(APIView):
         else:
             return Response({"error": "Invalid credentials"}, status=400)
 
-class GetPlayer(APIView):
+class GetUser(APIView):
 
     authentication_classes = [CookieTokenAuthentication]
 
@@ -75,11 +75,11 @@ class GetPlayer(APIView):
                             status=InvalidToken.status_code)
         
         try:
-            player = PlayerInfo.objects.get(id=access_token['user_id'])
-        except PlayerInfo.DoesNotExist:
+            user = UserInfo.objects.get(id=access_token['user_id'])
+        except UserInfo.DoesNotExist:
             return Response({'error': 'Player not found.'},
                             status=status.HTTP_404_NOT_FOUND)
-        serializer = PlayerRegistrationSerializer(player)
+        serializer = UserRegistrationSerializer(user)
         return Response(serializer.data,
                         status=status.HTTP_200_OK)
 
@@ -109,7 +109,7 @@ class LogoutView(APIView):
         response.delete_cookie(settings.REFRESH_TOKEN)
         return response
     
-class UpdatePlayer(APIView):
+class UpdateUser(APIView):
 
     authentication_classes = [CookieTokenAuthentication]
 
@@ -125,8 +125,8 @@ class UpdatePlayer(APIView):
             return Response({'error': 'Invalid token.'},
                             status=InvalidToken.status_code)
 
-        player = PlayerInfo.objects.get(id=access_token['user_id'])
-        serializer = PlayerUpdateSerializer(player, data=request.data)
+        user = UserInfo.objects.get(id=access_token['user_id'])
+        serializer = UserUpdateSerializer(user, data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
