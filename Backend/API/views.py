@@ -1,20 +1,16 @@
 
-from .serializers import UserRegistrationSerializer, UserUpdateSerializer, GetUserBasicInfoSerializer, GetGameStatsSerializer
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework.decorators import authentication_classes
-from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
+from .serializers import    UserRegistrationSerializer, UserUpdateSerializer, \
+                            GetUserBasicInfoSerializer, GetGameStatsSerializer
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from .authentication import CookieTokenAuthentication
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
+from .models import UserInfo, UserGameStats
 from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
-from .models import UserInfo, UserGameStats
-import time
 
 class RegisterView(APIView):
 
