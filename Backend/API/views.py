@@ -46,7 +46,7 @@ class LoginView(APIView):
         refresh_token = str(refresh)
 
         response = Response({"message": "User logged in successfully"})
-        response.set_cookie(settings.ACCESS_TOKEN, access_token, httponly=True)
+        response.set_cookie(settings.ACCESS_TOKEN, access_token)
         response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
 
         return response

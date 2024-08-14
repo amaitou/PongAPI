@@ -8,35 +8,53 @@ from django.conf import settings
 import time
 
 class RefreshTokenMiddleware(MiddlewareMixin):
-    def process_request(self, request):
-        access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
-        refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
-        
-        if access_token and refresh_token:
-            try:
-                access = AccessToken(access_token)
-                
-                expired_time = access['exp']
-                remaining_time = expired_time - time.time()
-                
-                if remaining_time < 60 * 60:
-                    
-                    refresh = RefreshToken(refresh_token)
-                    refresh.blacklist()
 
-                    try:
-                        user = UserInfo.objects.get(id=access['user_id'])
-                    except UserInfo.DoesNotExist:
-                        return self.get_response(request)
-                    refresh = RefreshToken.for_user(user)
-                    new_access_token = str(refresh.access_token)
-                    new_refresh_token = str(refresh)
-                    
-                    response = self.get_response(request)
-                    response.set_cookie(settings.ACCESS_TOKEN, new_access_token, httponly=True)
-                    response.set_cookie(settings.REFRESH_TOKEN, new_refresh_token, httponly=True)
-                    
-                    return response
+    def process_request(self, request):
+        
+        current_access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
+
+        if current_access_token:
+            try:
+                AccessToken(current_access_token)
+                return None
             except TokenError:
                 pass
-        return self.get_response(request)
+        
+        current_refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
+
+        if current_refresh_token:
+
+            try:
+                
+                decoded_refresh_token = RefreshToken(current_refresh_token)
+            
+            except TokenError:
+
+                response = self.get_response(request)
+                response.delete_cookie(settings.ACCESS_TOKEN)
+                response.delete_cookie(settings.REFRESH_TOKEN)
+
+                return response
+
+            user_id = decoded_refresh_token['user_id']
+
+            decoded_refresh_token.blacklist()
+
+            user = UserInfo.objects.get(id=user_id)
+
+            new_token = RefreshToken.for_user(user)
+            new_access_token = str(new_token.access_token)
+            new_refresh_token = new_token
+
+            request.COOKIES[settings.ACCESS_TOKEN] = new_access_token
+            request.COOKIES[settings.REFRESH_TOKEN] = new_refresh_token
+
+            response = self.get_response(request)
+
+            response.set_cookie(settings.ACCESS_TOKEN, new_access_token)
+            response.set_cookie(settings.REFRESH_TOKEN, new_refresh_token, httponly=True)
+
+            return response
+
+        else:
+            return self.get_response(request)
