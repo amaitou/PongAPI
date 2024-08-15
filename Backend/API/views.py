@@ -11,6 +11,7 @@ from .models import UserInfo, UserGameStats
 from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
+import requests
 
 class RegisterView(APIView):
 
@@ -140,3 +141,38 @@ class GetGameStats(APIView):
         serializer = GetGameStatsSerializer(game_stats)
         return Response(serializer.data,
                         status=status.HTTP_200_OK)
+
+class Authentication42(APIView):
+
+	permission_classes = [AllowAny]
+
+	def get(self, request):
+		
+		code = request.GET.get('code')
+		if not code:
+			return Response({'error': 'No code provided'}, status=status.HTTP_400_BAD_REQUEST)
+		
+		data = {
+			'grant_type': 'authorization_code',
+			'client_id': settings.CLIENT_ID,
+			'client_secret': settings.CLIENT_SECRET,
+			'code': code.encode('utf-8'),
+			'redirect_uri': settings.REDIRECT,
+		}
+
+		__token = requests.post('https://api.intra.42.fr/oauth/token/', data = data)
+
+		
+		if "access_token" not in __token.json():
+			return Response({'error': 'Couldn\'t find an access token'}, status=status.HTTP_400_BAD_REQUEST)
+
+		access_token = __token.json()['access_token']
+
+		user_data = requests.get(settings.USER_INFO_URL, headers={'Authorization': f'Bearer {access_token}'})
+
+		if user_data.status_code != 200:
+			return Response({'error': 'Couldn\'t get user data'}, status=status.HTTP_400_BAD_REQUEST)
+
+		user_data = user_data.json()
+
+		return Response(user_data, status=status.HTTP_200_OK)
