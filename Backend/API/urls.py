@@ -6,7 +6,7 @@ from .views import \
     LogoutView,  \
     UpdateUser,  \
     UserProfile,  \
-    GetGameStats
+    GetGameStats, Authentication42
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -16,4 +16,5 @@ urlpatterns = [
     path('update/', UpdateUser.as_view(), name='update'),
     path('profile/<str:username>', UserProfile.as_view(), name='user_profile'),
     path('stats/', GetGameStats.as_view(), name='getuser'),
+    path('callback', Authentication42.as_view(), name='callback'),
 ]
