@@ -5,4 +5,5 @@ lib64
 avatars/
 venv/
 db.sqlite3
+.env
 
