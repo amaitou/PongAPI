@@ -55,7 +55,7 @@ class LoginView(APIView):
 
 	permission_classes = [AllowAny]
 
-	def post(self, request):
+	def post(self, request) -> Response:
 		if request.user.is_authenticated:
 			return Response({
 				'message': 'User already logged in',
@@ -95,7 +95,7 @@ class ProfileView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def get(self, request):
+	def get(self, request) -> Response:
 		
 		user = UserInfo.objects.get(username=request.user)
 		game = UserGameStats.objects.get(user_id=user.id)
@@ -110,7 +110,7 @@ class LogoutView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def post(self, request):
+	def post(self, request) -> Response:
 
 		refresh = request.COOKIES.get(settings.REFRESH_TOKEN)
 		if not refresh:
@@ -133,7 +133,7 @@ class UpdateUser(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def put(self, request):
+	def put(self, request) -> Response:
 
 		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
@@ -153,7 +153,7 @@ class UserProfile(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def get(self, request, username):
+	def get(self, request, username) -> Response:
 		
 		if request.user.username == username:
 			return Response('redirect',
@@ -174,7 +174,7 @@ class GetGameStats(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def get(self, request):
+	def get(self, request) -> Response:
 
 		game_stats = UserGameStats.objects.get(user_id=request.user.id)
 		serializer = GetGameStatsSerializer(game_stats)
@@ -185,7 +185,7 @@ class Authentication42(APIView):
 
 	permission_classes = [AllowAny]
 
-	def get(self, request):
+	def get(self, request) -> Response:
 		
 		code = request.GET.get('code')
 		if not code:
@@ -234,8 +234,26 @@ class Authentication42(APIView):
 				'jwt': create_token_for_user(serializer.instance)
 			}, status=status.HTTP_201_CREATED)
 		else:
-			return Response({
-				'message': 'Invalid data',
-				'redirect': False,
-				'redirect_url': ''
-			}, status=status.HTTP_400_BAD_REQUEST)
+			try:
+				user = UserInfo.objects.get(username=username)
+			except UserInfo.DoesNotExist:
+				return Response({
+					'message': 'Invalid data',
+					'redirect': False,
+					'redirect_url': ''
+				}, status=status.HTTP_400_BAD_REQUEST)
+			
+			response = Response({
+				'message': 'Login successful',
+				'redirect': True,
+				'redirect_url': '/api/profile'
+			}, status=status.HTTP_200_OK)
+
+			tokens = create_token_for_user(user)
+			access_token = tokens['access_token']
+			refresh_token = tokens['refresh_token']
+
+			response.set_cookie(settings.ACCESS_TOKEN, access_token)
+			response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
+
+			return response
