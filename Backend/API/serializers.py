@@ -18,8 +18,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             return user
 
         password = validated_data.pop('password')
+        email = validated_data.pop('email')
         user = UserInfo(**validated_data)
         user.set_password(password)
+        user.email = email.strip().lower()
         user.save()
 
         return user

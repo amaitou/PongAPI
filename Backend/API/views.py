@@ -7,12 +7,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
+from rest_framework.request import Request
 from .models import UserInfo, UserGameStats
 from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
 import requests
-from .jwt import create_token_for_user
+from .jwt import create_token_for_user, get_user_from_token
 
 class RegisterView(APIView):
 
@@ -24,14 +25,15 @@ class RegisterView(APIView):
 			return True
 		return password == re_password
 
-	def post(self, request) -> Response:
+	def post(self, request: Request) -> Response:
 
 		if not self.__check_password(request.data.get('password'), request.data.get('re_password')):
 			return Response({
 				'message': 'Passwords do not match',
 				'redirect': False,
 				'redirect_url': ''
-			}, status=status.HTTP_400_BAD_REQUEST)
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 
 		serializer = UserRegistrationSerializer(data=request.data)
 
@@ -43,19 +45,21 @@ class RegisterView(APIView):
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
 				'jwt': create_token_for_user(serializer.instance)
-			}, status=status.HTTP_201_CREATED)
+			},
+			status=status.HTTP_201_CREATED)
 		else:
 			return Response({
 				'message': 'Invalid data',
 				'redirect': False,
 				'redirect_url': ''
-			}, status=status.HTTP_400_BAD_REQUEST)
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
 
 	permission_classes = [AllowAny]
 
-	def post(self, request) -> Response:
+	def post(self, request: Request) -> Response:
 		if request.user.is_authenticated:
 			return Response({
 				'message': 'User already logged in',
@@ -71,10 +75,10 @@ class LoginView(APIView):
 		if not user:
 			return Response({
 				'message': 'Invalid credentials',
-				'status': status.HTTP_401_UNAUTHORIZED,
 				'redirect': False,
 				'redirect_url': ''
-			})
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
 		
 		tokens = create_token_for_user(user)
 		access_token = tokens['access_token']
@@ -95,9 +99,11 @@ class ProfileView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def get(self, request) -> Response:
+	def get(self, request: Request) -> Response:
 		
-		user = UserInfo.objects.get(username=request.user)
+		user = get_user_from_token(request.COOKIES.get(settings.ACCESS_TOKEN))
+
+		user = UserInfo.objects.get(username=user.username)
 		game = UserGameStats.objects.get(user_id=user.id)
 		
 		user_basic_info = UserRegistrationSerializer(user)
@@ -110,7 +116,7 @@ class LogoutView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def post(self, request) -> Response:
+	def post(self, request: Request) -> Response:
 
 		refresh = request.COOKIES.get(settings.REFRESH_TOKEN)
 		if not refresh:
@@ -133,7 +139,7 @@ class UpdateUser(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def put(self, request) -> Response:
+	def put(self, request: Request) -> Response:
 
 		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
@@ -153,7 +159,7 @@ class UserProfile(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def get(self, request, username) -> Response:
+	def get(self, request: Request, username) -> Response:
 		
 		if request.user.username == username:
 			return Response('redirect',
@@ -174,7 +180,7 @@ class GetGameStats(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def get(self, request) -> Response:
+	def get(self, request: Request) -> Response:
 
 		game_stats = UserGameStats.objects.get(user_id=request.user.id)
 		serializer = GetGameStatsSerializer(game_stats)
@@ -185,7 +191,14 @@ class Authentication42(APIView):
 
 	permission_classes = [AllowAny]
 
-	def get(self, request) -> Response:
+	def get(self, request: Request) -> Response:
+
+		if request.user.is_authenticated:
+			return Response({
+				'message': 'User already logged in',
+				'redirect': True,
+				'redirect_url': '/api/profile/'
+			}, status=status.HTTP_200_OK)
 		
 		code = request.GET.get('code')
 		if not code:
