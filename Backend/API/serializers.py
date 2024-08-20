@@ -6,23 +6,25 @@ from .models import UserInfo, UserGameStats
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'gender', 'avatar']
-    
-    password = serializers.CharField(write_only=True, validators=[password_validation])
+        fields = ['username', 'first_name', 'last_name', 'email', 'password']
+
+    password = serializers.CharField(write_only=True, required=False, validators=[password_validation])
 
     def create(self, validated_data):
 
-        password = validated_data.pop('password', None)
-        email = validated_data.pop('email', None)
+        if 'password' not in validated_data:
+            user = UserInfo(**validated_data)
+            user.save()
+            return user
 
-        instance = self.Meta.model(**validated_data)
+        password = validated_data.pop('password')
+        user = UserInfo(**validated_data)
+        user.set_password(password)
+        user.save()
 
-        if password is not None:
-            instance.set_password(password)
-        if email is not None:
-            instance.email = email.lower()
-        instance.save()
-        return instance
+        return user
+
+
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
