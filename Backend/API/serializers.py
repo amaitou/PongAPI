@@ -6,7 +6,7 @@ from .models import UserInfo, UserGameStats
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ['username', 'first_name', 'last_name', 'email', 'password']
+        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'gender']
 
     password = serializers.CharField(write_only=True, required=False, validators=[password_validation])
 
@@ -25,23 +25,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
-
-
-
-class UserUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserInfo
-        fields = ['username', 'first_name', 'last_name', 'email']
-    
-    def put(self, instance, validated_data):
-        
-        instance.username = validated_data.get('username', instance.username)
-        instance.first_name = validated_data.get('first_name', instance.first_name)
-        instance.last_name = validated_data.get('last_name', instance.last_name)
-        instance.email = validated_data.get('email', instance.email)
-        instance.save()
-
-        return instance
 
 class GetUserBasicInfoSerializer(serializers.ModelSerializer):
     class Meta:

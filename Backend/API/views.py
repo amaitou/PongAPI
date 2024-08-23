@@ -1,6 +1,5 @@
 
-from .serializers import    UserRegistrationSerializer, UserUpdateSerializer, \
-							GetUserBasicInfoSerializer, GetGameStatsSerializer
+from .serializers import UserRegistrationSerializer
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -13,7 +12,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
 import requests
-from .jwt import create_token_for_user, get_user_from_token
+from .jwt import create_jwt_for_user, get_user_from_jwt
 
 class RegisterView(APIView):
 
@@ -39,14 +38,17 @@ class RegisterView(APIView):
 
 		if serializer.is_valid():
 			serializer.save()
-			return Response ({
+			response = Response ({
 				'message': 'User registered successfully',
 				'redirect': True,
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
-				'jwt': create_token_for_user(serializer.instance)
+				'jwt': create_jwt_for_user(serializer.instance)
 			},
 			status=status.HTTP_201_CREATED)
+
+			return response
+
 		else:
 			return Response({
 				'message': 'Invalid data',
@@ -63,54 +65,35 @@ class LoginView(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'message': 'User already logged in',
-				'status': status.HTTP_200_OK,
 				'redirect': True,
-				'redirect_url': '/api/profile/'
-			})
+				'redirect_url': '/api/profile/',
+			},
+			status=status.HTTP_200_OK)
 
 		username = request.data.get("username")
 		password = request.data.get("password")
+
 		user = authenticate(request, username=username, password=password)
 
 		if not user:
 			return Response({
 				'message': 'Invalid credentials',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': '',
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
-		tokens = create_token_for_user(user)
-		access_token = tokens['access_token']
-		refresh_token = tokens['refresh_token']
+		tokens = create_jwt_for_user(user)
 
 		response = Response({
 			'message': 'Login successful',
 			'redirect': True,
-			'redirect_url': '/api/profile'
-		}, status=status.HTTP_200_OK)
-
-		response.set_cookie(settings.ACCESS_TOKEN, access_token)
-		response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
+			'redirect_url': '/api/profile',
+			'jwt': tokens
+		},
+		status=status.HTTP_200_OK)
 
 		return response
-
-class ProfileView(APIView):
-
-	permission_classes = [IsAuthenticated]
-
-	def get(self, request: Request) -> Response:
-		
-		user = get_user_from_token(request.COOKIES.get(settings.ACCESS_TOKEN))
-
-		user = UserInfo.objects.get(username=user.username)
-		game = UserGameStats.objects.get(user_id=user.id)
-		
-		user_basic_info = UserRegistrationSerializer(user)
-		game_stats = GetGameStatsSerializer(game)
-
-		serializers = [user_basic_info.data, game_stats.data]
-		return Response(serializers, status=status.HTTP_200_OK)
 
 class LogoutView(APIView):
 
@@ -120,72 +103,35 @@ class LogoutView(APIView):
 
 		refresh = request.COOKIES.get(settings.REFRESH_TOKEN)
 		if not refresh:
-			return Response({'error': 'No refresh token provided.'},
-							status=status.HTTP_400_BAD_REQUEST)
+			return Response({
+				'message': 'No refresh token provided',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 
 		try:
 			token = RefreshToken(refresh)
 			token.blacklist()
 		except TokenError:
-			return Response({'error': 'Invalid token or error blacklisting token.'},status=status.HTTP_400_BAD_REQUEST)
+			return Response({
+				'message': 'Invalid token',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
 
-		response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+		response = Response({
+			'message': 'Logout successful',
+			'redirect': True,
+			'redirect_url': '/api/login/'
+		},
+		status=status.HTTP_200_OK)
+
 		response.delete_cookie(settings.ACCESS_TOKEN)
 		response.delete_cookie(settings.REFRESH_TOKEN)
 
 		return response
-	
-class UpdateUser(APIView):
-
-	permission_classes = [IsAuthenticated]
-
-	def put(self, request: Request) -> Response:
-
-		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
-
-		user = UserInfo.objects.get(username=request.user)
-		serializer = UserUpdateSerializer(user, data=request.data)
-
-		try:
-			serializer.is_valid(raise_exception=True)
-		except Exception as e:
-			return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST) 
-		
-		serializer.save()
-		
-		return Response(serializer.data, status=status.HTTP_200_OK)
-
-class UserProfile(APIView):
-
-	permission_classes = [IsAuthenticated]
-
-	def get(self, request: Request, username) -> Response:
-		
-		if request.user.username == username:
-			return Response('redirect',
-							status=status.HTTP_302_FOUND,
-							headers={'Location': '/api/profile/'})
-
-		try:
-			user = UserInfo.objects.get(username=username)
-		except UserInfo.DoesNotExist:
-			return Response({'error': 'Player not found.'},
-							status=status.HTTP_404_NOT_FOUND)
-
-		serializer = GetUserBasicInfoSerializer(user)
-		return Response(serializer.data,
-						status=status.HTTP_200_OK)
-
-class GetGameStats(APIView):
-
-	permission_classes = [IsAuthenticated]
-
-	def get(self, request: Request) -> Response:
-
-		game_stats = UserGameStats.objects.get(user_id=request.user.id)
-		serializer = GetGameStatsSerializer(game_stats)
-		return Response(serializer.data,
-						status=status.HTTP_200_OK)
 
 class Authentication42(APIView):
 
@@ -223,6 +169,8 @@ class Authentication42(APIView):
 			'Authorization': f'Bearer {access_token}'
 		})
 
+		# return Response(user.json(), status=status.HTTP_200_OK)
+
 		user = user.json()
 
 		first_name = user['first_name']
@@ -239,13 +187,22 @@ class Authentication42(APIView):
 
 		if serializer.is_valid():
 			serializer.save()
-			return Response({
+
+			tokens = create_jwt_for_user(serializer.instance)
+			access_token = tokens['access_token']
+			refresh_token = tokens['refresh_token']
+
+			response = Response({
 				'message': 'User registered successfully',
 				'redirect': True,
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
-				'jwt': create_token_for_user(serializer.instance)
 			}, status=status.HTTP_201_CREATED)
+
+			response.set_cookie(settings.ACCESS_TOKEN, access_token)
+			response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
+
+			return response
 		else:
 			try:
 				user = UserInfo.objects.get(username=username)
@@ -262,7 +219,7 @@ class Authentication42(APIView):
 				'redirect_url': '/api/profile'
 			}, status=status.HTTP_200_OK)
 
-			tokens = create_token_for_user(user)
+			tokens = create_jwt_for_user(user)
 			access_token = tokens['access_token']
 			refresh_token = tokens['refresh_token']
 
