@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const accessToken = localStorage.getItem('access_token');
+
+            const headers = {
+                // Include the access token in the Authorization header if it exists
+                'Authorization': accessToken ? `Bearer ${accessToken}` : undefined
+            };
+
+            fetch('http://127.0.0.1:8000/api/login/', {
+                method: 'POST',
+                headers: headers,
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.jwt && data.jwt.refresh_token && data.jwt.access_token) {
+                    console.log(data.jwt.access_token);
+                    console.log(data.jwt.refresh_token);
+
+                    // Store access and refresh tokens in localStorage
+                    localStorage.setItem('access_token', data.jwt.access_token);
+                    localStorage.setItem('refresh_token', data.jwt.refresh_token);
+
+                    const at = localStorage.getItem('access_token');
+                    const rt = localStorage.getItem('refresh_token');
+
+                    console.log(at);
+                    console.log(rt);
+
+                    alert('Login successful! Tokens are stored in localStorage.');
+                } else if (data.message === 'User already logged in') {
+                    alert('You are already logged in.');
+                } else {
+                    alert('Login failed. Please check your credentials and try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Login failed. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>
