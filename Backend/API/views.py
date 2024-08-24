@@ -236,7 +236,7 @@ class TokenRefresher(APIView):
 			return Response({
 				'message': 'No refresh token provided',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -257,7 +257,7 @@ class TokenRefresher(APIView):
 			return Response({
 				'message': 'User not found',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
@@ -268,6 +268,5 @@ class TokenRefresher(APIView):
 			'jwt': create_jwt_for_user(user)
 		},
 		status=status.HTTP_200_OK)
-
 
 		return response
