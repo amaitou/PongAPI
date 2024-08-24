@@ -20,6 +20,19 @@ body{
   background: none;
   /* background-color: #6b90b7; */
 }
+.text
+{
+  font-size: 24px;
+  color: #00bebe
+}
+.header-content{
+  margin: 30px;
+  margin-left: 120px;
+  background-color: #285c9a;
+  width: 90rem;
+  padding: 15px;
+  border-radius: 20px;
+}
 
 .navbar-brand{
   flex:2
@@ -29,6 +42,9 @@ body{
 }
 #header{
   color: #dc3545;
+}
+.home{
+  margin-top: 40px;
 }
 
 /* .col-md-6{
@@ -51,13 +67,14 @@ body, html {
 .btn{
   border-radius: 20px;
   font-size: 10px;
+  color:aqua;
   
 }
 
 .form-control
 {
   margin-right: 10px;
-  background-color:#365c85;
+  background-color:#7c87b4;
   font-size: 7px;
   border-radius: 20px;
 }

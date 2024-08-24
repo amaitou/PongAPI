@@ -5,12 +5,12 @@ export function rendercontent()
   const header = document.getElementById('content');
   header.innerHTML += `
   <div class="col" style="font-family: Arial, Helvetica, sans-serif;"> 
-  <div class="m-4">
-    <h1 class="h4 mb-0">Hello <span class="text-primary">Solix!</span></h1>
+  <div class="header-content">
+    <h1 class="h4 mb-0">Hello <span class="text">Solix!</span></h1>
                 <p class="mb-0">Ready for a gaming surprise? Click 'Play' to start a random game.</p>
     </div>
   <!-- Game Modes -->
-  <div class="row m-5">
+  <div class="row" style="margin-left: 250px;">
       <div class="col-lg-3 m-3">
           <div class="card text-center p-4">
               <img src="https://placehold.co/100x100" class="card-img-top mx-auto" alt="Classic Mode">
@@ -44,9 +44,9 @@ export function rendercontent()
   </div>
 
   <!-- Best Players -->
-  <div class="m-4">
+  <div class="home p-3">
       <h3 class="mb-3">Best Players</h3>
-      <div class="row">
+      <div class="row" >
           <!-- Player 1 -->
           <div class="col-lg-6 mb-3">
               <div class="bestplayer d-flex justify-content-between align-items-center  m-2 p-2 rounded">
@@ -159,10 +159,10 @@ export function rendercontent()
 </div>
 
 <!-- Recent Activity -->
-<aside class="col-lg-3">
+<aside class="col-lg-3" style="font-family: Arial, Helvetica, sans-serif;">
   <div class="card m-4 p-3">
       <div class="d-flex align-items-center mb-3">
-          <img src="https://placehold.co/64x64" alt="Profile" class="rounded-circle me-3">
+          <img src="./avatars/avatar2.png" alt="Profile" class="rounded-circle me-3 w-25 h-25">
           <div>
               <h4 class="card-title">My Profile</h4>
               <p class="mb-0">SOLIX</p>
