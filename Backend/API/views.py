@@ -223,3 +223,53 @@ class Authentication42(APIView):
 			response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
 
 			return response
+
+class TokenRefresher(APIView):
+
+	permission_classes = [AllowAny]
+
+	def post(self, request: Request) -> Response:
+
+		refresh = request.data.get(settings.REFRESH_TOKEN)
+
+		print(refresh)
+
+		if not refresh:
+			return Response({
+				'message': 'No refresh token provided',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+
+		try:
+			token = RefreshToken(refresh)
+			token.blacklist()
+		except TokenError:
+			return Response({
+				'message': 'Refresh token is invalid or expired',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+
+		user = UserInfo.objects.get(id=token['user_id'])
+
+		if not user:
+			return Response({
+				'message': 'User not found',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_404_NOT_FOUND)
+
+		response = Response({
+			'message': 'Token refreshed',
+			'redirect': True,
+			'redirect_url': '/api/profile',
+			'jwt': create_jwt_for_user(user)
+		},
+		status=status.HTTP_200_OK)
+
+
+		return response

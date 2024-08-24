@@ -15,14 +15,28 @@ def create_jwt_for_user(user) -> dict:
 
     return jwt
 
-def get_user_from_jwt(token) -> UserInfo:
-    try:
-        access_token = AccessToken(token)
-        user_id = access_token['user_id']
+def get_user_from_jwt(token, __type) -> UserInfo:
+
+    if __type == 'refresh':
         try:
-            user = UserInfo.objects.get(id=user_id)
-            return user
-        except UserInfo.DoesNotExist:
+            refresh_token = RefreshToken(token)
+            user_id = refresh_token['user_id']
+            print(user_id)
+            try:
+                user = UserInfo.objects.get(id=user_id)
+                return user
+            except UserInfo.DoesNotExist:
+                return None
+        except Exception as e:
             return None
-    except Exception as e:
-        return None
+    else:
+        try:
+            access_token = AccessToken(token)
+            user_id = access_token['user_id']
+            try:
+                user = UserInfo.objects.get(id=user_id)
+                return user
+            except UserInfo.DoesNotExist:
+                return None
+        except Exception as e:
+            return None
