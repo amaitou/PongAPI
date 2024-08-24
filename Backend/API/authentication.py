@@ -6,10 +6,6 @@ class HeaderTokenAuthentication(JWTAuthentication):
 
     def authenticate(self, request: Request):
 
-        if request.path == '/api/register/':
-            return None
-
-        # Get the token from the Authorization header
         auth_header = request.headers.get('Authorization')
         if auth_header is None:
             return None
