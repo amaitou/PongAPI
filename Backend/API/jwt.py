@@ -21,7 +21,6 @@ def get_user_from_jwt(token, __type) -> UserInfo:
         try:
             refresh_token = RefreshToken(token)
             user_id = refresh_token['user_id']
-            print(user_id)
             try:
                 user = UserInfo.objects.get(id=user_id)
                 return user

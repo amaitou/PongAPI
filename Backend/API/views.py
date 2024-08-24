@@ -232,8 +232,6 @@ class TokenRefresher(APIView):
 
 		refresh = request.data.get(settings.REFRESH_TOKEN)
 
-		print(refresh)
-
 		if not refresh:
 			return Response({
 				'message': 'No refresh token provided',
