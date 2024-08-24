@@ -82,14 +82,12 @@ class LoginView(APIView):
 				'redirect_url': '',
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
-		
-		tokens = create_jwt_for_user(user)
 
 		response = Response({
 			'message': 'Login successful',
 			'redirect': True,
 			'redirect_url': '/api/profile',
-			'jwt': tokens
+			'jwt': create_jwt_for_user(user)
 		},
 		status=status.HTTP_200_OK)
 
@@ -101,7 +99,8 @@ class LogoutView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		refresh = request.COOKIES.get(settings.REFRESH_TOKEN)
+		refresh = request.data.get(settings.REFRESH_TOKEN)
+		print(refresh)
 		if not refresh:
 			return Response({
 				'message': 'No refresh token provided',
@@ -115,7 +114,7 @@ class LogoutView(APIView):
 			token.blacklist()
 		except TokenError:
 			return Response({
-				'message': 'Invalid token',
+				'message': 'Refresh token is invalid or expired',
 				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
@@ -127,9 +126,6 @@ class LogoutView(APIView):
 			'redirect_url': '/api/login/'
 		},
 		status=status.HTTP_200_OK)
-
-		response.delete_cookie(settings.ACCESS_TOKEN)
-		response.delete_cookie(settings.REFRESH_TOKEN)
 
 		return response
 

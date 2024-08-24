@@ -47,25 +47,33 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.jwt && data.jwt.refresh_token && data.jwt.access_token) {
-                    console.log(data.jwt.access_token);
-                    console.log(data.jwt.refresh_token);
-                    // Store access and refresh tokens in cookies
-                    localStorage.setItem('access_token', data.jwt.access_token);
-                    localStorage.setItem('refresh_token', data.jwt.refresh_token);
-
-                    at = localStorage.getItem('access_token');
-                    rt = localStorage.getItem('refresh_token');
-
-                    console.log(at);
-                    console.log(rt);
-
-                    alert('Registration successful! Tokens are stored in localStorage.');
-                } else {
+            .then(response => {
+                if (response.status === 400)
+                {
                     alert('Registration failed. Please try again.');
+                    return;
                 }
+                    
+                if (response.status === 201)
+                {
+                    alert('Registration successful.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                
+
+                if (!data)
+                    console.log('Error in registration');
+                
+                console.log(data);
+                
+                const __jwt_token = data.jwt;
+                const access_token = __jwt_token.access_token;
+                const refresh_token = __jwt_token.refresh_token;
+
+                localStorage.setItem('access_token', access_token);
+                localStorage.setItem('refresh_token', refresh_token);
             })
             .catch(error => {
                 console.error('Error:', error);
