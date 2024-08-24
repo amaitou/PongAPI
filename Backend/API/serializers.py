@@ -6,7 +6,7 @@ from .models import UserInfo, UserGameStats
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'gender']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'gender']
 
     password = serializers.CharField(write_only=True, required=False, validators=[password_validation])
 

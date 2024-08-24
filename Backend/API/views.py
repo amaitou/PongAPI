@@ -270,3 +270,19 @@ class TokenRefresher(APIView):
 		status=status.HTTP_200_OK)
 
 		return response
+
+
+class UsersView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def get(self, request: Request) -> Response:
+
+		users = UserInfo.objects.all()
+		return Response({
+			'message': 'Users retrieved successfully',
+			'redirect': False,
+			'redirect_url': '',
+			'data': UserRegistrationSerializer(users, many=True).data
+		},
+		status=status.HTTP_200_OK)

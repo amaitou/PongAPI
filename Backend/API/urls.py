@@ -4,7 +4,8 @@ from .views import \
     LoginView, \
     LogoutView,  \
     Authentication42, \
-    TokenRefresher
+    TokenRefresher, \
+    UsersView
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -12,4 +13,5 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('callback', Authentication42.as_view(), name='callback'),
     path('refresh/', TokenRefresher.as_view(), name='refresh'),
+    path('users/', UsersView.as_view(), name='token'),
 ]
