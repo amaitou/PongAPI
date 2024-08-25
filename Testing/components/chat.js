@@ -3,7 +3,7 @@ export function renderChat()
   const body = document.getElementById('body');
   body.innerHTML=
   `
-  <div class="container-fluid w-100" style="font-family: 'Monospace'; background-color:#ffff;">
+  <div class="container-fluid w-100" style="font-family: 'Monospace';">
   <div class="row w-100">
       <!-- Bloc des amis -->
       <div class="col-md-4 border-end ">

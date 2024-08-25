@@ -9,8 +9,8 @@ export function renderNavbar() {
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <form class="form-inline d-flex">
-                <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success ml-4" type="submit">Search</button>
+                <input class="form-control-search" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn-search btn-outline-success ml-4" type="submit">Search</button>
              </form>
               <ul class="navbar-nav">
                   <li class="nav-item" style="font-size: 10px;">
