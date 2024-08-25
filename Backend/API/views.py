@@ -1,5 +1,6 @@
 
-from .serializers import UserRegistrationSerializer
+from .serializers import *
+from .jwt import *
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -12,7 +13,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
 import requests
-from .jwt import create_jwt_for_user, get_user_from_jwt
 
 class RegisterView(APIView):
 
@@ -114,7 +114,7 @@ class LogoutView(APIView):
 			token.blacklist()
 		except TokenError:
 			return Response({
-				'message': 'Refresh token is invalid or expired',
+				'message': 'Refresh token is invalid, expired or blacklisted',
 				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
@@ -173,6 +173,9 @@ class Authentication42(APIView):
 		last_name = user['last_name']
 		username = user['login']
 		email = user['email']
+		avatar = user['image']['link']
+
+		print(avatar)
 
 		serializer = UserRegistrationSerializer(data={
 			'username': username,
@@ -283,6 +286,6 @@ class UsersView(APIView):
 			'message': 'Users retrieved successfully',
 			'redirect': False,
 			'redirect_url': '',
-			'data': UserRegistrationSerializer(users, many=True).data
+			'data': GetUsersSerializer(users, many=True).data
 		},
 		status=status.HTTP_200_OK)
