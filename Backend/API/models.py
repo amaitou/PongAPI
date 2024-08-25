@@ -182,7 +182,7 @@ class Chats(models.Model):
         if self.chat_status == 'not_chatted':
             self.chat_status = 'chatted'
             self.save()
-            return Conversation.objects.create(sender_id = sender_id, receiver_id = receiver_id, message_content = message_content)
+            return Conversations.objects.create(sender_id = sender_id, receiver_id = receiver_id, message_content = message_content)
 
 
 

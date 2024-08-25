@@ -1,12 +1,20 @@
 
-from .utils import password_validation
-from rest_framework import serializers
 from .models import UserInfo, UserGameStats
+from rest_framework import serializers
+from .utils import password_validation
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'gender']
+        fields = ['id',
+                'username',
+                'first_name',
+                'last_name',
+                'email',
+                'date_joined',
+                'password',
+                'avatar',
+                'gender',]
 
     password = serializers.CharField(write_only=True, required=False, validators=[password_validation])
 
@@ -35,3 +43,15 @@ class GetGameStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserGameStats
         fields = "__all__"
+
+class GetUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInfo
+        fields = ['id',
+                'username',
+                'first_name',
+                'last_name',
+                'email',
+                'date_joined',
+                'avatar',
+                'gender',]
