@@ -1,7 +1,7 @@
 
-from .utils import password_validation
-from rest_framework import serializers
 from .models import UserInfo, UserGameStats
+from rest_framework import serializers
+from .utils import password_validation
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
