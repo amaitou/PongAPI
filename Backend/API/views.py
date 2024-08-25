@@ -278,7 +278,7 @@ class UsersView(APIView):
 
 	def get(self, request: Request) -> Response:
 
-		users = UserInfo.objects.all()
+		users = UserInfo.objects.filter(id__gt=1)
 		return Response({
 			'message': 'Users retrieved successfully',
 			'redirect': False,
