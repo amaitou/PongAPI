@@ -7,5 +7,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('callback', Authentication42.as_view(), name='callback'),
     path('refresh/', TokenRefresher.as_view(), name='refresh'),
-    path('users/', UsersView.as_view(), name='token'),
+    path('users/', AllUsersView.as_view(), name='token'),
+    path('profile/', ProfileView.as_view(), name='profile'),
+    path('profile/<str:username>/', ProfileView.as_view(), name='profile'),
+    path("update_password/", UpdatePasswordView.as_view(), name="password_reset"),
 ]

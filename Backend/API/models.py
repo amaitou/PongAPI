@@ -12,10 +12,7 @@ class UserInfo(AbstractUser):
 
     avatar = models.ImageField(upload_to = 'avatars/', null = True)
     gender = models.CharField(max_length=2, choices = user_GENDER, null = True, default = 'N')
-    email = models.EmailField(unique = True, null = False)
-    first_name = models.CharField(max_length = 30, null = False)
-    last_name = models.CharField(max_length = 30, null = False)
-    username = models.CharField(max_length = 30, unique = True, null = False)
+    is_verified = models.BooleanField(default = False, null = False)
 
     class Meta:
         
@@ -24,7 +21,7 @@ class UserInfo(AbstractUser):
         verbose_name_plural = 'UserInfo'
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
+    read_only_fields = ['id']
     
     def __str__(self) -> str:
         return f"{self.username}"

@@ -18,25 +18,12 @@ class RegisterView(APIView):
 
 	permission_classes = [AllowAny]
 
-	def __check_password(self, password: str, re_password: str) -> bool:
-
-		if not password and not re_password:
-			return True
-		return password == re_password
-
 	def post(self, request: Request) -> Response:
-
-		if not self.__check_password(request.data.get('password'), request.data.get('re_password')):
-			return Response({
-				'message': 'Passwords do not match',
-				'redirect': False,
-				'redirect_url': ''
-			},
-			status=status.HTTP_400_BAD_REQUEST)
 
 		serializer = UserRegistrationSerializer(data=request.data)
 
-		if serializer.is_valid():
+		try:
+			serializer.is_valid(raise_exception=True)
 			serializer.save()
 			response = Response ({
 				'message': 'User registered successfully',
@@ -49,9 +36,9 @@ class RegisterView(APIView):
 
 			return response
 
-		else:
+		except serializers.ValidationError as e:
 			return Response({
-				'message': 'Invalid data',
+				'message': e.detail,
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -78,6 +65,14 @@ class LoginView(APIView):
 		if not user:
 			return Response({
 				'message': 'Invalid credentials',
+				'redirect': False,
+				'redirect_url': '',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+		
+		if not user.is_verified:
+			return Response({
+				'message': 'User not verified',
 				'redirect': False,
 				'redirect_url': '',
 			},
@@ -165,8 +160,6 @@ class Authentication42(APIView):
 			'Authorization': f'Bearer {access_token}'
 		})
 
-		# return Response(user.json(), status=status.HTTP_200_OK)
-
 		user = user.json()
 
 		first_name = user['first_name']
@@ -174,8 +167,6 @@ class Authentication42(APIView):
 		username = user['login']
 		email = user['email']
 		avatar = user['image']['link']
-
-		print(avatar)
 
 		serializer = UserRegistrationSerializer(data={
 			'username': username,
@@ -274,8 +265,7 @@ class TokenRefresher(APIView):
 
 		return response
 
-
-class UsersView(APIView):
+class AllUsersView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -289,3 +279,70 @@ class UsersView(APIView):
 			'data': GetUsersSerializer(users, many=True).data
 		},
 		status=status.HTTP_200_OK)
+
+class ProfileView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def get(self, request: Request, username = None) -> Response:
+
+		user = request.user
+		
+		if username:
+			if user.username == username:
+				return Response({
+					'message': 'User retrieved successfully',
+					'redirect': False,
+					'redirect_url': '',
+					'data': GetUserBasicInfoSerializer(user).data
+				})
+			try:
+				user = UserInfo.objects.get(username=username)
+				return Response({
+					'message': 'User retrieved successfully',
+					'redirect': False,
+					'redirect_url': '',
+					'data': GetUserBasicInfoSerializer(user).data
+				})
+			except UserInfo.DoesNotExist:
+				return Response({
+					'message': 'User not found',
+					'redirect': False,
+					'redirect_url': ''
+				},
+				status=status.HTTP_404_NOT_FOUND)
+		else:
+			return Response({
+			'message': 'User retrieved successfully',
+			'redirect': False,
+			'redirect_url': '',
+			'data': GetUserBasicInfoSerializer(user).data
+			},
+			status=status.HTTP_200_OK)
+
+class UpdatePasswordView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def put(self, request: Request) -> Response:
+
+		serializer = PasswordUpdateSerializer(instance=request.user, data=request.data, context={'request': request})
+
+		try:
+			serializer.is_valid(raise_exception=True)
+			serializer.save()
+			response = Response({
+				'message': 'Password updated successfully',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_200_OK)
+			return response
+		except serializers.ValidationError as e:
+			response = Response({
+				'message': e.detail,
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+			return response
