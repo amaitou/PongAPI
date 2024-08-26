@@ -1,4 +1,5 @@
 
+from django.contrib.sites.shortcuts import get_current_site
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -8,8 +9,10 @@ from rest_framework.response import Response
 from .models import UserInfo, UserGameStats
 from rest_framework.request import Request
 from rest_framework.views import APIView
+from .verification import Verification
 from rest_framework import status
 from django.conf import settings
+from django.urls import reverse
 from .serializers import *
 from .jwt import *
 import requests
@@ -20,17 +23,40 @@ class RegisterView(APIView):
 
 	def post(self, request: Request) -> Response:
 
+		print("EMAIL_BACKEND: ", settings.EMAIL_BACKEND)
+		print("EMAIL_HOST: ", settings.EMAIL_HOST)
+		print("EMAIL_PORT: ", settings.EMAIL_PORT)
+		print("EMAIL_USE_TLS: ", settings.EMAIL_USE_TLS)
+		print("EMAIL_HOST_USER: ", settings.EMAIL_HOST_USER)
+		print("EMAIL_HOST_PASSWORD: ", settings.EMAIL_HOST_PASSWORD)
+		print("SECRET_KEY: ", settings.SECRET_KEY)
+
 		serializer = UserRegistrationSerializer(data=request.data)
 
 		try:
 			serializer.is_valid(raise_exception=True)
 			serializer.save()
+
+			tokens = create_jwt_for_user(serializer.instance)
+			current_site = get_current_site(request).domain
+			relative_link = reverse('email_verification')
+			absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
+			email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
+			data = {
+				'domain': absurl,
+				'subject': 'Verify your email',
+				'email': serializer.instance.email,
+				'body': email_body
+			}
+
+			Verification.send_verification_email(data)
+
 			response = Response ({
 				'message': 'User registered successfully',
 				'redirect': True,
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
-				'jwt': create_jwt_for_user(serializer.instance)
+				'jwt': tokens
 			},
 			status=status.HTTP_201_CREATED)
 
