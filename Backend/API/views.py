@@ -364,3 +364,38 @@ class UpdatePasswordView(APIView):
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 			return response
+
+class VerifyEmailView(APIView):
+
+	permission_classes = [AllowAny]
+
+	def get(self, request: Request) -> Response:
+
+		token = request.GET.get('token')
+
+		if not token:
+			return Response({
+				'message': 'No token provided',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		try:
+			token = AccessToken(token)
+			user = UserInfo.objects.get(id=token['user_id'])
+			user.is_verified = True
+			user.save()
+
+			return Response({
+				'message': 'Email verified successfully',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			})
+		except TokenError:
+			return Response({
+				'message': 'Invalid or expired token',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
