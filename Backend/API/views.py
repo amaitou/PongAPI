@@ -60,7 +60,7 @@ class RegisterView(APIView):
 		},
 		status=status.HTTP_201_CREATED)
 
-class Authentication42(APIView):
+class Authentication42View(APIView):
 
 	permission_classes = [AllowAny]
 
@@ -222,7 +222,7 @@ class LogoutView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-class TokenRefresher(APIView):
+class TokenRefresherView(APIView):
 
 	permission_classes = [AllowAny]
 
@@ -322,7 +322,7 @@ class ProfileView(APIView):
 			},
 			status=status.HTTP_200_OK)
 
-class UpdatePasswordView(APIView):
+class PasswordUpdateView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -352,7 +352,7 @@ class UpdatePasswordView(APIView):
 		status=status.HTTP_200_OK)
 		return response
 
-class SettingsView(APIView):
+class ProfileUpdateView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -383,7 +383,7 @@ class SettingsView(APIView):
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
-class VerifyEmailView(APIView):
+class EmailVerifyView(APIView):
 
 	permission_classes = [AllowAny]
 
@@ -437,7 +437,7 @@ class VerifyEmailView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-class ResetPasswordView(APIView):
+class PasswordResetView(APIView):
 
 	permission_classes = [AllowAny]
 
@@ -485,7 +485,7 @@ class ResetPasswordView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-class VerifyPasswordView(APIView):
+class PasswordVerifyView(APIView):
 
 	permission_classes = [AllowAny]
 
