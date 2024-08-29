@@ -1,6 +1,7 @@
-from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+from pathlib import Path
+import certifi
 import os
 
 load_dotenv()
@@ -125,6 +126,7 @@ AUTH_URL = os.environ.get('AUTH_URL')
 
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 REFRESH_TOKEN = os.environ.get("REFRESH_TOKEN")
+AUTH_HEADER_NAME = os.environ.get("AUTHORIZATION")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
@@ -132,7 +134,5 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-
-import certifi, os
 
 os.environ['SSL_CERT_FILE'] = certifi.where()

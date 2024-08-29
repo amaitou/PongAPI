@@ -1,12 +1,13 @@
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.request import Request
+from django.conf import settings
 
 class HeaderTokenAuthentication(JWTAuthentication):
 
     def authenticate(self, request: Request):
 
-        auth_header = request.headers.get('Authorization')
+        auth_header = request.headers.get(settings.AUTH_HEADER_NAME)
         if auth_header is None:
             return None
 
