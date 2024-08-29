@@ -27,33 +27,6 @@ class RegisterView(APIView):
 
 		try:
 			serializer.is_valid(raise_exception=True)
-			serializer.save()
-
-			tokens = create_jwt_for_user(serializer.instance)
-
-			current_site = get_current_site(request).domain
-			relative_link = reverse('email_verification')
-			absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
-			email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
-			data = {
-				'domain': absurl,
-				'subject': 'Verify your email',
-				'email': serializer.instance.email,
-				'body': email_body
-			}
-
-			Verification.send_verification_email(data)
-
-			response = Response ({
-				'message': 'User registered successfully, verification email sent',
-				'redirect': True,
-				'redirect_url': '/api/login/',
-				'data': serializer.data,
-			},
-			status=status.HTTP_201_CREATED)
-
-			return response
-
 		except serializers.ValidationError as e:
 			return Response({
 				'message': e.detail,
@@ -61,6 +34,31 @@ class RegisterView(APIView):
 				'redirect_url': ''
 			},
 			status=status.HTTP_400_BAD_REQUEST)
+
+		serializer.save()
+
+		tokens = create_jwt_for_user(serializer.instance)
+
+		current_site = get_current_site(request).domain
+		relative_link = reverse('email_verification')
+		absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
+		email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
+		data = {
+			'domain': absurl,
+			'subject': 'Verify your email',
+			'email': serializer.instance.email,
+			'body': email_body
+		}
+
+		Verification.send_verification_email(data)
+
+		return Response ({
+			'message': 'User registered successfully, check your email for verification',
+			'redirect': True,
+			'redirect_url': '/api/login/',
+			'data': serializer.data,
+		},
+		status=status.HTTP_201_CREATED)
 
 class Authentication42(APIView):
 
@@ -168,7 +166,7 @@ class LoginView(APIView):
 
 		if not user:
 			return Response({
-				'message': 'Invalid credentials',
+				'message': 'Invalid username or password',
 				'redirect': False,
 				'redirect_url': '',
 			},
@@ -176,7 +174,7 @@ class LoginView(APIView):
 		
 		if not user.is_verified:
 			return Response({
-				'message': 'User not verified',
+				'message': 'User not verified, please check your email',
 				'redirect': False,
 				'redirect_url': '',
 			},
@@ -197,7 +195,7 @@ class LogoutView(APIView):
 	def post(self, request: Request) -> Response:
 
 		refresh = request.data.get(settings.REFRESH_TOKEN)
-		print(refresh)
+
 		if not refresh:
 			return Response({
 				'message': 'No refresh token provided',
@@ -217,14 +215,12 @@ class LogoutView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
-		response = Response({
+		return Response({
 			'message': 'Logout successful',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
 		status=status.HTTP_200_OK)
-
-		return response
 
 class TokenRefresher(APIView):
 
@@ -236,7 +232,7 @@ class TokenRefresher(APIView):
 
 		if not refresh:
 			return Response({
-				'message': 'No refresh token provided',
+				'message': 'No refresh token is provided',
 				'redirect': False,
 				'redirect_url': '/api/login/'
 			},
@@ -253,17 +249,17 @@ class TokenRefresher(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
-		user = UserInfo.objects.get(id=token['user_id'])
-
-		if not user:
+		try:
+			user = UserInfo.objects.get(id=token['user_id'])
+		except UserInfo.DoesNotExist:
 			return Response({
-				'message': 'User not found',
+				'message': 'Couldn\'t retrieve user from token',
 				'redirect': False,
 				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		response = Response({
+		return Response({
 			'message': 'Token refreshed',
 			'redirect': True,
 			'redirect_url': '/api/profile',
@@ -271,15 +267,13 @@ class TokenRefresher(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-		return response
-
 class AllUsersView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
 	def get(self, request: Request) -> Response:
 
-		users = UserInfo.objects.filter(id__gt=1)
+		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
 			'message': 'Users retrieved successfully',
 			'redirect': False,
@@ -321,10 +315,10 @@ class ProfileView(APIView):
 				status=status.HTTP_404_NOT_FOUND)
 		else:
 			return Response({
-			'message': 'User retrieved successfully',
-			'redirect': False,
-			'redirect_url': '',
-			'data': GetUserBasicInfoSerializer(user).data
+				'message': 'User retrieved successfully',
+				'redirect': False,
+				'redirect_url': '',
+				'data': GetUserBasicInfoSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -334,26 +328,29 @@ class UpdatePasswordView(APIView):
 
 	def put(self, request: Request) -> Response:
 
-		serializer = PasswordUpdateSerializer(instance=request.user, data=request.data, context={'request': request})
+		serializer = PasswordUpdateSerializer(instance=request.user,
+					data=request.data,
+					context={'request': request})
 
 		try:
 			serializer.is_valid(raise_exception=True)
-			serializer.save()
-			response = Response({
-				'message': 'Password updated successfully',
-				'redirect': False,
-				'redirect_url': ''
-			},
-			status=status.HTTP_200_OK)
-			return response
 		except serializers.ValidationError as e:
-			response = Response({
+			return Response({
 				'message': e.detail,
 				'redirect': False,
 				'redirect_url': ''
 			},
 			status=status.HTTP_400_BAD_REQUEST)
-			return response
+
+		serializer.save()
+
+		response = Response({
+			'message': 'Password updated successfully',
+			'redirect': False,
+			'redirect_url': ''
+		},
+		status=status.HTTP_200_OK)
+		return response
 
 class SettingsView(APIView):
 
