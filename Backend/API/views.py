@@ -88,7 +88,12 @@ class Authentication42View(APIView):
 		__token = requests.post("https://api.intra.42.fr/oauth/token/", data=data)
 
 		if not "access_token" in __token.json():
-			return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({
+				'message': 'Invalid code',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 		
 		access_token = __token.json()['access_token']
 
@@ -114,18 +119,20 @@ class Authentication42View(APIView):
 		if serializer.is_valid():
 			serializer.save()
 
-			tokens = create_jwt_for_user(serializer.instance)
-			access_token = tokens['access_token']
-			refresh_token = tokens['refresh_token']
-
-			return Response({
+			response = Response({
 				'message': 'User registered successfully',
 				'redirect': True,
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
-				'jwt': tokens
 			},
 			status=status.HTTP_201_CREATED)
+
+			__jwt = create_jwt_for_user(serializer.instance)
+
+			response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
+			response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
+
+			return response
 
 		else:
 			try:
@@ -138,13 +145,20 @@ class Authentication42View(APIView):
 				},
 				status=status.HTTP_400_BAD_REQUEST)
 			
-			return Response({
+			response = Response({
 				'message': 'Login successful',
 				'redirect': True,
 				'redirect_url': '/api/profile',
 				'jwt': create_jwt_for_user(user)
 			},
 			status=status.HTTP_200_OK)
+
+			__jwt = create_jwt_for_user(user)
+
+			response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
+			response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
+
+			return response
 
 class LoginView(APIView):
 
@@ -180,13 +194,19 @@ class LoginView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
-		return Response({
+		response = Response({
 			'message': 'Login successful',
 			'redirect': True,
 			'redirect_url': '/api/profile',
-			'jwt': create_jwt_for_user(user)
 		},
 		status=status.HTTP_200_OK)
+
+		__jwt = create_jwt_for_user(user)
+
+		response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
+		response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
+
+		return response
 
 class LogoutView(APIView):
 
@@ -215,12 +235,17 @@ class LogoutView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
-		return Response({
+		response = Response({
 			'message': 'Logout successful',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
 		status=status.HTTP_200_OK)
+
+		response.delete_cookie(settings.ACCESS_TOKEN)
+		response.delete_cookie(settings.REFRESH_TOKEN)
+
+		return response
 
 class TokenRefresherView(APIView):
 
@@ -259,13 +284,20 @@ class TokenRefresherView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		return Response({
+		response = Response({
 			'message': 'Token refreshed',
 			'redirect': True,
 			'redirect_url': '/api/profile',
-			'jwt': create_jwt_for_user(user)
 		},
 		status=status.HTTP_200_OK)
+
+		__jwt = create_jwt_for_user(user)
+
+		response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
+		response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
+
+		return response
+
 
 class AllUsersView(APIView):
 
