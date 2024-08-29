@@ -30,6 +30,7 @@ class RegisterView(APIView):
 			serializer.save()
 
 			tokens = create_jwt_for_user(serializer.instance)
+
 			current_site = get_current_site(request).domain
 			relative_link = reverse('email_verification')
 			absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
@@ -44,7 +45,7 @@ class RegisterView(APIView):
 			Verification.send_verification_email(data)
 
 			response = Response ({
-				'message': 'User registered successfully',
+				'message': 'User registered successfully, verification email sent',
 				'redirect': True,
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
@@ -61,86 +62,6 @@ class RegisterView(APIView):
 				'redirect_url': ''
 			},
 			status=status.HTTP_400_BAD_REQUEST)
-
-class LoginView(APIView):
-
-	permission_classes = [AllowAny]
-
-	def post(self, request: Request) -> Response:
-		if request.user.is_authenticated:
-			return Response({
-				'message': 'User already logged in',
-				'redirect': True,
-				'redirect_url': '/api/profile/',
-			},
-			status=status.HTTP_200_OK)
-
-		username = request.data.get("username")
-		password = request.data.get("password")
-
-		user = authenticate(request, username=username, password=password)
-
-		if not user:
-			return Response({
-				'message': 'Invalid credentials',
-				'redirect': False,
-				'redirect_url': '',
-			},
-			status=status.HTTP_401_UNAUTHORIZED)
-		
-		if not user.is_verified:
-			return Response({
-				'message': 'User not verified',
-				'redirect': False,
-				'redirect_url': '',
-			},
-			status=status.HTTP_401_UNAUTHORIZED)
-
-		response = Response({
-			'message': 'Login successful',
-			'redirect': True,
-			'redirect_url': '/api/profile',
-			'jwt': create_jwt_for_user(user)
-		},
-		status=status.HTTP_200_OK)
-
-		return response
-
-class LogoutView(APIView):
-
-	permission_classes = [IsAuthenticated]
-
-	def post(self, request: Request) -> Response:
-
-		refresh = request.data.get(settings.REFRESH_TOKEN)
-		print(refresh)
-		if not refresh:
-			return Response({
-				'message': 'No refresh token provided',
-				'redirect': False,
-				'redirect_url': ''
-			},
-			status=status.HTTP_400_BAD_REQUEST)
-
-		try:
-			token = RefreshToken(refresh)
-			token.blacklist()
-		except TokenError:
-			return Response({
-				'message': 'Refresh token is invalid, expired or blacklisted',
-				'redirect': True,
-				'redirect_url': '/api/login/'
-			},
-			status=status.HTTP_401_UNAUTHORIZED)
-
-		response = Response({
-			'message': 'Logout successful',
-			'redirect': True,
-			'redirect_url': '/api/login/'
-		},
-		status=status.HTTP_200_OK)
-
-		return response
 
 class Authentication42(APIView):
 
@@ -235,6 +156,86 @@ class Authentication42(APIView):
 			response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
 
 			return response
+
+class LoginView(APIView):
+
+	permission_classes = [AllowAny]
+
+	def post(self, request: Request) -> Response:
+		if request.user.is_authenticated:
+			return Response({
+				'message': 'User already logged in',
+				'redirect': True,
+				'redirect_url': '/api/profile/',
+			},
+			status=status.HTTP_200_OK)
+
+		username = request.data.get("username")
+		password = request.data.get("password")
+
+		user = authenticate(request, username=username, password=password)
+
+		if not user:
+			return Response({
+				'message': 'Invalid credentials',
+				'redirect': False,
+				'redirect_url': '',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+		
+		if not user.is_verified:
+			return Response({
+				'message': 'User not verified',
+				'redirect': False,
+				'redirect_url': '',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+
+		response = Response({
+			'message': 'Login successful',
+			'redirect': True,
+			'redirect_url': '/api/profile',
+			'jwt': create_jwt_for_user(user)
+		},
+		status=status.HTTP_200_OK)
+
+		return response
+
+class LogoutView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def post(self, request: Request) -> Response:
+
+		refresh = request.data.get(settings.REFRESH_TOKEN)
+		print(refresh)
+		if not refresh:
+			return Response({
+				'message': 'No refresh token provided',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+
+		try:
+			token = RefreshToken(refresh)
+			token.blacklist()
+		except TokenError:
+			return Response({
+				'message': 'Refresh token is invalid, expired or blacklisted',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+
+		response = Response({
+			'message': 'Logout successful',
+			'redirect': True,
+			'redirect_url': '/api/login/'
+		},
+		status=status.HTTP_200_OK)
+
+		return response
 
 class TokenRefresher(APIView):
 
@@ -365,6 +366,37 @@ class UpdatePasswordView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 			return response
 
+class SettingsView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def post(self, request: Request) -> Response:
+
+		try:
+
+			serializer = UserProfileSerializer(instance=request.user,
+								data=request.data,
+								context={'request': request},
+								partial=True)
+
+			serializer.is_valid(raise_exception=True)
+			serializer.save()
+
+			return Response({
+				'message': 'Profile updated successfully',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_200_OK)
+		
+		except serializers.ValidationError as e:
+			return Response({
+				'message': e.detail,
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+
 class VerifyEmailView(APIView):
 
 	permission_classes = [AllowAny]
@@ -392,6 +424,81 @@ class VerifyEmailView(APIView):
 				'redirect': True,
 				'redirect_url': '/api/login/'
 			})
+		except Exception as e:
+			return Response({
+				'message': 'Invalid or expired token',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+
+class ResetPasswordView(APIView):
+
+	permission_classes = [AllowAny]
+
+	def post(self, request: Request) -> Response:
+
+		email = request.data.get('email')
+
+		if not email:
+			return Response({
+				'message': 'No email provided',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		try:
+			user = UserInfo.objects.get(email=email)
+		except UserInfo.DoesNotExist:
+			return Response({
+				'message': 'email not found',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_404_NOT_FOUND)
+
+		tokens = create_jwt_for_user(user)
+		current_site = get_current_site(request).domain
+		relative_link = reverse('password_verification')
+		absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
+
+		email_body = f'Hi {user.username},\n\nPlease use the link below to reset your password:\n{absurl}'
+		data = {
+			'domain': absurl,
+			'subject': 'Reset your password',
+			'email': user.email,
+			'body': email_body
+		}
+
+		Verification.send_verification_email(data)
+
+		return Response({
+			'message': 'Password reset email sent',
+			'redirect': True,
+			'redirect_url': '/api/login/'
+		},
+		status=status.HTTP_200_OK)
+
+class VerifyPasswordView(APIView):
+
+	permission_classes = [AllowAny]
+
+	def post(self, request: Request) -> Response:
+
+		token = request.GET.get('token')
+
+		if not token:
+			return Response({
+				'message': 'No token provided',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+
+		try:
+			token = AccessToken(token)
+			user = UserInfo.objects.get(id=token['user_id'])
 		except TokenError:
 			return Response({
 				'message': 'Invalid or expired token',
@@ -399,3 +506,24 @@ class VerifyEmailView(APIView):
 				'redirect_url': ''
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
+	
+
+		try:
+			serializer = ResetPasswordSerializer(instance=user, data=request.data)
+			serializer.is_valid(raise_exception=True)
+
+			serializer.save()
+
+			return Response({
+				'message': 'Password reset successfully',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			},
+			status=status.HTTP_200_OK)
+		except serializers.ValidationError as e:
+			return Response({
+				'message': e.detail,
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_400_BAD_REQUEST)

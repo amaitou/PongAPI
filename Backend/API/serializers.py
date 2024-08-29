@@ -112,3 +112,54 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
 		instance.set_password(validated_data['new_password'])
 		instance.save()
 		return instance
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+	
+	new_password = serializers.CharField(write_only=True, required=True)
+	re_new_password = serializers.CharField(write_only=True, required=True)
+
+	class Meta:
+		model = UserInfo
+		fields = ['new_password', 're_new_password']
+
+	def validate(self, data):
+
+		if data['new_password'] != data['re_new_password']:
+			raise serializers.ValidationError({'new_password': 'Passwords do not match'})
+		return data
+
+	def update(self, instance, validated_data):
+		instance.set_password(validated_data['new_password'])
+		instance.save()
+		return instance
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+	
+	email = serializers.EmailField(required=True)
+
+	class Meta:
+		model = UserInfo
+		fields = ['first_name', 'last_name', 'email', 'gender', 'username']
+
+		def validate_email(self, value):
+			user = self.context['request'].user
+			if UserInfo.objects.exclude(pk=user.pk).filter(email=value).exists():
+				raise serializers.ValidationError({"email": "This email is already in use."})
+			return value
+		
+		
+		def validate_username(self, value):
+			user = self.context['request'].user
+			if UserInfo.objects.exclude(pk=user.pk).filter(username=value).exists():
+				raise serializers.ValidationError({"username": "This username is already in use."})
+			return value
+		
+		def update(self, instance, validated_data):
+
+			instance.first_name = validated_data.get('first_name', instance.first_name)
+			instance.last_name = validated_data.get('last_name', instance.last_name)
+			instance.email = validated_data.get('email', instance.email)
+			instance.username = validated_data.get('username', instance.username)
+			instance.save()
+
+			return instance
