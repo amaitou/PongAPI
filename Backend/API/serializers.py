@@ -2,8 +2,6 @@
 from .models import UserInfo, UserGameStats
 from rest_framework import serializers
 from .utils import password_validation
-from django.contrib.auth.management.commands.createsuperuser import Command as CreateSuperuserCommand
-
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
 	

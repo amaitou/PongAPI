@@ -415,22 +415,41 @@ class VerifyEmailView(APIView):
 		
 		try:
 			token = AccessToken(token)
-			user = UserInfo.objects.get(id=token['user_id'])
-			user.is_verified = True
-			user.save()
-
-			return Response({
-				'message': 'Email verified successfully',
-				'redirect': True,
-				'redirect_url': '/api/login/'
-			})
-		except Exception as e:
+		except TokenError:
 			return Response({
 				'message': 'Invalid or expired token',
 				'redirect': False,
 				'redirect_url': ''
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
+		
+		try:
+			user = UserInfo.objects.get(id=token['user_id'])
+		except UserInfo.DoesNotExist:
+			return Response({
+				'message': 'Couldn\'t find user',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_404_NOT_FOUND)
+	
+		if user.is_verified:
+			return Response({
+				'message': 'Email already verified',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_200_OK)
+
+		user.is_verified = True
+		user.save()
+
+		return Response({
+			'message': 'Email verified successfully',
+			'redirect': True,
+			'redirect_url': '/api/login/'
+		},
+		status=status.HTTP_200_OK)
 
 class ResetPasswordView(APIView):
 
