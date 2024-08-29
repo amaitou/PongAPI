@@ -49,7 +49,6 @@ class RegisterView(APIView):
 				'redirect': True,
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
-				'jwt': tokens
 			},
 			status=status.HTTP_201_CREATED)
 
@@ -121,17 +120,15 @@ class Authentication42(APIView):
 			access_token = tokens['access_token']
 			refresh_token = tokens['refresh_token']
 
-			response = Response({
+			return Response({
 				'message': 'User registered successfully',
 				'redirect': True,
 				'redirect_url': '/api/login/',
 				'data': serializer.data,
-			}, status=status.HTTP_201_CREATED)
+				'jwt': tokens
+			},
+			status=status.HTTP_201_CREATED)
 
-			response.set_cookie(settings.ACCESS_TOKEN, access_token)
-			response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
-
-			return response
 		else:
 			try:
 				user = UserInfo.objects.get(username=username)
@@ -140,22 +137,16 @@ class Authentication42(APIView):
 					'message': 'Invalid data',
 					'redirect': False,
 					'redirect_url': ''
-				}, status=status.HTTP_400_BAD_REQUEST)
+				},
+				status=status.HTTP_400_BAD_REQUEST)
 			
-			response = Response({
+			return Response({
 				'message': 'Login successful',
 				'redirect': True,
-				'redirect_url': '/api/profile'
-			}, status=status.HTTP_200_OK)
-
-			tokens = create_jwt_for_user(user)
-			access_token = tokens['access_token']
-			refresh_token = tokens['refresh_token']
-
-			response.set_cookie(settings.ACCESS_TOKEN, access_token)
-			response.set_cookie(settings.REFRESH_TOKEN, refresh_token, httponly=True)
-
-			return response
+				'redirect_url': '/api/profile',
+				'jwt': create_jwt_for_user(user)
+			},
+			status=status.HTTP_200_OK)
 
 class LoginView(APIView):
 
@@ -191,15 +182,13 @@ class LoginView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
-		response = Response({
+		return Response({
 			'message': 'Login successful',
 			'redirect': True,
 			'redirect_url': '/api/profile',
 			'jwt': create_jwt_for_user(user)
 		},
 		status=status.HTTP_200_OK)
-
-		return response
 
 class LogoutView(APIView):
 
