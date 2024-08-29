@@ -503,7 +503,6 @@ class PasswordVerifyView(APIView):
 
 		try:
 			token = AccessToken(token)
-			user = UserInfo.objects.get(id=token['user_id'])
 		except TokenError:
 			return Response({
 				'message': 'Invalid or expired token',
@@ -514,17 +513,18 @@ class PasswordVerifyView(APIView):
 	
 
 		try:
-			serializer = ResetPasswordSerializer(instance=user, data=request.data)
-			serializer.is_valid(raise_exception=True)
-
-			serializer.save()
-
+			user = UserInfo.objects.get(id=token['user_id'])
+		except UserInfo.DoesNotExist:
 			return Response({
-				'message': 'Password reset successfully',
-				'redirect': True,
-				'redirect_url': '/api/login/'
+				'message': 'Couldn\'t find user',
+				'redirect': False,
+				'redirect_url': ''
 			},
-			status=status.HTTP_200_OK)
+			status=status.HTTP_404_NOT_FOUND)
+
+		serializer = ResetPasswordSerializer(instance=user, data=request.data)
+		try:
+			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
 			return Response({
 				'message': e.detail,
@@ -532,3 +532,12 @@ class PasswordVerifyView(APIView):
 				'redirect_url': ''
 			},
 			status=status.HTTP_400_BAD_REQUEST)
+
+		serializer.save()
+
+		return Response({
+			'message': 'Password reset successfully',
+			'redirect': True,
+			'redirect_url': '/api/login/'
+		},
+		status=status.HTTP_200_OK)
