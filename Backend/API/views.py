@@ -344,13 +344,12 @@ class PasswordUpdateView(APIView):
 
 		serializer.save()
 
-		response = Response({
+		return Response({
 			'message': 'Password updated successfully',
 			'redirect': False,
 			'redirect_url': ''
 		},
 		status=status.HTTP_200_OK)
-		return response
 
 class ProfileUpdateView(APIView):
 
@@ -358,23 +357,12 @@ class ProfileUpdateView(APIView):
 
 	def post(self, request: Request) -> Response:
 
+		serializer = UserProfileSerializer(instance=request.user,
+							data=request.data,
+							context={'request': request},
+							partial=True)
 		try:
-
-			serializer = UserProfileSerializer(instance=request.user,
-								data=request.data,
-								context={'request': request},
-								partial=True)
-
 			serializer.is_valid(raise_exception=True)
-			serializer.save()
-
-			return Response({
-				'message': 'Profile updated successfully',
-				'redirect': False,
-				'redirect_url': ''
-			},
-			status=status.HTTP_200_OK)
-		
 		except serializers.ValidationError as e:
 			return Response({
 				'message': e.detail,
@@ -382,6 +370,15 @@ class ProfileUpdateView(APIView):
 				'redirect_url': ''
 			},
 			status=status.HTTP_400_BAD_REQUEST)
+
+		serializer.save()
+
+		return Response({
+			'message': 'Profile updated successfully',
+			'redirect': False,
+			'redirect_url': ''
+		},
+		status=status.HTTP_200_OK)
 
 class EmailVerifyView(APIView):
 
