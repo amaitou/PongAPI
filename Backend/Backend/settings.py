@@ -42,8 +42,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(hours=4),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     'USER_ID_FIELD': 'id',
@@ -117,17 +117,19 @@ CORS_ALLOW_ALL_ORIGINS = True
 AUTH_USER_MODEL = 'API.UserInfo'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# 42 API
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 REDIRECT = os.environ.get('REDIRECT')
 USER_INFO_URL = os.environ.get('USER_INFO_URL')
 AUTH_URL = os.environ.get('AUTH_URL')
 
+# Short Names
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 REFRESH_TOKEN = os.environ.get("REFRESH_TOKEN")
-AUTH_HEADER_NAME = os.environ.get("AUTHORIZATION")
+AUTH_HEADER_NAME = os.environ.get("AUTH_HEADER_NAME")
 
+# Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
 EMAIL_PORT = os.environ.get('EMAIL_PORT')

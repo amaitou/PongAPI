@@ -20,6 +20,7 @@ import requests
 class RegisterView(APIView):
 
 	permission_classes = [AllowAny]
+	authentication_classes = []
 
 	def post(self, request: Request) -> Response:
 
@@ -71,7 +72,8 @@ class Authentication42View(APIView):
 				'message': 'User already logged in',
 				'redirect': True,
 				'redirect_url': '/api/profile/'
-			}, status=status.HTTP_200_OK)
+			},
+			status=status.HTTP_200_OK)
 		
 		code = request.GET.get('code')
 		if not code:
@@ -122,7 +124,7 @@ class Authentication42View(APIView):
 			response = Response({
 				'message': 'User registered successfully',
 				'redirect': True,
-				'redirect_url': '/api/login/',
+				'redirect_url': '/api/profile/',
 				'data': serializer.data,
 			},
 			status=status.HTTP_201_CREATED)
@@ -139,7 +141,7 @@ class Authentication42View(APIView):
 				user = UserInfo.objects.get(username=username)
 			except UserInfo.DoesNotExist:
 				return Response({
-					'message': 'Invalid data',
+					'message': 'failed to authenticate',
 					'redirect': False,
 					'redirect_url': ''
 				},
@@ -149,7 +151,6 @@ class Authentication42View(APIView):
 				'message': 'Login successful',
 				'redirect': True,
 				'redirect_url': '/api/profile',
-				'jwt': create_jwt_for_user(user)
 			},
 			status=status.HTTP_200_OK)
 
@@ -188,7 +189,7 @@ class LoginView(APIView):
 		
 		if not user.is_verified:
 			return Response({
-				'message': 'User not verified, please check your email',
+				'message': 'User is not verified, please check your email',
 				'redirect': False,
 				'redirect_url': '',
 			},
@@ -214,7 +215,7 @@ class LogoutView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		refresh = request.data.get(settings.REFRESH_TOKEN)
+		refresh = request.COOKIES.get(settings.REFRESH_TOKEN)
 
 		if not refresh:
 			return Response({
