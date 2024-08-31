@@ -30,20 +30,14 @@ class RefreshTokenMiddleware(MiddlewareMixin):
         try:
             decoded_refresh_token = RefreshToken(current_refresh_token)
         except TokenError:
-            response = self.get_response(request)
-            response.delete_cookie(settings.ACCESS_TOKEN)
-            response.delete_cookie(settings.REFRESH_TOKEN)
-            return response
+            return self.get_response(request)
         
         user_id = decoded_refresh_token["user_id"]
 
         try:
             user = UserInfo.objects.get(id=user_id)
         except UserInfo.DoesNotExist:
-            response = self.get_response(request)
-            response.delete_cookie(settings.ACCESS_TOKEN)
-            response.delete_cookie("refresh_token")
-            return response
+            self.get_response(request)
     
         new_created_access_token = str(decoded_refresh_token.access_token)
 

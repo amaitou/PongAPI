@@ -30,7 +30,7 @@ class RegisterView(APIView):
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
 			return Response({
-				'message': e.detail,
+				'error': e.detail,
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -54,7 +54,7 @@ class RegisterView(APIView):
 		Verification.send_verification_email(data)
 
 		return Response ({
-			'message': 'User registered successfully, check your email for verification',
+			'success': 'User registered successfully, check your email for verification',
 			'redirect': True,
 			'redirect_url': '/api/login/',
 			'data': serializer.data,
@@ -69,7 +69,7 @@ class Authentication42View(APIView):
 
 		if request.user.is_authenticated:
 			return Response({
-				'message': 'User already logged in',
+				'success': 'User already logged in',
 				'redirect': True,
 				'redirect_url': '/api/profile/'
 			},
@@ -91,7 +91,7 @@ class Authentication42View(APIView):
 
 		if not "access_token" in __token.json():
 			return Response({
-				'message': 'Invalid code',
+				'error': 'Invalid code',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -122,7 +122,7 @@ class Authentication42View(APIView):
 			serializer.save()
 
 			response = Response({
-				'message': 'User registered successfully',
+				'success': 'User registered successfully',
 				'redirect': True,
 				'redirect_url': '/api/profile/',
 				'data': serializer.data,
@@ -141,14 +141,14 @@ class Authentication42View(APIView):
 				user = UserInfo.objects.get(username=username)
 			except UserInfo.DoesNotExist:
 				return Response({
-					'message': 'failed to authenticate',
+					'error': 'failed to authenticate',
 					'redirect': False,
 					'redirect_url': ''
 				},
 				status=status.HTTP_400_BAD_REQUEST)
 			
 			response = Response({
-				'message': 'Login successful',
+				'success': 'Login successful',
 				'redirect': True,
 				'redirect_url': '/api/profile',
 			},
@@ -168,7 +168,7 @@ class LoginView(APIView):
 	def post(self, request: Request) -> Response:
 		if request.user.is_authenticated:
 			return Response({
-				'message': 'User already logged in',
+				'success': 'User already logged in',
 				'redirect': True,
 				'redirect_url': '/api/profile/',
 			},
@@ -181,22 +181,22 @@ class LoginView(APIView):
 
 		if not user:
 			return Response({
-				'message': 'Invalid username or password',
-				'redirect': False,
-				'redirect_url': '',
+				'error': 'Invalid username or password',
+				'redirect': True,
+				'redirect_url': '/api/login/',
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
 		if not user.is_verified:
 			return Response({
-				'message': 'User is not verified, please check your email',
-				'redirect': False,
-				'redirect_url': '',
+				'error': 'User is not verified, please check your email',
+				'redirect': True,
+				'redirect_url': '/api/login/',
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
 		response = Response({
-			'message': 'Login successful',
+			'success': 'Login successful',
 			'redirect': True,
 			'redirect_url': '/api/profile',
 		},
@@ -212,7 +212,6 @@ class LoginView(APIView):
 class LogoutView(APIView):
 
 	permission_classes = [AllowAny]
-	authentication_classes = []
 
 	def post(self, request: Request) -> Response:
 
@@ -220,9 +219,9 @@ class LogoutView(APIView):
 
 		if not refresh:
 			return Response({
-				'message': 'No refresh token provided',
+				'error': 'No refresh token is provided',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -231,14 +230,14 @@ class LogoutView(APIView):
 			token.blacklist()
 		except TokenError:
 			return Response({
-				'message': 'Refresh token is invalid, expired or blacklisted',
+				'error': 'Refresh token is invalid, expired or blacklisted',
 				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
 		response = Response({
-			'message': 'Logout successful',
+			'success': 'Logout successful',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
@@ -260,7 +259,7 @@ class TokenRefresherView(APIView):
 
 		if not refresh:
 			return Response({
-				'message': 'No refresh token is provided',
+				'error': 'No refresh token is provided',
 				'redirect': False,
 				'redirect_url': '/api/login/'
 			},
@@ -271,7 +270,7 @@ class TokenRefresherView(APIView):
 			token.blacklist()
 		except TokenError:
 			return Response({
-				'message': 'Refresh token is invalid or expired',
+				'error': 'Refresh token is invalid or expired',
 				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
@@ -281,16 +280,16 @@ class TokenRefresherView(APIView):
 			user = UserInfo.objects.get(id=token['user_id'])
 		except UserInfo.DoesNotExist:
 			return Response({
-				'message': 'Couldn\'t retrieve user from token',
+				'error': 'Couldn\'t retrieve user from token',
 				'redirect': False,
 				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
 		response = Response({
-			'message': 'Token refreshed',
+			'success': 'Token refreshed',
 			'redirect': True,
-			'redirect_url': '/api/profile',
+			'redirect_url': f'{request.path}',
 		},
 		status=status.HTTP_200_OK)
 
@@ -310,7 +309,7 @@ class AllUsersView(APIView):
 
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
-			'message': 'Users retrieved successfully',
+			'success': 'Users retrieved successfully',
 			'redirect': False,
 			'redirect_url': '',
 			'data': GetUsersSerializer(users, many=True).data
@@ -323,12 +322,20 @@ class ProfileView(APIView):
 
 	def get(self, request: Request, username = None) -> Response:
 
-		user = request.user
+		user = get_user_from_jwt(request.COOKIES.get(settings.ACCESS_TOKEN), 'access')
+
+		if not user:
+			return Response({
+				'error': 'Couldn\'t retrieve user from token',
+				'redirect': False,
+				'redirect_url': ''
+			},
+			status=status.HTTP_404_NOT_FOUND)
 		
 		if username:
 			if user.username == username:
 				return Response({
-					'message': 'User retrieved successfully',
+					'success': 'User retrieved successfully',
 					'redirect': False,
 					'redirect_url': '',
 					'data': GetUserBasicInfoSerializer(user).data
@@ -336,21 +343,21 @@ class ProfileView(APIView):
 			try:
 				user = UserInfo.objects.get(username=username)
 				return Response({
-					'message': 'User retrieved successfully',
+					'success': 'User retrieved successfully',
 					'redirect': False,
 					'redirect_url': '',
 					'data': GetUserBasicInfoSerializer(user).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
-					'message': 'User not found',
+					'error': 'User not found',
 					'redirect': False,
 					'redirect_url': ''
 				},
 				status=status.HTTP_404_NOT_FOUND)
 		else:
 			return Response({
-				'message': 'User retrieved successfully',
+				'success': 'User retrieved successfully',
 				'redirect': False,
 				'redirect_url': '',
 				'data': GetUserBasicInfoSerializer(user).data
@@ -371,7 +378,7 @@ class PasswordUpdateView(APIView):
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
 			return Response({
-				'message': e.detail,
+				'error': e.detail,
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -380,7 +387,7 @@ class PasswordUpdateView(APIView):
 		serializer.save()
 
 		return Response({
-			'message': 'Password updated successfully',
+			'success': 'Password updated successfully',
 			'redirect': False,
 			'redirect_url': ''
 		},
@@ -400,7 +407,7 @@ class ProfileUpdateView(APIView):
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
 			return Response({
-				'message': e.detail,
+				'error': e.detail,
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -409,7 +416,7 @@ class ProfileUpdateView(APIView):
 		serializer.save()
 
 		return Response({
-			'message': 'Profile updated successfully',
+			'success': 'Profile updated successfully',
 			'redirect': False,
 			'redirect_url': ''
 		},
@@ -426,7 +433,7 @@ class EmailVerifyView(APIView):
 
 		if not token:
 			return Response({
-				'message': 'No token provided',
+				'error': 'No token provided',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -436,7 +443,7 @@ class EmailVerifyView(APIView):
 			token = AccessToken(token)
 		except TokenError:
 			return Response({
-				'message': 'Invalid or expired token',
+				'error': 'Invalid or expired token',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -446,7 +453,7 @@ class EmailVerifyView(APIView):
 			user = UserInfo.objects.get(id=token['user_id'])
 		except UserInfo.DoesNotExist:
 			return Response({
-				'message': 'Couldn\'t find user',
+				'error': 'Couldn\'t find user',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -454,7 +461,7 @@ class EmailVerifyView(APIView):
 	
 		if user.is_verified:
 			return Response({
-				'message': 'Email already verified',
+				'success': 'Email already verified',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -464,7 +471,7 @@ class EmailVerifyView(APIView):
 		user.save()
 
 		return Response({
-			'message': 'Email verified successfully',
+			'success': 'Email verified successfully',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
@@ -481,7 +488,7 @@ class PasswordResetView(APIView):
 
 		if not email:
 			return Response({
-				'message': 'No email provided',
+				'error': 'No email provided',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -491,7 +498,7 @@ class PasswordResetView(APIView):
 			user = UserInfo.objects.get(email=email)
 		except UserInfo.DoesNotExist:
 			return Response({
-				'message': 'email not found',
+				'error': 'email not found',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -513,7 +520,7 @@ class PasswordResetView(APIView):
 		Verification.send_verification_email(data)
 
 		return Response({
-			'message': 'Password reset email sent',
+			'success': 'Password reset email sent',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
@@ -530,7 +537,7 @@ class PasswordVerifyView(APIView):
 
 		if not token:
 			return Response({
-				'message': 'No token provided',
+				'error': 'No token provided',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -540,7 +547,7 @@ class PasswordVerifyView(APIView):
 			token = AccessToken(token)
 		except TokenError:
 			return Response({
-				'message': 'Invalid or expired token',
+				'error': 'Invalid or expired token',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -551,7 +558,7 @@ class PasswordVerifyView(APIView):
 			user = UserInfo.objects.get(id=token['user_id'])
 		except UserInfo.DoesNotExist:
 			return Response({
-				'message': 'Couldn\'t find user',
+				'error': 'Couldn\'t find user',
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -562,7 +569,7 @@ class PasswordVerifyView(APIView):
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
 			return Response({
-				'message': e.detail,
+				'error': e.detail,
 				'redirect': False,
 				'redirect_url': ''
 			},
@@ -571,7 +578,7 @@ class PasswordVerifyView(APIView):
 		serializer.save()
 
 		return Response({
-			'message': 'Password reset successfully',
+			'success': 'Password reset successfully',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},

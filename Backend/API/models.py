@@ -13,6 +13,7 @@ class UserInfo(AbstractUser):
     avatar = models.ImageField(upload_to = 'avatars/', null = True)
     gender = models.CharField(max_length=2, choices = user_GENDER, null = True, default = 'N')
     is_verified = models.BooleanField(default = False, null = False)
+    two_factor_auth = models.BooleanField(default = False, null = False)
 
     class Meta:
         
