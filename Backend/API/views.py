@@ -13,6 +13,7 @@ from rest_framework import status
 from django.conf import settings
 from django.urls import reverse
 from .serializers import *
+from rest_framework_simplejwt.tokens import AccessToken
 from .utils import Utils
 import requests
 
@@ -37,7 +38,7 @@ class RegisterView(APIView):
 
 		serializer.save()
 
-		tokens = Utils.Utils.create_jwt_for_user(serializer.instance)
+		tokens = Utils.create_jwt_for_user(serializer.instance)
 
 		current_site = get_current_site(request).domain
 		relative_link = reverse('email_verification')
@@ -170,6 +171,10 @@ class LoginView(APIView):
 				'success': 'User already logged in',
 				'redirect': True,
 				'redirect_url': '/api/profile/',
+				'tokens': {
+					'access_token': request.COOKIES.get(settings.ACCESS_TOKEN),
+					'refresh_token': request.COOKIES.get(settings.REFRESH_TOKEN)
+				}
 			},
 			status=status.HTTP_200_OK)
 
@@ -198,6 +203,10 @@ class LoginView(APIView):
 			'success': 'Login successful',
 			'redirect': True,
 			'redirect_url': '/api/profile',
+			'tokens': {
+				'access_token': request.COOKIES.get(settings.ACCESS_TOKEN),
+				'refresh_token': request.COOKIES.get(settings.REFRESH_TOKEN)
+			}
 		},
 		status=status.HTTP_200_OK)
 
@@ -321,7 +330,7 @@ class ProfileView(APIView):
 
 	def get(self, request: Request, username = None) -> Response:
 
-		user = Utils.get_user_from_jwt(request.COOKIES.get(settings.ACCESS_TOKEN), 'access')
+		user = Utils.get_user_from_jwt(str(request.COOKIES.get(settings.ACCESS_TOKEN)), 'access')
 
 		if not user:
 			return Response({

@@ -33,7 +33,7 @@ class RefreshTokenMiddleware(MiddlewareMixin):
         except TokenError:
             return self.get_response(request)
 
-        user = Utils.get_user_from_jwt(decoded_refresh_token, 'refresh')
+        user = Utils.get_user_from_jwt(str(decoded_refresh_token), 'refresh')
 
         if not user:
             return self.get_response(request)
