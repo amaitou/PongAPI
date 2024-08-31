@@ -9,12 +9,11 @@ from rest_framework.response import Response
 from .models import UserInfo, UserGameStats
 from rest_framework.request import Request
 from rest_framework.views import APIView
-from .verification import Verification
 from rest_framework import status
 from django.conf import settings
 from django.urls import reverse
 from .serializers import *
-from .jwt import *
+from .utils import Utils
 import requests
 
 class RegisterView(APIView):
@@ -38,7 +37,7 @@ class RegisterView(APIView):
 
 		serializer.save()
 
-		tokens = create_jwt_for_user(serializer.instance)
+		tokens = Utils.Utils.create_jwt_for_user(serializer.instance)
 
 		current_site = get_current_site(request).domain
 		relative_link = reverse('email_verification')
@@ -51,7 +50,7 @@ class RegisterView(APIView):
 			'body': email_body
 		}
 
-		Verification.send_verification_email(data)
+		Utils.send_verification_email(data)
 
 		return Response ({
 			'success': 'User registered successfully, check your email for verification',
@@ -129,7 +128,7 @@ class Authentication42View(APIView):
 			},
 			status=status.HTTP_201_CREATED)
 
-			__jwt = create_jwt_for_user(serializer.instance)
+			__jwt = Utils.create_jwt_for_user(serializer.instance)
 
 			response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
 			response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
@@ -154,7 +153,7 @@ class Authentication42View(APIView):
 			},
 			status=status.HTTP_200_OK)
 
-			__jwt = create_jwt_for_user(user)
+			__jwt = Utils.create_jwt_for_user(user)
 
 			response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
 			response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
@@ -202,7 +201,7 @@ class LoginView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-		__jwt = create_jwt_for_user(user)
+		__jwt = Utils.create_jwt_for_user(user)
 
 		response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
 		response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
@@ -293,7 +292,7 @@ class TokenRefresherView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-		__jwt = create_jwt_for_user(user)
+		__jwt = Utils.create_jwt_for_user(user)
 
 		response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
 		response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
@@ -322,7 +321,7 @@ class ProfileView(APIView):
 
 	def get(self, request: Request, username = None) -> Response:
 
-		user = get_user_from_jwt(request.COOKIES.get(settings.ACCESS_TOKEN), 'access')
+		user = Utils.get_user_from_jwt(request.COOKIES.get(settings.ACCESS_TOKEN), 'access')
 
 		if not user:
 			return Response({
@@ -504,7 +503,7 @@ class PasswordResetView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		tokens = create_jwt_for_user(user)
+		tokens = Utils.create_jwt_for_user(user)
 		current_site = get_current_site(request).domain
 		relative_link = reverse('password_verification')
 		absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
@@ -517,7 +516,7 @@ class PasswordResetView(APIView):
 			'body': email_body
 		}
 
-		Verification.send_verification_email(data)
+		Utils.send_verification_email(data)
 
 		return Response({
 			'success': 'Password reset email sent',

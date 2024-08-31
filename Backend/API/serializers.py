@@ -1,11 +1,11 @@
 
 from .models import UserInfo, UserGameStats
 from rest_framework import serializers
-from .utils import password_validation
+from .utils import Utils
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
 	
-	password = serializers.CharField(write_only=True, required=False, validators=[password_validation])
+	password = serializers.CharField(write_only=True, required=False, validators=[Utils.password_validation])
 	re_password = serializers.CharField(write_only=True, required=False)
 
 	class Meta:
