@@ -24,9 +24,6 @@ class RefreshTokenMiddleware(MiddlewareMixin):
 
         current_refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
 
-        print("- current_refresh_token: ", current_refresh_token)
-        print("- current_access_token: ", current_access_token)
-
         if not current_refresh_token:
             return None
             
@@ -50,8 +47,6 @@ class RefreshTokenMiddleware(MiddlewareMixin):
     
         new_created_access_token = str(decoded_refresh_token.access_token)
 
-        print("- refresh_toke: ", str(decoded_refresh_token))
-        print("- new_created_access_token: ", new_created_access_token)
         request.COOKIES[settings.ACCESS_TOKEN] = new_created_access_token
 
         response = self.get_response(request)

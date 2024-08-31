@@ -20,4 +20,3 @@ class CookieTokenAuthentication(JWTAuthentication):
             return None
 
         return user, validated_token
-
