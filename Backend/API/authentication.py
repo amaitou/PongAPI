@@ -3,7 +3,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.request import Request
 from django.conf import settings
 
-class HeaderTokenAuthentication(JWTAuthentication):
+class CookieTokenAuthentication(JWTAuthentication):
 
     def authenticate(self, request: Request):
 
