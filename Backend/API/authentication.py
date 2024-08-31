@@ -7,16 +7,9 @@ class HeaderTokenAuthentication(JWTAuthentication):
 
     def authenticate(self, request: Request):
 
-        auth_header = request.headers.get(settings.AUTH_HEADER_NAME)
-        if auth_header is None:
-            return None
+        access_token = request.COOKIES.get("access_token")
 
-
-        try:
-            prefix, access_token = auth_header.split(' ')
-            if prefix.lower() != 'bearer':
-                return None
-        except ValueError:
+        if access_token is None:
             return None
 
 
