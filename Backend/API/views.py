@@ -31,8 +31,8 @@ class RegisterView(APIView):
 		except serializers.ValidationError as e:
 			return Response({
 				'error': e.detail,
-				'redirect': False,
-				'redirect_url': ''
+				'redirect': True,
+				'redirect_url': '/api/register/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,8 +92,8 @@ class Authentication42View(APIView):
 		if not "access_token" in __token.json():
 			return Response({
 				'error': 'Invalid code',
-				'redirect': False,
-				'redirect_url': ''
+				'redirect': True,
+				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -142,8 +142,8 @@ class Authentication42View(APIView):
 			except UserInfo.DoesNotExist:
 				return Response({
 					'error': 'failed to authenticate',
-					'redirect': False,
-					'redirect_url': ''
+					'redirect': True,
+					'redirect_url': '/api/login/'
 				},
 				status=status.HTTP_400_BAD_REQUEST)
 			
@@ -170,11 +170,7 @@ class LoginView(APIView):
 			return Response({
 				'success': 'User already logged in',
 				'redirect': True,
-				'redirect_url': '/api/profile/',
-				'tokens': {
-					'access_token': request.COOKIES.get(settings.ACCESS_TOKEN),
-					'refresh_token': request.COOKIES.get(settings.REFRESH_TOKEN)
-				}
+				'redirect_url': f'/api/profile/'
 			},
 			status=status.HTTP_200_OK)
 
@@ -187,7 +183,7 @@ class LoginView(APIView):
 			return Response({
 				'error': 'Invalid username or password',
 				'redirect': True,
-				'redirect_url': '/api/login/',
+				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
@@ -202,11 +198,7 @@ class LoginView(APIView):
 		response = Response({
 			'success': 'Login successful',
 			'redirect': True,
-			'redirect_url': '/api/profile',
-			'tokens': {
-				'access_token': request.COOKIES.get(settings.ACCESS_TOKEN),
-				'refresh_token': request.COOKIES.get(settings.REFRESH_TOKEN)
-			}
+			'redirect_url': '/api/profile'
 		},
 		status=status.HTTP_200_OK)
 
@@ -228,7 +220,7 @@ class LogoutView(APIView):
 		if not refresh:
 			return Response({
 				'error': 'No refresh token is provided',
-				'redirect': False,
+				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
@@ -268,7 +260,7 @@ class TokenRefresherView(APIView):
 		if not refresh:
 			return Response({
 				'error': 'No refresh token is provided',
-				'redirect': False,
+				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
@@ -279,8 +271,8 @@ class TokenRefresherView(APIView):
 		except TokenError:
 			return Response({
 				'error': 'Refresh token is invalid or expired',
-				'redirect': True,
-				'redirect_url': '/api/login/'
+				'redirect': False,
+				'redirect_url': None
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
@@ -290,14 +282,14 @@ class TokenRefresherView(APIView):
 			return Response({
 				'error': 'Couldn\'t retrieve user from token',
 				'redirect': False,
-				'redirect_url': '/api/login/'
+				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
 		response = Response({
 			'success': 'Token refreshed',
-			'redirect': True,
-			'redirect_url': f'{request.path}',
+			'redirect': False,
+			'redirect_url': None,
 		},
 		status=status.HTTP_200_OK)
 
@@ -319,7 +311,7 @@ class AllUsersView(APIView):
 		return Response({
 			'success': 'Users retrieved successfully',
 			'redirect': False,
-			'redirect_url': '',
+			'redirect_url': None,
 			'data': GetUsersSerializer(users, many=True).data
 		},
 		status=status.HTTP_200_OK)
@@ -336,7 +328,7 @@ class ProfileView(APIView):
 			return Response({
 				'error': 'Couldn\'t retrieve user from token',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
@@ -345,7 +337,7 @@ class ProfileView(APIView):
 				return Response({
 					'success': 'User retrieved successfully',
 					'redirect': False,
-					'redirect_url': '',
+					'redirect_url': None,
 					'data': GetUserBasicInfoSerializer(user).data
 				})
 			try:
@@ -353,21 +345,21 @@ class ProfileView(APIView):
 				return Response({
 					'success': 'User retrieved successfully',
 					'redirect': False,
-					'redirect_url': '',
+					'redirect_url': None,
 					'data': GetUserBasicInfoSerializer(user).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
 					'error': 'User not found',
 					'redirect': False,
-					'redirect_url': ''
+					'redirect_url': None
 				},
 				status=status.HTTP_404_NOT_FOUND)
 		else:
 			return Response({
 				'success': 'User retrieved successfully',
 				'redirect': False,
-				'redirect_url': '',
+				'redirect_url': None,
 				'data': GetUserBasicInfoSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
@@ -388,7 +380,7 @@ class PasswordUpdateView(APIView):
 			return Response({
 				'error': e.detail,
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -397,7 +389,7 @@ class PasswordUpdateView(APIView):
 		return Response({
 			'success': 'Password updated successfully',
 			'redirect': False,
-			'redirect_url': ''
+			'redirect_url': None
 		},
 		status=status.HTTP_200_OK)
 
@@ -417,7 +409,7 @@ class ProfileUpdateView(APIView):
 			return Response({
 				'error': e.detail,
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -426,7 +418,7 @@ class ProfileUpdateView(APIView):
 		return Response({
 			'success': 'Profile updated successfully',
 			'redirect': False,
-			'redirect_url': ''
+			'redirect_url': None
 		},
 		status=status.HTTP_200_OK)
 
@@ -443,7 +435,7 @@ class EmailVerifyView(APIView):
 			return Response({
 				'error': 'No token provided',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -453,7 +445,7 @@ class EmailVerifyView(APIView):
 			return Response({
 				'error': 'Invalid or expired token',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
@@ -463,7 +455,7 @@ class EmailVerifyView(APIView):
 			return Response({
 				'error': 'Couldn\'t find user',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 	
@@ -471,7 +463,7 @@ class EmailVerifyView(APIView):
 			return Response({
 				'success': 'Email already verified',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_200_OK)
 
@@ -498,7 +490,7 @@ class PasswordResetView(APIView):
 			return Response({
 				'error': 'No email provided',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -508,7 +500,7 @@ class PasswordResetView(APIView):
 			return Response({
 				'error': 'email not found',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
@@ -547,7 +539,7 @@ class PasswordVerifyView(APIView):
 			return Response({
 				'error': 'No token provided',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -557,7 +549,7 @@ class PasswordVerifyView(APIView):
 			return Response({
 				'error': 'Invalid or expired token',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 	
@@ -568,7 +560,7 @@ class PasswordVerifyView(APIView):
 			return Response({
 				'error': 'Couldn\'t find user',
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
@@ -579,7 +571,7 @@ class PasswordVerifyView(APIView):
 			return Response({
 				'error': e.detail,
 				'redirect': False,
-				'redirect_url': ''
+				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
