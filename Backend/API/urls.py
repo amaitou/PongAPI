@@ -6,7 +6,6 @@ urlpatterns = [
     path('callback', Authentication42View.as_view(), name='42_authentication'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('refresh/', TokenRefresherView.as_view(), name='token_refresher'),
     path('users/', AllUsersView.as_view(), name='all_users'),
     path('profile/', ProfileView.as_view(), name='profile_owner'),
     path('profile/<str:username>/', ProfileView.as_view(), name='user_profile'),

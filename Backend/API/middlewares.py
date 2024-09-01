@@ -27,7 +27,32 @@ class CookieTokenAuthentication:
 
 		return response
 	
+	def __check_protected_endpoint(self, path: str) -> bool:
+
+		protected_endpoints = [
+			'/register/',
+			'/callback',
+			'/login/',
+			'/logout/',
+			'/users/',
+			'/profile/',
+			'/profile/<str:username>/',
+			'/profile_u/',
+			'/password_u/',
+		]
+
+		for endpoint in protected_endpoints:
+			if path.startswith('/api' + endpoint):
+				return True
+		
+		return False
+	
 	def __call__(self, request):
+
+		if not self.__check_protected_endpoint(request.path):
+			print(request.path)
+			return self.get_response(request)
+
 		access_token = request.COOKIES.get('access_token')
 
 		if not access_token:

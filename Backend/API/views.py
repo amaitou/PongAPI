@@ -213,7 +213,7 @@ class LogoutView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
-	def post(self, request: Request) -> Response:
+	def get(self, request: Request) -> Response:
 
 		refresh = request.COOKIES.get(settings.REFRESH_TOKEN)
 
@@ -245,58 +245,6 @@ class LogoutView(APIView):
 
 		response.delete_cookie(settings.ACCESS_TOKEN)
 		response.delete_cookie(settings.REFRESH_TOKEN)
-
-		return response
-
-class TokenRefresherView(APIView):
-
-	permission_classes = [AllowAny]
-	authentication_classes = []
-
-	def post(self, request: Request) -> Response:
-
-		refresh = request.data.get(settings.REFRESH_TOKEN)
-
-		if not refresh:
-			return Response({
-				'error': 'No refresh token is provided',
-				'redirect': True,
-				'redirect_url': '/api/login/'
-			},
-			status=status.HTTP_400_BAD_REQUEST)
-
-		try:
-			token = RefreshToken(refresh)
-			token.blacklist()
-		except TokenError:
-			return Response({
-				'error': 'Refresh token is invalid or expired',
-				'redirect': False,
-				'redirect_url': None
-			},
-			status=status.HTTP_401_UNAUTHORIZED)
-
-		try:
-			user = UserInfo.objects.get(id=token['user_id'])
-		except UserInfo.DoesNotExist:
-			return Response({
-				'error': 'Couldn\'t retrieve user from token',
-				'redirect': False,
-				'redirect_url': None
-			},
-			status=status.HTTP_404_NOT_FOUND)
-
-		response = Response({
-			'success': 'Token refreshed',
-			'redirect': False,
-			'redirect_url': None,
-		},
-		status=status.HTTP_200_OK)
-
-		__jwt = Utils.create_jwt_for_user(user)
-
-		response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
-		response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
 
 		return response
 
