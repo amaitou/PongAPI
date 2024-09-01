@@ -50,7 +50,6 @@ class CookieTokenAuthentication:
 	def __call__(self, request):
 
 		if not self.__check_protected_endpoint(request.path):
-			print(request.path)
 			return self.get_response(request)
 
 		access_token = request.COOKIES.get('access_token')
