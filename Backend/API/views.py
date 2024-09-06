@@ -79,7 +79,7 @@ class Authentication42View(APIView):
 
 		if not code:
 			return Response({
-				'error': 'No code provided',
+				'error': 'No code is provided',
 				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
@@ -195,7 +195,7 @@ class LoginView(APIView):
 		
 		if not user.is_verified:
 			return Response({
-				'error': 'User is not verified, please check your email',
+				'error': 'User is not verified, check your email',
 				'redirect': True,
 				'redirect_url': '/api/login/',
 			},
@@ -225,7 +225,7 @@ class LogoutView(APIView):
 
 		if not refresh:
 			return Response({
-				'error': 'No refresh token is provided',
+				'error': 'No refresh token was provided',
 				'redirect': True,
 				'redirect_url': '/api/login/'
 			},
@@ -266,7 +266,7 @@ class AllUsersView(APIView):
 			'success': 'Users was retrieved successfully',
 			'redirect': False,
 			'redirect_url': None,
-			'data': GetUsersSerializer(users, many=True).data
+			'data': UserSerializer(users, many=True).data
 		},
 		status=status.HTTP_200_OK)
 
@@ -280,7 +280,7 @@ class ProfileView(APIView):
 
 		if not user:
 			return Response({
-				'error': 'Couldn\'t retrieve user from token',
+				'error': 'Couldn\'t find the user',
 				'redirect': False,
 				'redirect_url': None
 			},
@@ -289,7 +289,7 @@ class ProfileView(APIView):
 		if username:
 			if user.username == username:
 				return Response({
-					'success': 'User retrieved successfully',
+					'success': 'User was retrieved successfully',
 					'redirect': False,
 					'redirect_url': None,
 					'data': UserSerializer(user).data
@@ -370,7 +370,7 @@ class ProfileUpdateView(APIView):
 		serializer.save()
 
 		return Response({
-			'success': 'Profile updated successfully',
+			'success': 'Profile was updated successfully',
 			'redirect': False,
 			'redirect_url': None
 		},
@@ -397,7 +397,7 @@ class EmailVerifyView(APIView):
 			token = RefreshToken(token)
 		except TokenError:
 			return Response({
-				'error': 'Invalid or expired token',
+				'error': 'Refresh token is invalid, expired or blacklisted',
 				'redirect': False,
 				'redirect_url': None
 			},
@@ -415,7 +415,7 @@ class EmailVerifyView(APIView):
 	
 		if user.is_verified:
 			return Response({
-				'success': 'Email already verified',
+				'success': 'Email is already verified',
 				'redirect': False,
 				'redirect_url': None
 			},
@@ -427,7 +427,7 @@ class EmailVerifyView(APIView):
 		token.blacklist()
 
 		return Response({
-			'success': 'Email verified successfully',
+			'success': 'Email was verified successfully',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
@@ -454,7 +454,7 @@ class PasswordResetView(APIView):
 			user = UserInfo.objects.get(email=email)
 		except UserInfo.DoesNotExist:
 			return Response({
-				'error': 'Couldn\'t find the provided email',
+				'error': 'Couldn\'t find the email',
 				'redirect': False,
 				'redirect_url': None
 			},
@@ -503,7 +503,7 @@ class PasswordVerifyView(APIView):
 			token = RefreshToken(token)
 		except TokenError:
 			return Response({
-				'error': 'Invalid or expired token',
+				'error': 'Refresh token is invalid, expired or blacklisted',
 				'redirect': False,
 				'redirect_url': None
 			},
