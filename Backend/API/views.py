@@ -42,7 +42,7 @@ class RegisterView(APIView):
 
 		current_site = get_current_site(request).domain
 		relative_link = reverse('email_verification')
-		absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
+		absurl = f'http://{current_site}{relative_link}?token={str(tokens["refresh_token"])}'
 		email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
 		data = {
 			'domain': absurl,
@@ -76,8 +76,14 @@ class Authentication42View(APIView):
 			status=status.HTTP_200_OK)
 		
 		code = request.GET.get('code')
+
 		if not code:
-			return Response({'error': 'No code provided'}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({
+				'error': 'No code provided',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 		
 		data = {
 			'grant_type': 'authorization_code',
@@ -257,7 +263,7 @@ class AllUsersView(APIView):
 
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
-			'success': 'Users retrieved successfully',
+			'success': 'Users was retrieved successfully',
 			'redirect': False,
 			'redirect_url': None,
 			'data': GetUsersSerializer(users, many=True).data
@@ -348,9 +354,9 @@ class ProfileUpdateView(APIView):
 	def post(self, request: Request) -> Response:
 
 		serializer = UserProfileSerializer(instance=request.user,
-							data=request.data,
-							context={'request': request},
-							partial=True)
+					data=request.data,
+					context={'request': request},
+					partial=True)
 		try:
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
@@ -388,7 +394,7 @@ class EmailVerifyView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
-			token = AccessToken(token)
+			token = RefreshToken(token)
 		except TokenError:
 			return Response({
 				'error': 'Invalid or expired token',
@@ -418,6 +424,8 @@ class EmailVerifyView(APIView):
 		user.is_verified = True
 		user.save()
 
+		token.blacklist()
+
 		return Response({
 			'success': 'Email verified successfully',
 			'redirect': True,
@@ -446,7 +454,7 @@ class PasswordResetView(APIView):
 			user = UserInfo.objects.get(email=email)
 		except UserInfo.DoesNotExist:
 			return Response({
-				'error': 'email not found',
+				'error': 'Couldn\'t find the provided email',
 				'redirect': False,
 				'redirect_url': None
 			},
@@ -455,7 +463,7 @@ class PasswordResetView(APIView):
 		tokens = Utils.create_jwt_for_user(user)
 		current_site = get_current_site(request).domain
 		relative_link = reverse('password_verification')
-		absurl = f'http://{current_site}{relative_link}?token={str(tokens["access_token"])}'
+		absurl = f'http://{current_site}{relative_link}?token={str(tokens["refresh_token"])}'
 
 		email_body = f'Hi {user.username},\n\nPlease use the link below to reset your password:\n{absurl}'
 		data = {
@@ -492,7 +500,7 @@ class PasswordVerifyView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 
 		try:
-			token = AccessToken(token)
+			token = RefreshToken(token)
 		except TokenError:
 			return Response({
 				'error': 'Invalid or expired token',
@@ -524,6 +532,7 @@ class PasswordVerifyView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 
 		serializer.save()
+		token.blacklist()
 
 		return Response({
 			'success': 'Password reset successfully',

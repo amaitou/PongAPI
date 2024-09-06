@@ -78,7 +78,7 @@ class CookieTokenAuthentication:
 			user = Utils.get_user_from_jwt(refresh_token, 'refresh')
 
 			if not user:
-				return self.__generate_error_response('Failed to retrieve user',
+				return self.__generate_error_response('Failed to find user',
 										True,
 										'/api/login/')
 			
