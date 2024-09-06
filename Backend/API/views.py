@@ -65,51 +65,36 @@ class Authentication42View(APIView):
 
 	permission_classes = [AllowAny]
 
-	def get(self, request: Request) -> Response:
-
-		if request.user.is_authenticated:
-			return Response({
-				'success': 'User already logged in',
-				'redirect': True,
-				'redirect_url': '/api/profile/'
-			},
-			status=status.HTTP_200_OK)
-		
-		code = request.GET.get('code')
-
-		if not code:
-			return Response({
-				'error': 'No code is provided',
-				'redirect': True,
-				'redirect_url': '/api/login/'
-			},
-			status=status.HTTP_400_BAD_REQUEST)
-		
-		data = {
+	def __init__(self):
+		self.code = ""
+		self.data = {
 			'grant_type': 'authorization_code',
 			'client_id': settings.CLIENT_ID,
 			'client_secret': settings.CLIENT_SECRET,
-			'code': code.encode('utf-8'),
+			'code': self.code.encode('utf-8'),
 			'redirect_uri': settings.REDIRECT,
 		}
 
-		__token = requests.post("https://api.intra.42.fr/oauth/token/", data=data)
-
+	def __get_code(self, request: Request) -> str:
+		self.code = request.GET.get('code')
+		return self.code
+	
+	def __get_token(self) -> str:
+		__token = requests.post("https://api.intra.42.fr/oauth/token/", data=self.data)
 		if not "access_token" in __token.json():
-			return Response({
-				'error': 'Invalid code',
-				'redirect': True,
-				'redirect_url': '/api/login/'
-			},
-			status=status.HTTP_400_BAD_REQUEST)
-		
-		access_token = __token.json()['access_token']
+			return None
+		return __token.json()['access_token']
 
+	def __get_user(self, access_token: str) -> dict:
 		user = requests.get("https://api.intra.42.fr/v2/me", headers={
 			'Authorization': f'Bearer {access_token}'
 		})
+		return user.json()
+	
+	def __set_code_in_data(self, code: str) -> None:
+		self.data['code'] = code.encode('utf-8')
 
-		user = user.json()
+	def __register_user(self, user: dict) -> None:
 
 		first_name = user['first_name']
 		last_name = user['last_name']
@@ -166,6 +151,40 @@ class Authentication42View(APIView):
 			response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
 
 			return response
+
+	def get(self, request: Request) -> Response:
+
+		if request.user.is_authenticated:
+			return Response({
+				'success': 'User already logged in',
+				'redirect': True,
+				'redirect_url': '/api/profile/'
+			},
+			status=status.HTTP_200_OK)
+		
+		self.code = self.__get_code(request)
+		self.__set_code_in_data(self.code)
+
+		if not self.code:
+			return Response({
+				'error': 'No code was provided',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		access_token = self.__get_token()
+
+		if not access_token:
+			return Response({
+				'error': 'Failed to authenticate',
+				'redirect': True,
+				'redirect_url': '/api/login/'
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+
+		user = self.__get_user(access_token)
+		return self.__register_user(user)
 
 class LoginView(APIView):
 
