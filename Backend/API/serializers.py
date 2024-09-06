@@ -3,7 +3,7 @@ from .models import UserInfo, UserGameStats
 from rest_framework import serializers
 from .utils import Utils
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
+class RegistrationSerializer(serializers.ModelSerializer):
 	
 	password = serializers.CharField(write_only=True, required=False, validators=[Utils.password_validation])
 	re_password = serializers.CharField(write_only=True, required=False)
@@ -51,17 +51,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 		return user
 
-class GetUserBasicInfoSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = UserInfo
-		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'gender']
+class UserSerializer(serializers.ModelSerializer):
 
-class GetGameStatsSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = UserGameStats
-		fields = "__all__"
-
-class GetUsersSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = UserInfo
 		fields = ['id',
@@ -71,7 +62,13 @@ class GetUsersSerializer(serializers.ModelSerializer):
 				'email',
 				'date_joined',
 				'avatar',
-				'gender',]
+				'date_joined',
+				'gender']
+
+class GameStatsSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = UserGameStats
+		fields = "__all__"
 
 class UserProfileSerializer(serializers.ModelSerializer):
 	class Meta:

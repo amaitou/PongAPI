@@ -24,7 +24,7 @@ class RegisterView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		serializer = UserRegistrationSerializer(data=request.data)
+		serializer = RegistrationSerializer(data=request.data)
 
 		try:
 			serializer.is_valid(raise_exception=True)
@@ -117,7 +117,7 @@ class Authentication42View(APIView):
 		email = user['email']
 		avatar = user['image']['link']
 
-		serializer = UserRegistrationSerializer(data={
+		serializer = RegistrationSerializer(data={
 			'username': username,
 			'first_name': first_name,
 			'last_name': last_name,
@@ -292,7 +292,7 @@ class ProfileView(APIView):
 					'success': 'User retrieved successfully',
 					'redirect': False,
 					'redirect_url': None,
-					'data': GetUserBasicInfoSerializer(user).data
+					'data': UserSerializer(user).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
@@ -300,7 +300,7 @@ class ProfileView(APIView):
 					'success': 'User retrieved successfully',
 					'redirect': False,
 					'redirect_url': None,
-					'data': GetUserBasicInfoSerializer(user).data
+					'data': UserSerializer(user).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
@@ -314,7 +314,7 @@ class ProfileView(APIView):
 				'success': 'User retrieved successfully',
 				'redirect': False,
 				'redirect_url': None,
-				'data': GetUserBasicInfoSerializer(user).data
+				'data': UserSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
 
