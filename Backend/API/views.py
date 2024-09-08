@@ -495,7 +495,7 @@ class PasswordResetView(APIView):
 		Utils.send_verification_email(data)
 
 		return Response({
-			'success': 'Password reset email sent',
+			'success': 'Password reset email was sent',
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
