@@ -16,6 +16,7 @@ from .serializers import *
 from rest_framework_simplejwt.tokens import AccessToken
 from .utils import Utils
 import requests
+from django.http import HttpResponseRedirect
 
 class RegisterView(APIView):
 
@@ -273,7 +274,6 @@ class LogoutView(APIView):
 
 		return response
 
-
 class AllUsersView(APIView):
 
 	permission_classes = [IsAuthenticated]
@@ -445,12 +445,13 @@ class EmailVerifyView(APIView):
 
 		token.blacklist()
 
-		return Response({
-			'success': 'Email was verified successfully',
-			'redirect': True,
-			'redirect_url': '/api/login/'
-		},
-		status=status.HTTP_200_OK)
+		# return Response({
+		# 	'success': 'Email was verified successfully',
+		# 	'redirect': True,
+		# 	'redirect_url': '/api/login/'
+		# },
+		# status=status.HTTP_200_OK)
+		return HttpResponseRedirect('/api/login/')
 
 class PasswordResetView(APIView):
 
