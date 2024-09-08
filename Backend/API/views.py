@@ -501,7 +501,7 @@ class PasswordResetView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-class PasswordVerifyView(APIView):
+class PasswordConfirmationView(APIView):
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
