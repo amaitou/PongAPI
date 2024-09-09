@@ -372,7 +372,7 @@ class ProfileUpdateView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		serializer = UserProfileSerializer(instance=request.user,
+		serializer = ProfileUpdateSerializer(instance=request.user,
 					data=request.data,
 					context={'request': request},
 					partial=True)
@@ -445,13 +445,12 @@ class EmailVerifyView(APIView):
 
 		token.blacklist()
 
-		# return Response({
-		# 	'success': 'Email was verified successfully',
-		# 	'redirect': True,
-		# 	'redirect_url': '/api/login/'
-		# },
-		# status=status.HTTP_200_OK)
-		return HttpResponseRedirect('/api/login/')
+		return Response({
+			'success': 'Email was verified successfully',
+			'redirect': True,
+			'redirect_url': '/api/login/'
+		},
+		status=status.HTTP_200_OK)
 
 class PasswordResetView(APIView):
 

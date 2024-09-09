@@ -135,7 +135,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = UserInfo
-		fields = ['first_name', 'last_name', 'email', 'gender', 'username']
+		fields = ['first_name', 'last_name', 'email', 'gender', 'username', 'two_fa']
 
 		def validate_email(self, value):
 			user = self.context['request'].user
@@ -149,6 +149,11 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 			if UserInfo.objects.exclude(pk=user.pk).filter(username=value).exists():
 				raise serializers.ValidationError({"username": "This username is already in use."})
 			return value
+
+		def validate_two_fa(self, value):
+			if not value in [True, False]:
+				raise serializers.ValidationError({"two_fa": "Invalid value"})
+			return value
 		
 		def update(self, instance, validated_data):
 
@@ -156,6 +161,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 			instance.last_name = validated_data.get('last_name', instance.last_name)
 			instance.email = validated_data.get('email', instance.email)
 			instance.username = validated_data.get('username', instance.username)
+			instance.two_fa = validated_data.get('two_fa', instance.two_fa)
 			instance.save()
 
 			return instance
