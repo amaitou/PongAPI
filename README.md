@@ -412,6 +412,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 - ## Get All Users
 
+  <img width="2125" alt="Screen Shot 2024-09-11 at 9 38 41 AM" src="https://github.com/user-attachments/assets/77efa703-64a9-434c-bf6c-bca226b1dd53">
+
+
     - **Endpoint:** `/api/users/`
     - **Method:** `GET`
     - **Description:** Retrieves a list of all users excluding superusers. Requires authentication.
@@ -427,6 +430,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
     ---
 
     ### Response
+
+    <img width="2125" alt="Screen Shot 2024-09-11 at 9 39 58 AM" src="https://github.com/user-attachments/assets/3c876d63-3305-4612-8ec7-b1f173d8a13c">
+
 
     - **Status Code:** `200 OK`
     - **Body:** If the request is successful, the response will contain:
@@ -469,6 +475,8 @@ Authentication is the process of verifying the identity of a user, device, or sy
     ---
 
     ### Error Responses
+
+    <img width="2125" alt="Screen Shot 2024-09-11 at 9 41 28 AM" src="https://github.com/user-attachments/assets/8f87f40a-271d-4295-aa26-e5770449f8b2">
 
     - **Unauthorized Request:**
 
