@@ -334,3 +334,76 @@ The signature is created by taking the encoded header, the encoded payload, a se
 - This endpoint does not accept any parameters in the request body.
 
 ---
+
+### Get All Users
+
+- **Endpoint:** `/api/users/`
+- **Method:** `GET`
+- **Description:** Retrieves a list of all users excluding superusers. Requires authentication.
+
+#### Request
+
+- **Headers:**
+  - `Content-Type: application/json`
+
+- **Body:** None
+
+- **Authentication:** This request requires to be authenticated first.
+
+#### Response
+
+- **Status Code:** `200 OK`
+- **Body:** If the request is successful, the response will contain:
+
+    ```json
+    {
+        "success": "Users were retrieved successfully",
+        "redirect": false,
+        "redirect_url": null,
+        "data": [
+            {
+                "id": 1,
+                "first_name": "Amine",
+                "last_name": "Ait Ouazghour",
+                "username": "amaitou",
+                "gender": "M",
+                "email": "aitouazghouramine@gmail.com",
+                ...
+            },
+            {
+                "id": 2,
+                "first_name": "Ahmad",
+                "last_name": "Idrissi",
+                "username": "Amed26",
+                "gender": "M",
+                "email": "Amed@example.com",
+                ...
+            }
+        ]
+    }
+    ```
+
+    - **success (string):** A message indicating that the users were retrieved successfully.
+    - **redirect (boolean):** Indicates whether a redirect is needed (always `false` in this case).
+    - **redirect_url (string):** The URL to redirect to if a redirect is needed (always `null` in this case).
+    - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, `email`.
+
+#### Error Responses
+
+1. **Unauthorized Request:**
+
+   - **Status Code:** `401 Unauthorized`
+   - **Body:**
+
+     ```json
+     {
+         "detail": "Authentication credentials were not provided."
+     }
+     ```
+
+#### Notes
+
+- The endpoint requires the user to be authenticated to access the list of users.
+- Only non-superuser accounts are retrieved and included in the response.
+- The response provides a list of all users along with their details serialized using the `UserSerializer`.
+- This endpoint does not accept any parameters in the request body.
