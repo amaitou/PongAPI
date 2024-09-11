@@ -79,81 +79,89 @@ The signature is created by taking the encoded header, the encoded payload, a se
 
 # Endpoints
 
-### Register a New User
+- # Register a New User
 
-- **Endpoint:** `/auth/register`
-- **Method:** `POST`
-- **Description:** Registers a new user and sends an email verification link.
+    - **Endpoint:** `/auth/register`
+    - **Method:** `POST`
+    - **Description:** Registers a new user and sends an email verification link.
+    - **Authentication**: no authentication required.
 
-#### Request
+    ---
 
-- **Headers:**
-  - `Content-Type: application/json`
+    ## Request
 
-- **Body:**
+    - **Headers:** 'Content-Type: application/json`
 
-    ```json
-    {
-        "first_name": "Amine",
-        "last_name": "Ait Ouazghour",
-        "username": "amaitou",
-        "gender": "M",
-        "email": "aitouazghouramine@gmail.com",
-        "password": "Test@12__34",
-        "re_password": "Test@12__34"
-    }
-    ```
+    - **Body:**
 
-  - **first_name (string, required):** The first name of the user.
-  - **last_name (string, required):** The last name of the user.
-  - **username (string, required):** The username chosen by the user.
-  - **gender (string, required):** The gender of the user (e.g., "M" for male, "F" for female).
-  - **email (string, required):** The user's email address. This email will be used to send a verification link.
-  - **password (string, required):** The user's password.
-  - **re_password (string, required):** The user's password confirmation. Must match the `password` field.
-
-#### Response
-
-- **Status Code:** `201 Created`
-- **Body:** If registration is successful, the response will contain:
-
-    ```json
-    {
-        "success": "User registered successfully, check your email for verification",
-        "redirect": true,
-        "redirect_url": "/api/login/",
-        "data": {
-            "id": 1,
+        ```json
+        {
             "first_name": "Amine",
             "last_name": "Ait Ouazghour",
             "username": "amaitou",
-            "date_joined": "2024-09-11T06:23:07.641780Z",
-            "avatar": null,
             "gender": "M",
-            "is_verified": false,
-            "email": "aitouazghouramine@gmail.com"
+            "email": "aitouazghouramine@gmail.com",
+            "password": "Test@12__34",
+            "re_password": "Test@12__34"
         }
-    }
-    ```
+        ```
 
-#### Error Response
+        - **first_name (string, required):** The first name of the user.
+        - **last_name (string, required):** The last name of the user.
+        - **username (string, required):** The username chosen by the user.
+        - **gender (string, required):** The gender of the user (e.g., "M" for male, "F" for female).
+        - **email (string, required):** The user's email address. This email will be used to send a verification link.
+        - **password (string, required):** The user's password.
+        - **re_password (string, required):** The user's password confirmation. Must match the `password` field.
 
-- **Status Code:** `400 Bad Request`
-- **Body:** If there are validation errors, the response will contain:
+    ---
 
-    ```json
-    {
-        "error": {
-            "username": [
-                "A user with that username already exists."
-            ]
-        },
-        "redirect": true,
-        "redirect_url": "/api/register/"
-    }
-    ```
+    ## Response
 
-#### Notes
+    - **Status Code:** `201 Created`
+    - **Body:** If registration is successful, the response will contain:
+
+        ```json
+        {
+            "success": "User registered successfully, check your email for verification",
+            "redirect": true,
+            "redirect_url": "/api/login/",
+            "data": {
+                "id": 1,
+                "first_name": "Amine",
+                "last_name": "Ait Ouazghour",
+                "username": "amaitou",
+                "date_joined": "2024-09-11T06:23:07.641780Z",
+                "avatar": null,
+                "gender": "M",
+                "is_verified": false,
+                "email": "aitouazghouramine@gmail.com"
+            }
+        }
+        ```
+
+        ---
+
+        ## Error Response
+
+        - **Status Code:** `400 Bad Request`
+        - **Body:** If there are validation errors, the response will contain:
+
+            ```json
+            {
+                "error": {
+                    "username": [
+                        "A user with that username already exists."
+                    ]
+                },
+                "redirect": true,
+                "redirect_url": "/api/register/"
+            }
+            ```
+
+        ---
+
+>  Notes
 
 - Ensure the `email` field is correct and accessible, as it will be used for email verification.
 - The passwords (`password` and `re_password`) must match.
@@ -162,154 +170,172 @@ The signature is created by taking the encoded header, the encoded payload, a se
 
 ---
 
-### Login User
+- # Login User
 
-- **Endpoint:** `/api/login/`
-- **Method:** `POST`
-- **Description:** Authenticates a user using their username and password, and sets JWT tokens in cookies if authentication is successful.
+    - **Endpoint:** `/api/login/`
+    - **Method:** `POST`
+    - **Description:** Authenticates a user using their username and password, and sets JWT tokens in cookies if authentication is successful.
+    - **Authentication**: no authentication required (only when the user is not logged in).
 
-#### Request
+    ---
 
-- **Headers:**
-  - `Content-Type: application/json`
+    ## Request
+    
+    - **Headers:** `Content-Type: application/json`
 
-- **Body:**
+    - **Body:**
 
-    ```json
-    {
-        "username": "amaitou",
-        "password": "Test@12__34"
-    }
-    ```
+        ```json
+        {
+            "username": "amaitou",
+            "password": "Test@12__34"
+        }
+        ```
 
-  - **username (string, required):** The username of the user.
-  - **password (string, required):** The password of the user.
+        - **username (string, required):** The username of the user.
+        - **password (string, required):** The password of the user.
+    
+    ---
 
-#### Response
+    ## Response
 
-- **Status Code:** `200 OK`
-- **Body:** If the login is successful, the response will contain:
+    - **Status Code:** `200 OK`
+    - **Body:** If the login is successful, the response will contain:
 
-    ```json
-    {
-        "success": "Login successful",
-        "redirect": true,
-        "redirect_url": "/api/profile"
-    }
-    ```
+        ```json
+        {
+            "success": "Login successful",
+            "redirect": true,
+            "redirect_url": "/api/profile"
+        }
+        ```
 
-- **Cookies:**
-  - `access_token`: JWT access token set as a cookie (not `HttpOnly`).
-  - `refresh_token`: JWT refresh token set as a cookie (`HttpOnly`).
+    - **Cookies:**
+        - `access_token`: JWT access token set as a cookie (not `HttpOnly`).
+        - `refresh_token`: JWT refresh token set as a cookie (`HttpOnly`).
 
-#### Error Responses
+    ---
 
-1. **User Already Logged In:**
+    ## Error Responses
 
-   - **Status Code:** `200 OK`
-   - **Body:**
+    1. **User Already Logged In:**
 
-     ```json
-     {
-         "success": "User already logged in",
-         "redirect": true,
-         "redirect_url": "/api/profile/"
-     }
-     ```
+        - **Status Code:** `200 OK`
+        - **Body:**
 
-2. **Invalid Credentials:**
+            ```json
+            {
+                "success": "User already logged in",
+                "redirect": true,
+                "redirect_url": "/api/profile/"
+            }
+            ```
 
-   - **Status Code:** `401 Unauthorized`
-   - **Body:**
+            ---
 
-     ```json
-     {
-         "error": "Invalid username or password",
-         "redirect": true,
-         "redirect_url": "/api/login/"
-     }
-     ```
+    2. **Invalid Credentials:**
 
-3. **User Not Verified:**
+        - **Status Code:** `401 Unauthorized`
+        - **Body:**
 
-   - **Status Code:** `401 Unauthorized`
-   - **Body:**
+            ```json
+            {
+                "error": "Invalid username or password",
+                "redirect": true,
+                "redirect_url": "/api/login/"
+            }
+            ```
 
-     ```json
-     {
-         "error": "User is not verified, check your email",
-         "redirect": true,
-         "redirect_url": "/api/login/"
-     }
-     ```
+            ---
 
-#### Notes
+    3. **User Not Verified:**
+
+        - **Status Code:** `401 Unauthorized`
+        - **Body:**
+
+            ```json
+            {
+                "error": "User is not verified, check your email",
+                "redirect": true,
+                "redirect_url": "/api/login/"
+            }
+            ```
+
+            ---
+
+> Notes
 
 - If the user is already authenticated (i.e., logged in), the endpoint returns a message stating the user is already logged in and redirects them to their profile.
 - If the login is successful, JWT tokens (`access_token` and `refresh_token`) are generated and set as cookies. The `access_token` is not `HttpOnly`, allowing access by client-side JavaScript, while the `refresh_token` is `HttpOnly`.
 - Ensure that the user has verified their email before attempting to log in. If not, they will receive an "User is not verified" error.
 - This endpoint does not require authentication to access.
 
-
 ---
 
-### Logout User
+- # Logout User
 
-- **Endpoint:** `/api/logout/`
-- **Method:** `GET`
-- **Description:** Logs out the user by blacklisting their refresh token and clearing the relevant cookies. Requires authentication.
+    - **Endpoint:** `/api/logout/`
+    - **Method:** `GET`
+    - **Description:** Logs out the user by blacklisting their refresh token and clearing the relevant cookies. Requires authentication.
+    - **Authentication**: authentication is required. (the access token is retrieved from the cookies).
 
-#### Request
+    ---
 
-- **Headers:**
-  - `Content-Type: application/json`
+    ## Request
 
-- **Body:** None
+    - **Headers:** `Content-Type: application/json`
+    - **Body:** None
 
-- **Authentication**: The request must include authentication cookies. The access token should be present in the cookies.
+    ---
 
-#### Response
+    ## Response
 
-- **Status Code:** `200 OK`
-- **Body:** If the logout is successful, the response will contain:
+    - **Status Code:** `200 OK`
+    - **Body:** If the logout is successful, the response will contain:
 
-    ```json
-    {
-        "success": "Logout successful",
-        "redirect": true,
-        "redirect_url": "/api/login/"
-    }
-    ```
+        ```json
+        {
+            "success": "Logout successful",
+            "redirect": true,
+            "redirect_url": "/api/login/"
+        }
+        ```
+    
+    ---
 
-#### Error Responses
+    ## Error Responses
 
-1. **No Refresh Token Provided:**
+    1. **No Refresh Token Provided:**
 
-   - **Status Code:** `400 Bad Request`
-   - **Body:**
+        - **Status Code:** `400 Bad Request`
+        - **Body:**
 
-     ```json
-     {
-         "error": "No refresh token was provided",
-         "redirect": true,
-         "redirect_url": "/api/login/"
-     }
-     ```
+            ```json
+            {
+                "error": "No refresh token was provided",
+                "redirect": true,
+                "redirect_url": "/api/login/"
+            }
+            ```
 
-2. **Invalid, Expired, or Blacklisted Refresh Token:**
+        ---
 
-   - **Status Code:** `401 Unauthorized`
-   - **Body:**
+    2. **Invalid, Expired, or Blacklisted Refresh Token:**
 
-     ```json
-     {
-         "error": "Refresh token is invalid, expired or blacklisted",
-         "redirect": true,
-         "redirect_url": "/api/login/"
-     }
-     ```
+        - **Status Code:** `401 Unauthorized`
+        - **Body:**
 
-#### Notes
+            ```json
+            {
+                "error": "Refresh token is invalid, expired or blacklisted",
+                "redirect": true,
+                "redirect_url": "/api/login/"
+            }
+            ```
+        
+        ---
+
+> Notes
 
 - The endpoint requires the user to be authenticated before logging out.
 - The logout process involves checking for the presence of a refresh token in the request cookies.
@@ -319,77 +345,84 @@ The signature is created by taking the encoded header, the encoded payload, a se
 
 ---
 
-### Get All Users
+- # Get All Users
 
-- **Endpoint:** `/api/users/`
-- **Method:** `GET`
-- **Description:** Retrieves a list of all users excluding superusers. Requires authentication.
+    - **Endpoint:** `/api/users/`
+    - **Method:** `GET`
+    - **Description:** Retrieves a list of all users excluding superusers. Requires authentication.
+    - **Authentication**: authentication is required. (the access token is retrieved from the cookies).
 
-#### Request
+    ---
 
-- **Headers:**
-  - `Content-Type: application/json`
+    ## Request
 
-- **Body:** None
+    - **Headers:** `Content-Type: application/json`
+    - **Body:** None
 
-- **Authentication:** The request must include authentication cookies. The access token should be present in the cookies.
+    ---
 
-#### Response
+    ## Response
 
-- **Status Code:** `200 OK`
-- **Body:** If the request is successful, the response will contain:
+    - **Status Code:** `200 OK`
+    - **Body:** If the request is successful, the response will contain:
 
-    ```json
-    {
-        "success": "Users were retrieved successfully",
-        "redirect": false,
-        "redirect_url": null,
-        "data": [
+        ```json
+        {
+            "success": "Users were retrieved successfully",
+            "redirect": false,
+            "redirect_url": null,
+            "data": [
+                {
+                    "id": 1,
+                    "first_name": "Amine",
+                    "last_name": "Ait Ouazghour",
+                    "username": "amaitou",
+                    "gender": "M",
+                    "email": "aitouazghouramine@gmail.com",
+                    "date_joined": "2024-09-11T06:23:07.641780Z",
+                    "avatar": null,
+                },
+                {
+                    "id": 2,
+                    "first_name": "Ahmad",
+                    "last_name": "Idrissi",
+                    "username": "Amed26",
+                    "gender": "M",
+                    "email": "Amed@example.com",
+                    "date_joined": "2024-09-11T06:23:07.641780Z",
+                    "avatar": null,
+                }
+            ]
+        }
+        ```
+
+        - **success (string):** A message indicating that the users were retrieved successfully.
+        - **redirect (boolean):** Indicates whether a redirect is needed (always `false` in this case).
+        - **redirect_url (string):** The URL to redirect to if a redirect is needed (always `null` in this case).
+        - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, `email`.
+    
+    ---
+
+    ## Error Responses
+
+    - **Unauthorized Request:**
+
+        - **Status Code:** `401 Unauthorized`
+        - **Body:**
+
+            ```json
             {
-                "id": 1,
-                "first_name": "Amine",
-                "last_name": "Ait Ouazghour",
-                "username": "amaitou",
-                "gender": "M",
-                "email": "aitouazghouramine@gmail.com",
-                "date_joined": "2024-09-11T06:23:07.641780Z",
-                "avatar": null,
-            },
-            {
-                "id": 2,
-                "first_name": "Ahmad",
-                "last_name": "Idrissi",
-                "username": "Amed26",
-                "gender": "M",
-                "email": "Amed@example.com",
-                "date_joined": "2024-09-11T06:23:07.641780Z",
-                "avatar": null,
+                "detail": "Authentication credentials were not provided."
             }
-        ]
-    }
-    ```
+            ```
+    
+    ---
 
-    - **success (string):** A message indicating that the users were retrieved successfully.
-    - **redirect (boolean):** Indicates whether a redirect is needed (always `false` in this case).
-    - **redirect_url (string):** The URL to redirect to if a redirect is needed (always `null` in this case).
-    - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, `email`.
-
-#### Error Responses
-
-1. **Unauthorized Request:**
-
-   - **Status Code:** `401 Unauthorized`
-   - **Body:**
-
-     ```json
-     {
-         "detail": "Authentication credentials were not provided."
-     }
-     ```
-
-#### Notes
+> Notes
 
 - The endpoint requires the user to be authenticated to access the list of users.
 - Only non-superuser accounts are retrieved and included in the response.
 - The response provides a list of all users along with their details serialized using the `UserSerializer`.
 - This endpoint does not accept any parameters in the request body.
+
+---
