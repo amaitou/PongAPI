@@ -275,7 +275,7 @@ The signature is created by taking the encoded header, the encoded payload, a se
 
 - **Endpoint:** `/api/logout/`
 - **Method:** `GET`
-- **Description:** Logs out the user by blacklisting their refresh token and clearing the relevant cookies.
+- **Description:** Logs out the user by blacklisting their refresh token and clearing the relevant cookies. Requires authentication.
 
 #### Request
 
@@ -283,6 +283,8 @@ The signature is created by taking the encoded header, the encoded payload, a se
   - `Content-Type: application/json`
 
 - **Body:** None
+
+- **Authentication**: This request requires to be authenticated first.
 
 #### Response
 
@@ -348,7 +350,7 @@ The signature is created by taking the encoded header, the encoded payload, a se
 
 - **Body:** None
 
-- **Authentication:** This request requires to be authenticated first.
+- **Authentication:** The request must include authentication cookies. The access token should be present in the cookies.
 
 #### Response
 
