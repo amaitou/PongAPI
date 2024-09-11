@@ -392,7 +392,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
             ```json
             {
-                "error": "Refresh token is invalid, expired or blacklisted",
+                "error": "Invalid or Expired refresh token",
                 "redirect": true,
                 "redirect_url": "/api/login/"
             }
