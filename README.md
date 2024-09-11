@@ -127,7 +127,10 @@ The signature is created by taking the encoded header, the encoded payload, a se
             "first_name": "Amine",
             "last_name": "Ait Ouazghour",
             "username": "amaitou",
+            "date_joined": "2024-09-11T06:23:07.641780Z",
+            "avatar": null,
             "gender": "M",
+            "is_verified": false,
             "email": "aitouazghouramine@gmail.com"
         }
     }
@@ -141,7 +144,9 @@ The signature is created by taking the encoded header, the encoded payload, a se
     ```json
     {
         "error": {
-            "field_name": ["Error message for that field."]
+            "username": [
+                "A user with that username already exists."
+            ]
         },
         "redirect": true,
         "redirect_url": "/api/register/"
@@ -370,7 +375,8 @@ The signature is created by taking the encoded header, the encoded payload, a se
                 "username": "amaitou",
                 "gender": "M",
                 "email": "aitouazghouramine@gmail.com",
-                ...
+                "date_joined": "2024-09-11T06:23:07.641780Z",
+                "avatar": null,
             },
             {
                 "id": 2,
@@ -379,7 +385,8 @@ The signature is created by taking the encoded header, the encoded payload, a se
                 "username": "Amed26",
                 "gender": "M",
                 "email": "Amed@example.com",
-                ...
+                "date_joined": "2024-09-11T06:23:07.641780Z",
+                "avatar": null,
             }
         ]
     }

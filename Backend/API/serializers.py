@@ -20,8 +20,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 				'password',
 				'avatar',
 				'gender',
-				'is_verified',
-				'two_factor_auth']
+				'is_verified',]
 
 
 	def validate(self, data):
