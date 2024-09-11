@@ -6,17 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
-from .models import UserInfo, UserGameStats
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework import status
 from django.conf import settings
 from django.urls import reverse
 from .serializers import *
-from rest_framework_simplejwt.tokens import AccessToken
 from .utils import Utils
 import requests
-from django.http import HttpResponseRedirect
 
 class RegisterView(APIView):
 
@@ -496,6 +493,7 @@ class PasswordResetView(APIView):
 
 		return Response({
 			'success': 'Password reset email was sent',
+			'user_id': user.id,
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
