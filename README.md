@@ -160,29 +160,6 @@ The signature is created by taking the encoded header, the encoded payload, a se
 - This endpoint does not require authentication.
 - No duplicate email or username is allowed (one per user).
 
-
-    #### Error Response
-
-    - Status Code: 400 Bad Request
-    - Body: If there are validation errors, the response will contain:
-
-        ```json
-        {
-            "error": {
-                "field_name": ["Error message for that field."]
-            },
-            "redirect": true,
-            "redirect_url": "/api/register/"
-        }
-        ```
-
-    #### Notes
-
-    - Ensure the email field is correct and accessible, as it will be used for email verification.
-    - The passwords (password and re_password) must match.
-    - This endpoint does not require authentication.
-    - No Duplicate email or username (one per user)
-
 ---
 
 ### Login User
