@@ -284,7 +284,7 @@ The signature is created by taking the encoded header, the encoded payload, a se
 
 - **Body:** None
 
-- **Authentication**: This request requires to be authenticated first.
+- **Authentication**: The request must include authentication cookies. The access token should be present in the cookies.
 
 #### Response
 
