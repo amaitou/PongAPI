@@ -328,8 +328,11 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 - ## Logout User
 
+    <img width="2125" alt="Screen Shot 2024-09-11 at 9 31 04 AM" src="https://github.com/user-attachments/assets/15c31993-7677-4d11-a50f-6de6d12d5a46"> <br>
+
+
     - **Endpoint:** `/api/logout/`
-    - **Method:** `GET`
+    - **Method:** `POST`
     - **Description:** Logs out the user by blacklisting their refresh token and clearing the relevant cookies. Requires authentication.
     - **Authentication**: authentication is required. (the access token is retrieved from the cookies).
 
@@ -343,6 +346,8 @@ Authentication is the process of verifying the identity of a user, device, or sy
     ---
 
     ### Response
+
+    <img width="2125" alt="Screen Shot 2024-09-11 at 9 31 29 AM" src="https://github.com/user-attachments/assets/31b3afcf-f3d7-49b0-853f-083aa552cb6b"> <br>
 
     - **Status Code:** `200 OK`
     - **Body:** If the logout is successful, the response will contain:
@@ -360,6 +365,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
     ### Error Responses
 
     1. **No Refresh Token Provided:**
+ 
+        <img width="2125" alt="Screen Shot 2024-09-11 at 9 33 09 AM" src="https://github.com/user-attachments/assets/a1eee346-9193-439c-90d0-d5296bc62907">
+
 
         - **Status Code:** `400 Bad Request`
         - **Body:**
@@ -374,7 +382,10 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
         ---
 
-    2. **Invalid, Expired, or Blacklisted Refresh Token:**
+    3. **Invalid, Expired, or Blacklisted Refresh Token:**
+ 
+       <img width="2125" alt="Screen Shot 2024-09-11 at 9 35 17 AM" src="https://github.com/user-attachments/assets/62def221-b197-439f-a1b5-8e5ce388ab33">
+
 
         - **Status Code:** `401 Unauthorized`
         - **Body:**
