@@ -50,8 +50,8 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ```json
     {
-    "alg": "HS256",
-    "typ": "JWT"
+        "alg": "HS256",
+        "typ": "JWT"
     }
     ```
 
@@ -61,9 +61,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ```json
     {
-    "sub": "1234567890",
-    "name": "Amine",
-    "iat": 1516239022
+        "sub": "1234567890",
+        "name": "Amine",
+        "iat": 1516239022
     }
     ```
 
@@ -104,6 +104,8 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 - ## Register a New User
 
+    <img width="2124" alt="Screen Shot 2024-09-11 at 8 44 25 AM" src="https://github.com/user-attachments/assets/cc67e579-7a6c-40c9-9fb1-c4cd49d99967"> <br>
+
     - **Endpoint:** `/api/register/`
     - **Method:** `POST`
     - **Description:** Registers a new user and sends an email verification link.
@@ -113,6 +115,8 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ### Request
 
+    <img width="1051" alt="Screen Shot 2024-09-11 at 8 47 36 AM" src="https://github.com/user-attachments/assets/f59aa05c-7a89-4c48-8cf6-b75351fb68d4"> <br>
+    
     - **Headers:** 'Content-Type: application/json`
 
     - **Body:**
@@ -141,6 +145,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ### Response
 
+    <img width="2131" alt="Screen Shot 2024-09-11 at 8 50 15 AM" src="https://github.com/user-attachments/assets/8ee11cd0-db4f-488f-9d16-0ded274b5ea9">
+
+
     - **Status Code:** `201 Created`
     - **Body:** If registration is successful, the response will contain:
 
@@ -166,6 +173,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
         ---
 
         ### Error Response
+ 
+      <img width="2131" alt="Screen Shot 2024-09-11 at 8 50 59 AM" src="https://github.com/user-attachments/assets/8d882562-8694-49e8-9a3b-8ce409fbaca7">
+
 
         - **Status Code:** `400 Bad Request`
         - **Body:** If there are validation errors, the response will contain:
