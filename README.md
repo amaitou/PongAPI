@@ -251,6 +251,10 @@ Authentication is the process of verifying the identity of a user, device, or sy
         ```
 
     - **Cookies:**
+
+        <img width="2131" alt="Screen Shot 2024-09-11 at 8 54 24 AM" src="https://github.com/user-attachments/assets/731fe83e-fd62-49f2-8a80-4dbbcda12d30">
+
+      
         - `access_token`: JWT access token set as a cookie (not `HttpOnly`).
         - `refresh_token`: JWT refresh token set as a cookie (`HttpOnly`).
 
