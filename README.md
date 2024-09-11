@@ -269,3 +269,68 @@ The signature is created by taking the encoded header, the encoded payload, a se
 - This endpoint does not require authentication to access.
 
 
+---
+
+### Logout User
+
+- **Endpoint:** `/api/logout/`
+- **Method:** `GET`
+- **Description:** Logs out the user by blacklisting their refresh token and clearing the relevant cookies.
+
+#### Request
+
+- **Headers:**
+  - `Content-Type: application/json`
+
+- **Body:** None
+
+#### Response
+
+- **Status Code:** `200 OK`
+- **Body:** If the logout is successful, the response will contain:
+
+    ```json
+    {
+        "success": "Logout successful",
+        "redirect": true,
+        "redirect_url": "/api/login/"
+    }
+    ```
+
+#### Error Responses
+
+1. **No Refresh Token Provided:**
+
+   - **Status Code:** `400 Bad Request`
+   - **Body:**
+
+     ```json
+     {
+         "error": "No refresh token was provided",
+         "redirect": true,
+         "redirect_url": "/api/login/"
+     }
+     ```
+
+2. **Invalid, Expired, or Blacklisted Refresh Token:**
+
+   - **Status Code:** `401 Unauthorized`
+   - **Body:**
+
+     ```json
+     {
+         "error": "Refresh token is invalid, expired or blacklisted",
+         "redirect": true,
+         "redirect_url": "/api/login/"
+     }
+     ```
+
+#### Notes
+
+- The endpoint requires the user to be authenticated before logging out.
+- The logout process involves checking for the presence of a refresh token in the request cookies.
+- If a valid refresh token is provided, it is blacklisted to prevent future use, and the JWT tokens (`access_token` and `refresh_token`) are removed from the cookies.
+- On successful logout, the user is redirected to the login page.
+- This endpoint does not accept any parameters in the request body.
+
+---
