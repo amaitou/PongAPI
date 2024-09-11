@@ -96,7 +96,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 # Endpoints
 
-- # Register a New User
+- ## Register a New User
 
     - **Endpoint:** `/api/register/`
     - **Method:** `POST`
@@ -105,7 +105,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ---
 
-    ## Request
+    ### Request
 
     - **Headers:** 'Content-Type: application/json`
 
@@ -133,7 +133,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ---
 
-    ## Response
+    ### Response
 
     - **Status Code:** `201 Created`
     - **Body:** If registration is successful, the response will contain:
@@ -159,7 +159,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
         ---
 
-        ## Error Response
+        ### Error Response
 
         - **Status Code:** `400 Bad Request`
         - **Body:** If there are validation errors, the response will contain:
@@ -187,7 +187,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 ---
 
-- # Login User
+- ## Login User
 
     - **Endpoint:** `/api/login/`
     - **Method:** `POST`
@@ -196,7 +196,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ---
 
-    ## Request
+    ### Request
     
     - **Headers:** `Content-Type: application/json`
 
@@ -214,7 +214,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
     
     ---
 
-    ## Response
+    ### Response
 
     - **Status Code:** `200 OK`
     - **Body:** If the login is successful, the response will contain:
@@ -233,7 +233,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ---
 
-    ## Error Responses
+    ### Error Responses
 
     1. **User Already Logged In:**
 
@@ -289,7 +289,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 ---
 
-- # Logout User
+- ## Logout User
 
     - **Endpoint:** `/api/logout/`
     - **Method:** `GET`
@@ -298,14 +298,14 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ---
 
-    ## Request
+    ### Request
 
     - **Headers:** `Content-Type: application/json`
     - **Body:** None
 
     ---
 
-    ## Response
+    ### Response
 
     - **Status Code:** `200 OK`
     - **Body:** If the logout is successful, the response will contain:
@@ -320,7 +320,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
     
     ---
 
-    ## Error Responses
+    ### Error Responses
 
     1. **No Refresh Token Provided:**
 
@@ -362,7 +362,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 ---
 
-- # Get All Users
+- ## Get All Users
 
     - **Endpoint:** `/api/users/`
     - **Method:** `GET`
@@ -371,14 +371,14 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ---
 
-    ## Request
+    ### Request
 
     - **Headers:** `Content-Type: application/json`
     - **Body:** None
 
     ---
 
-    ## Response
+    ### Response
 
     - **Status Code:** `200 OK`
     - **Body:** If the request is successful, the response will contain:
@@ -420,7 +420,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
     
     ---
 
-    ## Error Responses
+    ### Error Responses
 
     - **Unauthorized Request:**
 
