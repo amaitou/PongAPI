@@ -205,6 +205,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 - ## Login User
 
+    <img width="2131" alt="Screen Shot 2024-09-11 at 8 55 00 AM" src="https://github.com/user-attachments/assets/50303a10-c050-420a-8caa-76b0f148cc4f"> <br>
+
+
     - **Endpoint:** `/api/login/`
     - **Method:** `POST`
     - **Description:** Authenticates a user using their username and password, and sets JWT tokens in cookies if authentication is successful.
@@ -213,7 +216,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
     ---
 
     ### Request
-    
+
+    <img width="2131" alt="Screen Shot 2024-09-11 at 8 55 36 AM" src="https://github.com/user-attachments/assets/8b2ba6b3-f68f-47d0-894b-4a84e6f0bcbc"> <br>
+
     - **Headers:** `Content-Type: application/json`
 
     - **Body:**
@@ -231,6 +236,8 @@ Authentication is the process of verifying the identity of a user, device, or sy
     ---
 
     ### Response
+
+    <img width="2131" alt="Screen Shot 2024-09-11 at 8 54 16 AM" src="https://github.com/user-attachments/assets/84482a28-bcb2-40dc-83b7-5fd2c5711c06">
 
     - **Status Code:** `200 OK`
     - **Body:** If the login is successful, the response will contain:
@@ -251,7 +258,11 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     ### Error Responses
 
+
+
     1. **User Already Logged In:**
+
+        <img width="2125" alt="Screen Shot 2024-09-11 at 8 56 45 AM" src="https://github.com/user-attachments/assets/2d30375b-bba1-45a4-ac80-0d668a56c35d"> <br>
 
         - **Status Code:** `200 OK`
         - **Body:**
@@ -266,7 +277,10 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
             ---
 
-    2. **Invalid Credentials:**
+    3. **Invalid Credentials:**
+ 
+       <img width="2125" alt="Screen Shot 2024-09-11 at 8 58 00 AM" src="https://github.com/user-attachments/assets/0eb060c6-2af5-41f2-9af5-9b89ad76c9aa"> <br>
+
 
         - **Status Code:** `401 Unauthorized`
         - **Body:**
@@ -281,7 +295,10 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
             ---
 
-    3. **User Not Verified:**
+    4. **User Not Verified:**
+ 
+       <img width="2131" alt="Screen Shot 2024-09-11 at 8 53 14 AM" src="https://github.com/user-attachments/assets/31f1b869-6aa7-4a6a-8acd-d108b5d06284"> <br>
+
 
         - **Status Code:** `401 Unauthorized`
         - **Body:**
