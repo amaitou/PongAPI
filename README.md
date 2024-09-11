@@ -18,11 +18,17 @@
 
 # Authentication
 
+![MFA-Azure-Hero-image](https://github.com/user-attachments/assets/599a6a9d-ca1f-4491-96c0-b39e1dc25b78)
+
+
 Authentication is the process of verifying the identity of a user, device, or system to ensure that they are who they claim to be. In the context of web applications and digital systems, authentication is a critical security measure that protects sensitive information and resources from unauthorized access. It typically involves the user providing credentials, such as a username and password, which are then checked against a database or authentication service. More advanced forms of authentication may include multi-factor authentication (MFA), where users must provide additional proof of identity, such as a code sent to their mobile device or a fingerprint scan. Authentication is the first line of defense in securing applications and is often combined with authorization, which controls what authenticated users are allowed to do within a system.
 
 ---
 
 # JWT
+
+![jwt-structure](https://github.com/user-attachments/assets/6e9ceeec-4530-490c-9262-ae9162ee868d)
+
 
 - ### What is a JSON Web Token (JWT)?
 
