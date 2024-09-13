@@ -477,9 +477,7 @@ class PasswordResetView(APIView):
 			status=status.HTTP_404_NOT_FOUND)
 
 		tokens = Utils.create_jwt_for_user(user)
-		current_site = get_current_site(request).domain
-		relative_link = reverse('password_verification')
-		absurl = f'http://{current_site}{relative_link}?token={str(tokens["refresh_token"])}'
+		absurl = f'http://127.0.0.1:3000/password-reset/?token={str(tokens["refresh_token"])}'
 
 		email_body = f'Hi {user.username},\n\nPlease use the link below to reset your password:\n{absurl}'
 		data = {
