@@ -16,5 +16,6 @@ urlpatterns = [
     path("profile_u/", ProfileUpdateView.as_view(), name="profile_update"),
     path("email_v/", EmailVerifyView.as_view(), name="email_verification"),
     path("password_r/", PasswordResetView.as_view(), name="password_reset"),
-    path("password_c/", PasswordConfirmationView.as_view(), name="password_verification"),
+    path("password_v/", PasswordVerify.as_view(), name="password_verification"),
+    path("password_c/", PasswordConfirmationView.as_view(), name="password_confirmation"),
 ]

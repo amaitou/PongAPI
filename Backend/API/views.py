@@ -499,6 +499,50 @@ class PasswordResetView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
+class PasswordVerify(APIView):
+
+	permission_classes = [AllowAny]
+	authentication_classes = []
+
+	def post(self, request: Request) -> Response:
+
+		token = request.GET.get('refresh_token')
+
+		if not token:
+			return Response({
+				'error': 'No token provided',
+				'redirect': False,
+				'redirect_url': None
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		try:
+			token = RefreshToken(token)
+		except TokenError:
+			return Response({
+				'error': 'Refresh token is invalid, expired or blacklisted',
+				'redirect': False,
+				'redirect_url': None
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+		
+		try:
+			user = UserInfo.objects.get(id=token['user_id'])
+		except UserInfo.DoesNotExist:
+			return Response({
+				'error': 'Couldn\'t find user',
+				'redirect': False,
+				'redirect_url': None
+			},
+			status=status.HTTP_404_NOT_FOUND)
+		
+		return Response({
+			'success': "Token is valid",
+			'redirect': False,
+			'redirect_url': None
+		},
+		status=status.HTTP_200_OK)
+
 class PasswordConfirmationView(APIView):
 
 	permission_classes = [AllowAny]
