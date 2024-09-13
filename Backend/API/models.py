@@ -14,6 +14,8 @@ class UserInfo(AbstractUser):
     gender = models.CharField(max_length=2, choices = user_GENDER, null = True, default = 'N')
     is_verified = models.BooleanField(default = False, null = False)
     two_fa = models.BooleanField(default = False, null = False)
+    opt_code = models.CharField(max_length = 6, null = True)
+    opt_time = models.DateTimeField(blank = True, null = True)
 
     class Meta:
         
