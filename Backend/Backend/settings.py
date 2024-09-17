@@ -127,9 +127,8 @@ USER_INFO_URL = os.environ.get('USER_INFO_URL')
 AUTH_URL = os.environ.get('AUTH_URL')
 
 # Short Names
-ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
-REFRESH_TOKEN = os.environ.get("REFRESH_TOKEN")
-AUTH_HEADER_NAME = os.environ.get("AUTH_HEADER_NAME")
+ACCESS_TOKEN = "access_token"
+REFRESH_TOKEN = "refresh_token"
 
 # Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -139,4 +138,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
+# SSL Certificates
 os.environ['SSL_CERT_FILE'] = certifi.where()

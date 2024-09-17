@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
+from django.conf import settings
 
 class CookieTokenAuthentication:
 
@@ -22,8 +23,8 @@ class CookieTokenAuthentication:
 		response.renderer_context = {}
 		response.render()
 
-		response.delete_cookie('access_token')
-		response.delete_cookie('refresh_token')
+		response.delete_cookie(settings.ACCESS_TOKEN)
+		response.delete_cookie(settings.REFRESH_TOKEN)
 
 		return response
 	
@@ -52,7 +53,7 @@ class CookieTokenAuthentication:
 		if not self.__check_protected_endpoint(request.path):
 			return self.get_response(request)
 
-		access_token = request.COOKIES.get('access_token')
+		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
 		if not access_token:
 			return self.get_response(request)
@@ -62,7 +63,7 @@ class CookieTokenAuthentication:
 			if not user:
 				raise Exception('Invalid access token')
 		except Exception as e:
-			refresh_token = request.COOKIES.get('refresh_token')
+			refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
 			if not refresh_token:
 				return self.__generate_error_response('No refresh token was provided', 
 						True, 
@@ -83,9 +84,9 @@ class CookieTokenAuthentication:
 										'/api/login/')
 			
 			created_access_token = str(decoded_refresh_token.access_token)
-			request.COOKIES['access_token'] = created_access_token
+			request.COOKIES[settings.ACCESS_TOKEN] = created_access_token
 			response = self.get_response(request)
-			response.set_cookie('access_token', created_access_token, httponly=False)
+			response.set_cookie(settings.ACCESS_TOKEN, created_access_token, httponly=False)
 
 			return response
 	
