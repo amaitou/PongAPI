@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from ..serializers import PasswordUpdateSerializer, ResetPasswordSerializer
+from ..serializers.password_serializer import PasswordUpdateSerializer, ResetPasswordSerializer
 from ..models import UserInfo
 from rest_framework import serializers
 from ..utils import Utils

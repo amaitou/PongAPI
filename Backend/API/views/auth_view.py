@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate
 from django.conf import settings
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
-from ..serializers import RegistrationSerializer
+from ..serializers.user_serializer import RegistrationSerializer
 from ..models import UserInfo
 from ..utils import Utils
 from rest_framework import serializers

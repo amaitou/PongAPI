@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from ..models import UserInfo
-from ..serializers import UserSerializer, ProfileUpdateSerializer
+from ..serializers.user_serializer import UserSerializer, ProfileUpdateSerializer
 from ..utils import Utils
 from django.conf import settings
 from rest_framework import serializers
