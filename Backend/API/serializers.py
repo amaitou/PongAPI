@@ -10,17 +10,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = UserInfo
-		fields = ['id',
-				'username',
-				're_password',
-				'first_name',
-				'last_name',
-				'email',
-				'date_joined',
-				'password',
-				'avatar',
-				'gender',
-				'is_verified',]
+		fields = ['id', 'username', 're_password', 'first_name', 'last_name', 'email', 'date_joined', 'password', 'avatar', 'gender', 'is_verified']
 
 
 	def validate(self, data):
@@ -54,15 +44,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = UserInfo
-		fields = ['id',
-				'username',
-				'first_name',
-				'last_name',
-				'email',
-				'date_joined',
-				'avatar',
-				'date_joined',
-				'gender']
+		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'avatar', 'gender']
+
 
 class GameStatsSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -72,14 +55,8 @@ class GameStatsSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = UserInfo
-		fields = ['id',
-				'gender',
-				'username',
-				'first_name',
-				'last_name',
-				'email',
-				'date_joined',
-				'avatar',]
+		fields = ['id', 'gender', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'avatar']
+
 
 class PasswordUpdateSerializer(serializers.ModelSerializer):
 	
@@ -136,31 +113,31 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 		model = UserInfo
 		fields = ['first_name', 'last_name', 'email', 'gender', 'username', 'two_fa']
 
-		def validate_email(self, value):
-			user = self.context['request'].user
-			if UserInfo.objects.exclude(pk=user.pk).filter(email=value).exists():
-				raise serializers.ValidationError({"email": "This email is already in use."})
-			return value
-		
-		
-		def validate_username(self, value):
-			user = self.context['request'].user
-			if UserInfo.objects.exclude(pk=user.pk).filter(username=value).exists():
-				raise serializers.ValidationError({"username": "This username is already in use."})
-			return value
+	def validate_email(self, value):
+		user = self.context['request'].user
+		if UserInfo.objects.exclude(pk=user.pk).filter(email=value).exists():
+			raise serializers.ValidationError({"email": "This email is already in use."})
+		return value
+	
+	
+	def validate_username(self, value):
+		user = self.context['request'].user
+		if UserInfo.objects.exclude(pk=user.pk).filter(username=value).exists():
+			raise serializers.ValidationError({"username": "This username is already in use."})
+		return value
 
-		def validate_two_fa(self, value):
-			if not value in [True, False]:
-				raise serializers.ValidationError({"two_fa": "Invalid value"})
-			return value
-		
-		def update(self, instance, validated_data):
+	def validate_two_fa(self, value):
+		if not value in [True, False]:
+			raise serializers.ValidationError({"two_fa": "Invalid value"})
+		return value
+	
+	def update(self, instance, validated_data):
 
-			instance.first_name = validated_data.get('first_name', instance.first_name)
-			instance.last_name = validated_data.get('last_name', instance.last_name)
-			instance.email = validated_data.get('email', instance.email)
-			instance.username = validated_data.get('username', instance.username)
-			instance.two_fa = validated_data.get('two_fa', instance.two_fa)
-			instance.save()
+		instance.first_name = validated_data.get('first_name', instance.first_name)
+		instance.last_name = validated_data.get('last_name', instance.last_name)
+		instance.email = validated_data.get('email', instance.email)
+		instance.username = validated_data.get('username', instance.username)
+		instance.two_fa = validated_data.get('two_fa', instance.two_fa)
+		instance.save()
 
-			return instance
+		return instance
