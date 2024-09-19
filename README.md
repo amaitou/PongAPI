@@ -539,9 +539,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
         }
         ```
 
-    - **success (string):** A message indicating the user was retrieved successfully.
-    - **redirect (boolean):** Indicates whether a redirect is needed (always `false` in this case).
-    - **redirect_url (string):** The URL to redirect if a redirect is needed (always `null` in this case).
-    - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, `email`, `date_joined`, and `avatar`.
+        - **success (string):** A message indicating the user was retrieved successfully.
+        - **redirect (boolean):** Indicates whether a redirect is needed (always `false` in this case).
+        - **redirect_url (string):** The URL to redirect if a redirect is needed (always `null` in this case).
+        - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, `email`, `date_joined`, and `avatar`.
 
     ---
