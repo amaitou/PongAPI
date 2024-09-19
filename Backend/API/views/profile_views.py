@@ -21,7 +21,7 @@ class AllUsersView(APIView):
 			'success': 'Users was retrieved successfully',
 			'redirect': False,
 			'redirect_url': None,
-			'data': UserSerializer(users, many=True).data
+			'output': UserSerializer(users, many=True).data
 		},
 		status=status.HTTP_200_OK)
 
@@ -47,7 +47,7 @@ class ProfileView(APIView):
 					'success': 'User was retrieved successfully',
 					'redirect': False,
 					'redirect_url': None,
-					'data': UserSerializer(user).data
+					'output': UserSerializer(user).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
@@ -55,7 +55,7 @@ class ProfileView(APIView):
 					'success': 'User retrieved successfully',
 					'redirect': False,
 					'redirect_url': None,
-					'data': UserSerializer(user).data
+					'output': UserSerializer(user).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
@@ -69,7 +69,7 @@ class ProfileView(APIView):
 				'success': 'User retrieved successfully',
 				'redirect': False,
 				'redirect_url': None,
-				'data': UserSerializer(user).data
+				'output': UserSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
 

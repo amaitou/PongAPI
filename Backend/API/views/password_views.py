@@ -82,7 +82,6 @@ class PasswordResetView(APIView):
 
 		return Response({
 			'success': 'Password reset email was sent',
-			'user_id': user.id,
 			'redirect': True,
 			'redirect_url': '/api/login/'
 		},
