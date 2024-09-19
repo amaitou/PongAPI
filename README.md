@@ -504,6 +504,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 - # Retrieve User Profile
 
+    ![Screenshot from 2024-09-19 08-45-46](https://github.com/user-attachments/assets/c5112bd9-f0e7-42d5-ba24-ddb00601d48d)
+
+
     - **Endpoint**: /api/profile/ or /api/profile/<username>/
     - **Method**: GET
     - **Description**: Retrieves the profile information of the authenticated user or a specific user if the username is provided.
@@ -519,6 +522,9 @@ Authentication is the process of verifying the identity of a user, device, or sy
     ---
 
     ### Response
+
+    ![Screenshot from 2024-09-19 08-44-37](https://github.com/user-attachments/assets/11829e94-b90f-4aa7-9ffa-e672f3c627cd)
+
 
     - **Status Code:** `200 OK`
     - **Body:** If the request is successful, the response will contain: <br>
