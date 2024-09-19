@@ -46,7 +46,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
     > Header
 
-    he header typically consists of two parts: the type of token (JWT) and the signing algorithm being used, such as HMAC SHA256 or RSA.
+    The header typically consists of two parts: the type of token (JWT) and the signing algorithm being used, such as HMAC SHA256 or RSA.
 
     ```json
     {
@@ -156,7 +156,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
             "success": "User registered successfully, check your email for verification",
             "redirect": true,
             "redirect_url": "/api/login/",
-            "data": {
+            "output": {
                 "id": 1,
                 "first_name": "Amine",
                 "last_name": "Ait Ouazghour",
@@ -211,7 +211,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
     - **Endpoint:** `/api/login/`
     - **Method:** `POST`
     - **Description:** Authenticates a user using their username and password, and sets JWT tokens in cookies if authentication is successful.
-    - **Authentication**: no authentication required (only when the user is not logged in).
+    - **Authentication**: no authentication is required (only when the user is not logged in).
 
     ---
 
@@ -321,7 +321,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
 
 - If the user is already authenticated (i.e., logged in), the endpoint returns a message stating the user is already logged in and redirects them to their profile.
 - If the login is successful, JWT tokens (`access_token` and `refresh_token`) are generated and set as cookies. The `access_token` is not `HttpOnly`, allowing access by client-side JavaScript, while the `refresh_token` is `HttpOnly`.
-- Ensure that the user has verified their email before attempting to log in. If not, they will receive an "User is not verified" error.
+- Ensure that the user has verified their email before attempting to log in. If not, they will receive a "User is not verified" error.
 - This endpoint does not require authentication to access.
 
 ---
@@ -442,7 +442,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
             "success": "Users were retrieved successfully",
             "redirect": false,
             "redirect_url": null,
-            "data": [
+            "output": [
                 {
                     "id": 1,
                     "first_name": "Amine",
@@ -470,7 +470,7 @@ Authentication is the process of verifying the identity of a user, device, or sy
         - **success (string):** A message indicating that the users were retrieved successfully.
         - **redirect (boolean):** Indicates whether a redirect is needed (always `false` in this case).
         - **redirect_url (string):** The URL to redirect to if a redirect is needed (always `null` in this case).
-        - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, `email`.
+        - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, and `email`.
     
     ---
 
@@ -501,3 +501,47 @@ Authentication is the process of verifying the identity of a user, device, or sy
 - This endpoint does not accept any parameters in the request body.
 
 ---
+
+- # Retrieve User Profile
+
+    - **Endpoint**: /api/profile/ or /api/profile/<username>/
+    - **Method**: GET
+    - **Description**: Retrieves the profile information of the authenticated user or a specific user if the username is provided.
+    - **Authorization**: authentication is required. (the access token is retrieved from the cookies).
+
+    ---
+
+    ### Request
+
+    - **Headers**: Content-Type: application/json
+    - **Body**: None
+
+    ---
+
+    ### Response
+
+    - **Status Code:** `200 OK`
+    - **Body:** If the request is successful, the response will contain: <br>
+        ```json
+        {
+            "success": "User retrieved successfully",
+            "redirect": false,
+            "redirect_url": null,
+            "output": {
+                "id": 7,
+                "username": "amaitou",
+                "first_name": "Amine",
+                "last_name": "Ait Ouazghour",
+                "email": "aitouazghouramine@gmail.com",
+                "date_joined": "2024-09-19T07:25:00.929065Z",
+                "avatar": null,
+                "gender": "M"
+        }
+        ```
+
+    - **success (string):** A message indicating the user was retrieved successfully.
+    - **redirect (boolean):** Indicates whether a redirect is needed (always `false` in this case).
+    - **redirect_url (string):** The URL to redirect if a redirect is needed (always `null` in this case).
+    - **data (array):** An array of user objects containing details such as `id`, `first_name`, `last_name`, `username`, `gender`, `email`, `date_joined`, and `avatar`.
+
+    ---
