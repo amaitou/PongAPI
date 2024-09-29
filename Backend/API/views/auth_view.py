@@ -37,20 +37,20 @@ class RegisterView(APIView):
 
 		serializer.save()
 
-		# tokens = Utils.create_jwt_for_user(serializer.instance)
+		tokens = Utils.create_jwt_for_user(serializer.instance)
 
-		# current_site = get_current_site(request).domain
-		# relative_link = reverse('email_verification')
-		# absurl = f'http://{current_site}{relative_link}?token={str(tokens["refresh_token"])}'
-		# email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
-		# data = {
-		# 	'domain': absurl,
-		# 	'subject': 'Verify your email',
-		# 	'email': serializer.instance.email,
-		# 	'body': email_body
-		# }
+		current_site = get_current_site(request).domain
+		relative_link = reverse('email_verification')
+		absurl = f'http://{current_site}{relative_link}?token={str(tokens["refresh_token"])}'
+		email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
+		data = {
+			'domain': absurl,
+			'subject': 'Verify your email',
+			'email': serializer.instance.email,
+			'body': email_body
+		}
 
-		# Utils.send_verification_email(data)
+		Utils.send_verification_email(data)
 
 		return Response ({
 			'success': 'User registered successfully, check your email for verification',
@@ -211,13 +211,13 @@ class LoginView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
-		# if not user.is_verified:
-		# 	return Response({
-		# 		'error': 'User is not verified, check your email',
-		# 		'redirect': True,
-		# 		'redirect_url': '/api/login/',
-		# 	},
-		# 	status=status.HTTP_401_UNAUTHORIZED)
+		if not user.is_verified:
+			return Response({
+				'error': 'User is not verified, check your email',
+				'redirect': True,
+				'redirect_url': '/api/login/',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
 
 		response = Response({
 			'success': 'Login successful',
