@@ -231,7 +231,7 @@ class LoginConfirmationView(APIView):
 		__id = base64.b64encode(str(user.id).encode('utf-8')).decode('utf-8')
 
 		response = Response({
-			'success': "check your email for the two factor authentication code",
+			'success': "check your email verification code",
 		},
 		status=status.HTTP_200_OK)
 
@@ -248,9 +248,15 @@ class LoginVerificationView(APIView):
 		otp_code = request.data.get('otp_code')
 		user_id = request.COOKIES.get('user_id')
 
-		if not otp_code or not user_id:
+		if not user_id:
 			return Response({
-				'error': 'No otp code or user_id provided',
+				'error': 'No user id was provided',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		if not otp_code:
+			return Response({
+				'error': 'No otp code was provided',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
