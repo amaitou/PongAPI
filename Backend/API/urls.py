@@ -8,7 +8,8 @@ from .views.profile_views import *
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='registration'),
     path('callback', Authentication42View.as_view(), name='42_authentication'),
-    path('login/', LoginView.as_view(), name='login'),
+    path('login_c/', LoginConfirmationView.as_view(), name='login'),
+    path('login_v/', LoginVerificationView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('users/', AllUsersView.as_view(), name='all_users'),
     path('profile/', ProfileView.as_view(), name='profile_owner'),

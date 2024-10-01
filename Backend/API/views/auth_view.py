@@ -15,6 +15,8 @@ from ..models import UserInfo
 from ..utils import Utils
 from rest_framework import serializers
 import requests
+import base64
+from django.utils import timezone
 
 class RegisterView(APIView):
 
@@ -29,9 +31,7 @@ class RegisterView(APIView):
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
 			return Response({
-				'error': e.detail,
-				'redirect': True,
-				'redirect_url': '/api/register/'
+				'error': e.detail
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -54,8 +54,6 @@ class RegisterView(APIView):
 
 		return Response ({
 			'success': 'User registered successfully, check your email for verification',
-			'redirect': True,
-			'redirect_url': '/api/login/',
 			'output': serializer.data,
 		},
 		status=status.HTTP_201_CREATED)
@@ -113,8 +111,6 @@ class Authentication42View(APIView):
 
 			response = Response({
 				'success': 'User registered successfully',
-				'redirect': True,
-				'redirect_url': '/api/profile/',
 				'output': serializer.data,
 			},
 			status=status.HTTP_201_CREATED)
@@ -132,15 +128,11 @@ class Authentication42View(APIView):
 			except UserInfo.DoesNotExist:
 				return Response({
 					'error': 'failed to authenticate',
-					'redirect': True,
-					'redirect_url': '/api/login/'
 				},
 				status=status.HTTP_400_BAD_REQUEST)
 			
 			response = Response({
 				'success': 'Login successful',
-				'redirect': True,
-				'redirect_url': '/api/profile',
 			},
 			status=status.HTTP_200_OK)
 
@@ -156,8 +148,6 @@ class Authentication42View(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'redirect': True,
-				'redirect_url': '/api/profile/'
 			},
 			status=status.HTTP_200_OK)
 		
@@ -167,8 +157,6 @@ class Authentication42View(APIView):
 		if not self.code:
 			return Response({
 				'error': 'No code was provided',
-				'redirect': True,
-				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -177,15 +165,13 @@ class Authentication42View(APIView):
 		if not access_token:
 			return Response({
 				'error': 'Failed to authenticate',
-				'redirect': True,
-				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
 		user = self.__get_user(access_token)
 		return self.__register_user(user)
 
-class LoginView(APIView):
+class LoginConfirmationView(APIView):
 
 	permission_classes = [AllowAny]
 
@@ -193,8 +179,6 @@ class LoginView(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'redirect': True,
-				'redirect_url': '/api/profile/'
 			},
 			status=status.HTTP_200_OK)
 
@@ -206,23 +190,97 @@ class LoginView(APIView):
 		if not user:
 			return Response({
 				'error': 'Invalid username or password',
-				'redirect': True,
-				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
 		if not user.is_verified:
 			return Response({
 				'error': 'User is not verified, check your email',
-				'redirect': True,
-				'redirect_url': '/api/login/',
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
+		
+		if not user.two_fa:
+			response = Response({
+				'success': 'Login successful',
+			},
+			status=status.HTTP_200_OK)
+
+			__jwt = Utils.create_jwt_for_user(user)
+
+			response.set_cookie(settings.ACCESS_TOKEN, __jwt[settings.ACCESS_TOKEN], httponly=False)
+			response.set_cookie(settings.REFRESH_TOKEN, __jwt[settings.REFRESH_TOKEN], httponly=True)
+
+			return response
+		
+		user.otp_code = Utils.generate_otp_code()
+		user.otp_time = Utils.generate_otp_expiration()
+
+		user.save()
+
+		absurl = f''
+		email_body = f'Hi {user.username},\n\nPlease use the code below to verify your login:\n{user.otp_code}'	
+		data = {
+			'domain': absurl,
+			'subject': 'Verification code',
+			'email': user.email,
+			'body': email_body
+		}
+
+		Utils.send_verification_email(data)
+
+		__id = base64.b64encode(str(user.id).encode('utf-8')).decode('utf-8')
+
+		response = Response({
+			'success': "check your email for the two factor authentication code",
+		},
+		status=status.HTTP_200_OK)
+
+		response.set_cookie('identifier', str(__id), httponly=True)
+
+		return response
+
+class LoginVerificationView(APIView):
+
+	permission_classes = [AllowAny]
+
+	def post(self, request: Request) -> Response:
+
+		otp_code = request.data.get('otp_code')
+		identifier = request.COOKIES.get('identifier')
+
+		if not otp_code or not identifier:
+			return Response({
+				'error': 'No otp code or identifier provided',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		try:
+			__id = int(base64.b64decode(identifier.encode('utf-8')).decode('utf-8'))
+			user = UserInfo.objects.get(id=__id)
+		except UserInfo.DoesNotExist:
+			return Response({
+				'error': 'User not found',
+			},
+			status=status.HTTP_404_NOT_FOUND)
+		
+		if user.otp_code != otp_code:
+			return Response({
+				'error': 'Invalid otp code',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+		
+		if user.otp_time < timezone.now():
+			return Response({
+				'error': 'OTP code has expired',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+		
+		user.otp_code = None
+		user.otp_time = None
+		user.save()
 
 		response = Response({
 			'success': 'Login successful',
-			'redirect': True,
-			'redirect_url': '/api/profile'
 		},
 		status=status.HTTP_200_OK)
 
@@ -230,6 +288,7 @@ class LoginView(APIView):
 
 		response.set_cookie(settings.ACCESS_TOKEN, __jwt[settings.ACCESS_TOKEN], httponly=False)
 		response.set_cookie(settings.REFRESH_TOKEN, __jwt[settings.REFRESH_TOKEN], httponly=True)
+		response.delete_cookie("identifier")
 
 		return response
 
@@ -244,8 +303,6 @@ class LogoutView(APIView):
 		if not refresh:
 			return Response({
 				'error': 'No refresh token was provided',
-				'redirect': True,
-				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -255,15 +312,11 @@ class LogoutView(APIView):
 		except TokenError:
 			return Response({
 				'error': 'Refresh token is invalid, expired or blacklisted',
-				'redirect': True,
-				'redirect_url': '/api/login/'
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 
 		response = Response({
 			'success': 'Logout successful',
-			'redirect': True,
-			'redirect_url': '/api/login/'
 		},
 		status=status.HTTP_200_OK)
 
@@ -284,8 +337,6 @@ class EmailVerifyView(APIView):
 		if not token:
 			return Response({
 				'error': 'No token provided',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -294,8 +345,6 @@ class EmailVerifyView(APIView):
 		except TokenError:
 			return Response({
 				'error': 'Refresh token is invalid, expired or blacklisted',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
@@ -304,16 +353,12 @@ class EmailVerifyView(APIView):
 		except UserInfo.DoesNotExist:
 			return Response({
 				'error': 'Couldn\'t find user',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 	
 		if user.is_verified:
 			return Response({
 				'success': 'Email is already verified',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_200_OK)
 
@@ -324,7 +369,5 @@ class EmailVerifyView(APIView):
 
 		return Response({
 			'success': 'Email was verified successfully',
-			'redirect': True,
-			'redirect_url': '/api/login/'
 		},
 		status=status.HTTP_200_OK)

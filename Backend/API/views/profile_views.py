@@ -19,8 +19,6 @@ class AllUsersView(APIView):
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
 			'success': 'Users was retrieved successfully',
-			'redirect': False,
-			'redirect_url': None,
 			'output': UserSerializer(users, many=True).data
 		},
 		status=status.HTTP_200_OK)
@@ -36,8 +34,6 @@ class ProfileView(APIView):
 		if not user:
 			return Response({
 				'error': 'Couldn\'t find the user',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
@@ -45,30 +41,22 @@ class ProfileView(APIView):
 			if user.username == username:
 				return Response({
 					'success': 'User was retrieved successfully',
-					'redirect': False,
-					'redirect_url': None,
 					'output': UserSerializer(user).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
 				return Response({
 					'success': 'User retrieved successfully',
-					'redirect': False,
-					'redirect_url': None,
 					'output': UserSerializer(user).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
 					'error': 'User not found',
-					'redirect': False,
-					'redirect_url': None
 				},
 				status=status.HTTP_404_NOT_FOUND)
 		else:
 			return Response({
 				'success': 'User retrieved successfully',
-				'redirect': False,
-				'redirect_url': None,
 				'output': UserSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
@@ -89,8 +77,6 @@ class ProfileUpdateView(APIView):
 		except serializers.ValidationError as e:
 			return Response({
 				'error': e.detail,
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -98,7 +84,5 @@ class ProfileUpdateView(APIView):
 
 		return Response({
 			'success': 'Profile was updated successfully',
-			'redirect': False,
-			'redirect_url': None
 		},
 		status=status.HTTP_200_OK)

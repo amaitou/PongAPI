@@ -14,8 +14,6 @@ class CookieTokenAuthentication:
 	def __generate_error_response(self, message: str, redirect: bool, redirect_url: str) -> Response:
 		response = Response({
 			'error': message,
-			'redirect': redirect,
-			'redirect_url': redirect_url
 		},
 		status=status.HTTP_401_UNAUTHORIZED)
 		response.accepted_renderer = JSONRenderer()

@@ -26,8 +26,6 @@ class PasswordUpdateView(APIView):
 		except serializers.ValidationError as e:
 			return Response({
 				'error': e.detail,
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -35,8 +33,6 @@ class PasswordUpdateView(APIView):
 
 		return Response({
 			'success': 'Password updated successfully',
-			'redirect': False,
-			'redirect_url': None
 		},
 		status=status.HTTP_200_OK)
 
@@ -52,8 +48,6 @@ class PasswordResetView(APIView):
 		if not email:
 			return Response({
 				'error': 'No email provided',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -62,8 +56,6 @@ class PasswordResetView(APIView):
 		except UserInfo.DoesNotExist:
 			return Response({
 				'error': 'Couldn\'t find the email',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
@@ -82,8 +74,6 @@ class PasswordResetView(APIView):
 
 		return Response({
 			'success': 'Password reset email was sent',
-			'redirect': True,
-			'redirect_url': '/api/login/'
 		},
 		status=status.HTTP_200_OK)
 
@@ -99,8 +89,6 @@ class PasswordVerify(APIView):
 		if not token:
 			return Response({
 				'error': 'No token provided',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -109,8 +97,6 @@ class PasswordVerify(APIView):
 		except TokenError:
 			return Response({
 				'error': 'Refresh token is invalid, expired or blacklisted',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
@@ -119,15 +105,11 @@ class PasswordVerify(APIView):
 		except UserInfo.DoesNotExist:
 			return Response({
 				'error': 'Couldn\'t find user',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
 		return Response({
 			'success': "Token is valid",
-			'redirect': False,
-			'redirect_url': None
 		},
 		status=status.HTTP_200_OK)
 
@@ -143,8 +125,6 @@ class PasswordConfirmationView(APIView):
 		if not token:
 			return Response({
 				'error': 'No token provided',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,8 +133,6 @@ class PasswordConfirmationView(APIView):
 		except TokenError:
 			return Response({
 				'error': 'Refresh token is invalid, expired or blacklisted',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 	
@@ -164,8 +142,6 @@ class PasswordConfirmationView(APIView):
 		except UserInfo.DoesNotExist:
 			return Response({
 				'error': 'Couldn\'t find user',
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
@@ -175,8 +151,6 @@ class PasswordConfirmationView(APIView):
 		except serializers.ValidationError as e:
 			return Response({
 				'error': e.detail,
-				'redirect': False,
-				'redirect_url': None
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -185,7 +159,5 @@ class PasswordConfirmationView(APIView):
 
 		return Response({
 			'success': 'Password reset successfully',
-			'redirect': True,
-			'redirect_url': '/api/login/'
 		},
 		status=status.HTTP_200_OK)

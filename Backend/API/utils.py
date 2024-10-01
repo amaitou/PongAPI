@@ -2,6 +2,10 @@ from django.core.mail import EmailMessage
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.core.exceptions import ValidationError
 from .models import UserInfo
+import random
+import string
+from datetime import timedelta
+from django.utils import timezone
 
 class Utils:
     """
@@ -85,3 +89,17 @@ class Utils:
 
         if errors:
             raise ValidationError(errors)
+    
+    @staticmethod
+    def generate_otp_code():
+        """
+        This method generates a random 6-digit OTP code.
+        """
+        return ''.join(random.choices(string.digits, k=6))
+
+    @staticmethod
+    def generate_otp_expiration():
+        """
+        This method generates a time for the OTP code.
+        """
+        return timezone.now() + timedelta(minutes=2)
