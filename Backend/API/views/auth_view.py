@@ -235,7 +235,7 @@ class LoginConfirmationView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-		response.set_cookie('identifier', str(__id), httponly=True)
+		response.set_cookie('user_id', str(__id), httponly=True)
 
 		return response
 
@@ -246,16 +246,16 @@ class LoginVerificationView(APIView):
 	def post(self, request: Request) -> Response:
 
 		otp_code = request.data.get('otp_code')
-		identifier = request.COOKIES.get('identifier')
+		user_id = request.COOKIES.get('user_id')
 
-		if not otp_code or not identifier:
+		if not otp_code or not user_id:
 			return Response({
-				'error': 'No otp code or identifier provided',
+				'error': 'No otp code or user_id provided',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
-			__id = int(base64.b64decode(identifier.encode('utf-8')).decode('utf-8'))
+			__id = int(base64.b64decode(user_id.encode('utf-8')).decode('utf-8'))
 			user = UserInfo.objects.get(id=__id)
 		except UserInfo.DoesNotExist:
 			return Response({
@@ -288,7 +288,7 @@ class LoginVerificationView(APIView):
 
 		response.set_cookie(settings.ACCESS_TOKEN, __jwt[settings.ACCESS_TOKEN], httponly=False)
 		response.set_cookie(settings.REFRESH_TOKEN, __jwt[settings.REFRESH_TOKEN], httponly=True)
-		response.delete_cookie("identifier")
+		response.delete_cookie("user_id")
 
 		return response
 
