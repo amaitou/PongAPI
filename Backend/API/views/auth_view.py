@@ -231,16 +231,14 @@ class LoginConfirmationView(APIView):
 
 		Utils.send_verification_email(data)
 
-		token = RefreshToken.for_user(user)
-		verification_token = token.access_token
-		verification_token.set_exp(lifetime=timedelta(minutes=2))
+		token = Utils.create_one_time_jwt(user)
 
 		response = Response({
 			'success': "check your email verification code",
 		},
 		status=status.HTTP_200_OK)
 
-		response.set_cookie("verification_token", str(verification_token), httponly=False)
+		response.set_cookie("verification_token", str(token), httponly=False)
 
 		return response
 
@@ -266,12 +264,17 @@ class LoginVerificationView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
-			token = AccessToken(verification_token)
-		except TokenError:
+			token = jwt.decode(verification_token, settings.SECRET_KEY, algorithms=['HS256'])
+		except jwt.ExpiredSignatureError:
 			return Response({
-				'error': 'Verification token is invalid, expired or blacklisted',
+				'error': 'Token is expired',
 			},
-			status=status.HTTP_401_UNAUTHORIZED)
+			status=status.HTTP_400_BAD_REQUEST)
+		except jwt.InvalidTokenError:
+			return Response({
+				'error': 'Token is invalid',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
 			user = UserInfo.objects.get(id=token['user_id'])
