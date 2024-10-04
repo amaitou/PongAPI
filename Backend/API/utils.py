@@ -6,6 +6,8 @@ import random
 import string
 from datetime import timedelta
 from django.utils import timezone
+import jwt
+from django.conf import settings
 
 class Utils:
     """
@@ -103,3 +105,16 @@ class Utils:
         This method generates a time for the OTP code.
         """
         return timezone.now() + timedelta(minutes=15)
+    
+    @staticmethod
+    def create_one_time_jwt(user):
+        """
+        This method creates a one-time JWT for a given user.
+        It returns a dictionary containing the access and refresh tokens.
+        """
+        payload = {
+            'user_id': user.id,
+            'exp': timezone.now() + timedelta(minutes=2)
+        }
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        return token

@@ -17,6 +17,9 @@ from rest_framework import serializers
 import requests
 import base64
 from django.utils import timezone
+from datetime import timedelta
+from rest_framework_simplejwt.tokens import AccessToken
+import jwt
 
 class RegisterView(APIView):
 
@@ -37,11 +40,11 @@ class RegisterView(APIView):
 
 		serializer.save()
 
-		tokens = Utils.create_jwt_for_user(serializer.instance)
+		token = Utils.create_one_time_jwt(serializer.instance)
 
 		current_site = get_current_site(request).domain
 		relative_link = reverse('email_verification')
-		absurl = f'http://{current_site}{relative_link}?token={str(tokens["refresh_token"])}'
+		absurl = f'http://{current_site}{relative_link}?token={str(token)}'
 		email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
 		data = {
 			'domain': absurl,
@@ -228,14 +231,16 @@ class LoginConfirmationView(APIView):
 
 		Utils.send_verification_email(data)
 
-		verification_token = Utils.create_jwt_for_user(user)
+		token = RefreshToken.for_user(user)
+		verification_token = token.access_token
+		verification_token.set_exp(lifetime=timedelta(minutes=2))
 
 		response = Response({
 			'success': "check your email verification code",
 		},
 		status=status.HTTP_200_OK)
 
-		response.set_cookie("verification_token", verification_token[settings.REFRESH_TOKEN], httponly=False)
+		response.set_cookie("verification_token", str(verification_token), httponly=False)
 
 		return response
 
@@ -261,7 +266,7 @@ class LoginVerificationView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
-			token = RefreshToken(verification_token)
+			token = AccessToken(verification_token)
 		except TokenError:
 			return Response({
 				'error': 'Verification token is invalid, expired or blacklisted',
@@ -291,8 +296,6 @@ class LoginVerificationView(APIView):
 		user.otp_code = None
 		user.otp_time = None
 		user.save()
-
-		token.blacklist()
 
 		response = Response({
 			'success': 'Login successful',
@@ -356,12 +359,17 @@ class EmailVerifyView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
-			token = RefreshToken(token)
-		except TokenError:
+			token = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+		except jwt.ExpiredSignatureError:
 			return Response({
-				'error': 'Refresh token is invalid, expired or blacklisted',
+				'error': 'Token is expired',
 			},
-			status=status.HTTP_401_UNAUTHORIZED)
+			status=status.HTTP_400_BAD_REQUEST)
+		except jwt.InvalidTokenError:
+			return Response({
+				'error': 'Token is invalid',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
 			user = UserInfo.objects.get(id=token['user_id'])
@@ -370,9 +378,7 @@ class EmailVerifyView(APIView):
 				'error': 'Couldn\'t find user',
 			},
 			status=status.HTTP_404_NOT_FOUND)
-		
-		token.blacklist()
-	
+			
 		if user.is_verified:
 			return Response({
 				'success': 'Email is already verified',
