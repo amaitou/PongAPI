@@ -232,10 +232,9 @@ class LoginConfirmationView(APIView):
 
 		response = Response({
 			'success': "check your email verification code",
+			'user_id': __id
 		},
 		status=status.HTTP_200_OK)
-
-		response.set_cookie('user_id', str(__id), httponly=True)
 
 		return response
 
@@ -246,7 +245,7 @@ class LoginVerificationView(APIView):
 	def post(self, request: Request) -> Response:
 
 		otp_code = request.data.get('otp_code')
-		user_id = request.COOKIES.get('user_id')
+		user_id = request.data.get('user_id')
 
 		if not user_id:
 			return Response({
@@ -294,7 +293,6 @@ class LoginVerificationView(APIView):
 
 		response.set_cookie(settings.ACCESS_TOKEN, __jwt[settings.ACCESS_TOKEN], httponly=False)
 		response.set_cookie(settings.REFRESH_TOKEN, __jwt[settings.REFRESH_TOKEN], httponly=True)
-		response.delete_cookie("user_id")
 
 		return response
 
