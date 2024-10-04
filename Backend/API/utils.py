@@ -102,4 +102,4 @@ class Utils:
         """
         This method generates a time for the OTP code.
         """
-        return timezone.now() + timedelta(minutes=2)
+        return timezone.now() + timedelta(minutes=15)

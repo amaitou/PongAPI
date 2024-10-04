@@ -228,13 +228,14 @@ class LoginConfirmationView(APIView):
 
 		Utils.send_verification_email(data)
 
-		__id = base64.b64encode(str(user.id).encode('utf-8')).decode('utf-8')
+		verification_token = Utils.create_jwt_for_user(user)
 
 		response = Response({
 			'success': "check your email verification code",
-			'user_id': __id
 		},
 		status=status.HTTP_200_OK)
+
+		response.set_cookie("verification_token", verification_token[settings.REFRESH_TOKEN], httponly=False)
 
 		return response
 
@@ -245,11 +246,11 @@ class LoginVerificationView(APIView):
 	def post(self, request: Request) -> Response:
 
 		otp_code = request.data.get('otp_code')
-		user_id = request.data.get('user_id')
+		verification_token = request.COOKIES.get('verification_token')
 
-		if not user_id:
+		if not verification_token:
 			return Response({
-				'error': 'No user id was provided',
+				'error': 'No verification token was provided',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -260,11 +261,18 @@ class LoginVerificationView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
-			__id = int(base64.b64decode(user_id.encode('utf-8')).decode('utf-8'))
-			user = UserInfo.objects.get(id=__id)
+			token = RefreshToken(verification_token)
+		except TokenError:
+			return Response({
+				'error': 'Verification token is invalid, expired or blacklisted',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
+		
+		try:
+			user = UserInfo.objects.get(id=token['user_id'])
 		except UserInfo.DoesNotExist:
 			return Response({
-				'error': 'User not found',
+				'error': 'Couldn\'t find user',
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
@@ -284,6 +292,8 @@ class LoginVerificationView(APIView):
 		user.otp_time = None
 		user.save()
 
+		token.blacklist()
+
 		response = Response({
 			'success': 'Login successful',
 		},
@@ -293,6 +303,7 @@ class LoginVerificationView(APIView):
 
 		response.set_cookie(settings.ACCESS_TOKEN, __jwt[settings.ACCESS_TOKEN], httponly=False)
 		response.set_cookie(settings.REFRESH_TOKEN, __jwt[settings.REFRESH_TOKEN], httponly=True)
+		response.delete_cookie('verification_token')
 
 		return response
 
@@ -359,6 +370,8 @@ class EmailVerifyView(APIView):
 				'error': 'Couldn\'t find user',
 			},
 			status=status.HTTP_404_NOT_FOUND)
+		
+		token.blacklist()
 	
 		if user.is_verified:
 			return Response({
@@ -368,8 +381,6 @@ class EmailVerifyView(APIView):
 
 		user.is_verified = True
 		user.save()
-
-		token.blacklist()
 
 		return Response({
 			'success': 'Email was verified successfully',
