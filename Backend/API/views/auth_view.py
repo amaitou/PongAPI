@@ -242,7 +242,7 @@ class LoginConfirmationView(APIView):
 
 		return response
 
-class LoginVerificationView(APIView):
+class TwoFactorAuthenticationView(APIView):
 
 	permission_classes = [AllowAny]
 
