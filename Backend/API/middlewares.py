@@ -11,15 +11,11 @@ class CookieTokenAuthentication:
 		self.get_response = get_response
 
 	
-	def __generate_error_response(self, message: str, redirect: bool, redirect_url: str) -> Response:
+	def __generate_error_response(self, message: str) -> Response:
 		response = Response({
 			'error': message,
 		},
 		status=status.HTTP_401_UNAUTHORIZED)
-		response.accepted_renderer = JSONRenderer()
-		response.accepted_media_type = 'application/json'
-		response.renderer_context = {}
-		response.render()
 
 		response.delete_cookie(settings.ACCESS_TOKEN)
 		response.delete_cookie(settings.REFRESH_TOKEN)
@@ -40,16 +36,12 @@ class CookieTokenAuthentication:
 		except Exception as e:
 			refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
 			if not refresh_token:
-				return self.__generate_error_response('No refresh token was provided', 
-						True, 
-						'/api/login/')
+				return self.__generate_error_response('No refresh token was provided')
 
 			try:
 				old_refresh_token = RefreshToken(refresh_token)
 			except TokenError as e:
-				return self.__generate_error_response('Invalid or Expired refresh token',
-										True,
-										'/api/login/')
+				return self.__generate_error_response('Invalid or Expired refresh token')
 			
 			user = Utils.get_user_from_jwt(refresh_token, 'refresh')
 			old_refresh_token.blacklist()
@@ -57,9 +49,7 @@ class CookieTokenAuthentication:
 			tokens = Utils.create_jwt_for_user(user)
 
 			if not user:
-				return self.__generate_error_response('Failed to find user',
-										True,
-										'/api/login/')
+				return self.__generate_error_response('Failed to find user')
 			
 			request.COOKIES[settings.ACCESS_TOKEN] = str(tokens['access_token'])
 			request.COOKIES[settings.REFRESH_TOKEN] = str(tokens['refresh_token'])
