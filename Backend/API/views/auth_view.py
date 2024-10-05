@@ -234,7 +234,7 @@ class LoginConfirmationView(APIView):
 		token = Utils.create_one_time_jwt(user)
 
 		response = Response({
-			'success': "check your email verification code",
+			'success': "check your email for verification code",
 		},
 		status=status.HTTP_200_OK)
 

@@ -26,30 +26,7 @@ class CookieTokenAuthentication:
 
 		return response
 	
-	def __check_protected_endpoint(self, path: str) -> bool:
-
-		protected_endpoints = [
-			'/register/',
-			'/callback',
-			'/login/',
-			'/logout/',
-			'/users/',
-			'/profile/',
-			'/profile/<str:username>/',
-			'/profile_u/',
-			'/password_u/',
-		]
-
-		for endpoint in protected_endpoints:
-			if path.startswith('/api' + endpoint):
-				return True
-		
-		return False
-	
 	def __call__(self, request):
-
-		if not self.__check_protected_endpoint(request.path):
-			return self.get_response(request)
 
 		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
@@ -68,23 +45,28 @@ class CookieTokenAuthentication:
 						'/api/login/')
 
 			try:
-				decoded_refresh_token = RefreshToken(refresh_token)
+				old_refresh_token = RefreshToken(refresh_token)
 			except TokenError as e:
 				return self.__generate_error_response('Invalid or Expired refresh token',
 										True,
 										'/api/login/')
 			
 			user = Utils.get_user_from_jwt(refresh_token, 'refresh')
+			old_refresh_token.blacklist()
+
+			tokens = Utils.create_jwt_for_user(user)
 
 			if not user:
 				return self.__generate_error_response('Failed to find user',
 										True,
 										'/api/login/')
 			
-			created_access_token = str(decoded_refresh_token.access_token)
-			request.COOKIES[settings.ACCESS_TOKEN] = created_access_token
+			request.COOKIES[settings.ACCESS_TOKEN] = str(tokens['access_token'])
+			request.COOKIES[settings.REFRESH_TOKEN] = str(tokens['refresh_token'])
+
 			response = self.get_response(request)
-			response.set_cookie(settings.ACCESS_TOKEN, created_access_token, httponly=False)
+			response.set_cookie(settings.ACCESS_TOKEN, str(tokens['access_token']), httponly=False)
+			response.set_cookie(settings.REFRESH_TOKEN, str(tokens['refresh_token']), httponly=True)
 
 			return response
 	
