@@ -8,6 +8,8 @@ load_dotenv()
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_URL = '/media/'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
@@ -56,7 +58,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     
-    'API.middlewares.CookieTokenAuthentication',
+    'API.middlewares.TokenRefresherMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 
     'django.contrib.auth.middleware.AuthenticationMiddleware',

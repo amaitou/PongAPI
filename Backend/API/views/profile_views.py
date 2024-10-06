@@ -19,7 +19,7 @@ class AllUsersView(APIView):
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
 			'success': 'Users was retrieved successfully',
-			'output': UserSerializer(users, many=True).data
+			'output': UserSerializer(users, many=True, context = {'request': request}).data
 		},
 		status=status.HTTP_200_OK)
 
@@ -41,13 +41,13 @@ class ProfileView(APIView):
 			if user.username == username:
 				return Response({
 					'success': 'User was retrieved successfully',
-					'output': UserSerializer(user).data
+					'output': UserSerializer(user,  context = {'request': request}).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
 				return Response({
 					'success': 'User retrieved successfully',
-					'output': UserSerializer(user).data
+					'output': UserSerializer(user,  context = {'request': request}).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
@@ -57,7 +57,7 @@ class ProfileView(APIView):
 		else:
 			return Response({
 				'success': 'User retrieved successfully',
-				'output': UserSerializer(user).data
+				'output': UserSerializer(user,  context = {'request': request}).data
 			},
 			status=status.HTTP_200_OK)
 

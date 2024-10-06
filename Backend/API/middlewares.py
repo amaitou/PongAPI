@@ -1,56 +1,52 @@
-from .utils import Utils
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.conf import settings
+from .utils import Utils
 
-class CookieTokenAuthentication:
+class TokenRefresherMiddleware:
 
 	def __init__(self, get_response):
 		self.get_response = get_response
 
-	
-	def __generate_error_response(self, message: str) -> Response:
-		response = Response({
-			'error': message,
-		},
-		status=status.HTTP_401_UNAUTHORIZED)
-
-		response.delete_cookie(settings.ACCESS_TOKEN)
-		response.delete_cookie(settings.REFRESH_TOKEN)
-
-		return response
-	
 	def __call__(self, request):
-
 		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
 
 		if not access_token:
 			return self.get_response(request)
-		
+
 		try:
 			user = Utils.get_user_from_jwt(access_token, 'access')
 			if not user:
 				raise Exception('Invalid access token')
-		except Exception as e:
+
+		except Exception:
 			refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN)
+
 			if not refresh_token:
-				return self.__generate_error_response('No refresh token was provided')
+				return self.get_response(request)
 
 			try:
 				old_refresh_token = RefreshToken(refresh_token)
 			except TokenError as e:
-				return self.__generate_error_response('Invalid or Expired refresh token')
-			
-			user = Utils.get_user_from_jwt(refresh_token, 'refresh')
-			old_refresh_token.blacklist()
+				response = self.get_response(request)
+				if response.status_code == 401:
+					response.delete_cookie(settings.ACCESS_TOKEN)
+					response.delete_cookie(settings.REFRESH_TOKEN)
+				return response
 
-			tokens = Utils.create_jwt_for_user(user)
+			user = Utils.get_user_from_jwt(refresh_token, 'refresh')
 
 			if not user:
-				return self.__generate_error_response('Failed to find user')
-			
+				response = self.get_response(request)
+				if response.status_code == 401:
+					response.delete_cookie(settings.ACCESS_TOKEN)
+					response.delete_cookie(settings.REFRESH_TOKEN)
+				return response
+
+			old_refresh_token.blacklist()
+			tokens = Utils.create_jwt_for_user(user)
+
 			request.COOKIES[settings.ACCESS_TOKEN] = str(tokens['access_token'])
 			request.COOKIES[settings.REFRESH_TOKEN] = str(tokens['refresh_token'])
 
@@ -59,7 +55,5 @@ class CookieTokenAuthentication:
 			response.set_cookie(settings.REFRESH_TOKEN, str(tokens['refresh_token']), httponly=True)
 
 			return response
-	
-		request.user = user
-		response = self.get_response(request)
-		return response
+
+		return self.get_response(request)

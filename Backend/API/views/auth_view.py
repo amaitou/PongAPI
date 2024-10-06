@@ -28,7 +28,7 @@ class RegisterView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		serializer = RegistrationSerializer(data=request.data)
+		serializer = RegistrationSerializer(data=request.data, context={'request': request})
 
 		try:
 			serializer.is_valid(raise_exception=True)
@@ -40,20 +40,20 @@ class RegisterView(APIView):
 
 		serializer.save()
 
-		token = Utils.create_one_time_jwt(serializer.instance)
+		# token = Utils.create_one_time_jwt(serializer.instance)
 
-		current_site = get_current_site(request).domain
-		relative_link = reverse('email_verification')
-		absurl = f'http://{current_site}{relative_link}?token={str(token)}'
-		email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
-		data = {
-			'domain': absurl,
-			'subject': 'Verify your email',
-			'email': serializer.instance.email,
-			'body': email_body
-		}
+		# current_site = get_current_site(request).domain
+		# relative_link = reverse('email_verification')
+		# absurl = f'http://{current_site}{relative_link}?token={str(token)}'
+		# email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
+		# data = {
+		# 	'domain': absurl,
+		# 	'subject': 'Verify your email',
+		# 	'email': serializer.instance.email,
+		# 	'body': email_body
+		# }
 
-		Utils.send_verification_email(data)
+		# Utils.send_verification_email(data)
 
 		return Response ({
 			'success': 'User registered successfully, check your email for verification',
@@ -102,14 +102,24 @@ class Authentication42View(APIView):
 		email = user['email']
 		avatar = user['image']['link']
 
+		print(avatar)
+
+		# return Response({
+		# 	'success': 'User retrieved successfully',
+		# 	'output': user,
+		# })
+
 		serializer = RegistrationSerializer(data={
 			'username': username,
 			'first_name': first_name,
 			'last_name': last_name,
-			'email': email
+			'email': email,
+			'avatar': avatar,
+			"gender": "M",
 		})
 
 		if serializer.is_valid():
+			print("serializer is valid")
 			serializer.save()
 
 			response = Response({
@@ -155,7 +165,9 @@ class Authentication42View(APIView):
 			status=status.HTTP_200_OK)
 		
 		self.code = self.__get_code(request)
+		print("code: ", self.code)
 		self.__set_code_in_data(self.code)
+		print("data: ", self.data)
 
 		if not self.code:
 			return Response({
@@ -164,6 +176,7 @@ class Authentication42View(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		access_token = self.__get_token()
+		print("access_token: ", access_token)
 
 		if not access_token:
 			return Response({
@@ -196,11 +209,11 @@ class LoginConfirmationView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
-		if not user.is_verified:
-			return Response({
-				'error': 'User is not verified, check your email',
-			},
-			status=status.HTTP_401_UNAUTHORIZED)
+		# if not user.is_verified:
+		# 	return Response({
+		# 		'error': 'User is not verified, check your email',
+		# 	},
+		# 	status=status.HTTP_401_UNAUTHORIZED)
 		
 		if not user.two_fa:
 			response = Response({
