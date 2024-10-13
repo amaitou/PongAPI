@@ -20,6 +20,7 @@ from django.utils import timezone
 from datetime import timedelta
 from rest_framework_simplejwt.tokens import AccessToken
 import jwt
+from django.conf import settings
 
 class RegisterView(APIView):
 
@@ -94,15 +95,22 @@ class Authentication42View(APIView):
 	def __set_code_in_data(self, code: str) -> None:
 		self.data['code'] = code.encode('utf-8')
 
-	def __register_user(self, user: dict) -> None:
+	def __register_user(self, user: dict, request: Request) -> None:
 
 		first_name = user['first_name']
 		last_name = user['last_name']
 		username = user['login']
 		email = user['email']
-		avatar = user['image']['link']
+		avatar = requests.get(user['image']['link']).content
 
-		print(avatar)
+		path = f"{settings.MEDIA_ROOT}{username}.jpg"
+		full_path = request.build_absolute_uri(path.replace(settings.MEDIA_ROOT, ''))
+		print(full_path)
+
+		print(path)
+
+		with open(path, 'wb') as f:
+			f.write(avatar)
 
 		# return Response({
 		# 	'success': 'User retrieved successfully',
@@ -114,11 +122,11 @@ class Authentication42View(APIView):
 			'first_name': first_name,
 			'last_name': last_name,
 			'email': email,
-			'avatar': avatar,
+			"avatar": path,
 			"gender": "M",
 		})
 
-		if serializer.is_valid():
+		if serializer.is_valid(raise_exception=True):
 			print("serializer is valid")
 			serializer.save()
 
@@ -185,7 +193,7 @@ class Authentication42View(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 
 		user = self.__get_user(access_token)
-		return self.__register_user(user)
+		return self.__register_user(user, request)
 
 class LoginConfirmationView(APIView):
 

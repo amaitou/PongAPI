@@ -2,15 +2,7 @@
 from rest_framework import serializers
 from ..models import UserInfo
 from ..utils import Utils
-
-class AvatarSerializerMixin:
-	
-	def get_avatar(self, instance):
-		rep = super().to_representation(instance)		
-		request = self.context.get('request')
-		if instance.avatar and request:
-			rep['avatar'] = request.build_absolute_uri(instance.avatar.url)
-		return rep
+from django.core.files.base import ContentFile
 
 class RegistrationSerializer(serializers.ModelSerializer):
 	
@@ -38,13 +30,14 @@ class RegistrationSerializer(serializers.ModelSerializer):
 			user = UserInfo(**validated_data)
 			user.save()
 			return user
-		
-		if validated_data['gender'] == 'M':
-			validated_data['avatar'] = "avatars/man.png"
-		elif validated_data["gender"] == 'F':
-			validated_data['avatar'] = "avatars/woman.png"
-		else:
-			validated_data['avatar'] = "avatars/unknown.png"
+
+		if validated_data['avatar'] is None:
+			if validated_data['gender'] == 'M':
+				validated_data['avatar'] = "avatars/man.png"
+			elif validated_data["gender"] == 'F':
+				validated_data['avatar'] = "avatars/woman.png"
+			else:
+				validated_data['avatar'] = "avatars/unknown.png"
 
 		password = validated_data.pop('password')
 		email = validated_data.pop('email')
@@ -54,13 +47,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
 		user.save()
 
 		return user
-	
-	def to_representation(self, instance):
-		rep = super().to_representation(instance)		
-		request = self.context.get('request')
-		if instance.avatar and request:
-			rep['avatar'] = request.build_absolute_uri(instance.avatar.url)
-		return rep
 
 class UserSerializer(serializers.ModelSerializer):
 
