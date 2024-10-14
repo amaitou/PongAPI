@@ -1,26 +1,23 @@
 
-from rest_framework.views import APIView
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
-from django.contrib.auth import authenticate
-from django.conf import settings
-from django.urls import reverse
-from django.contrib.sites.shortcuts import get_current_site
 from ..serializers.user_serializer import RegistrationSerializer
+from django.contrib.sites.shortcuts import get_current_site
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+from rest_framework.response import Response
+from rest_framework.request import Request
+from rest_framework.views import APIView
+from rest_framework import serializers
+from django.utils import timezone
+from rest_framework import status
+from django.urls import reverse
+from django.conf import settings
 from ..models import UserInfo
 from ..utils import Utils
-from rest_framework import serializers
 import requests
-import base64
-from django.utils import timezone
-from datetime import timedelta
-from rest_framework_simplejwt.tokens import AccessToken
 import jwt
-from django.conf import settings
+
 
 class RegisterView(APIView):
 
@@ -41,20 +38,20 @@ class RegisterView(APIView):
 
 		serializer.save()
 
-		# token = Utils.create_one_time_jwt(serializer.instance)
+		token = Utils.create_one_time_jwt(serializer.instance)
 
-		# current_site = get_current_site(request).domain
-		# relative_link = reverse('email_verification')
-		# absurl = f'http://{current_site}{relative_link}?token={str(token)}'
-		# email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
-		# data = {
-		# 	'domain': absurl,
-		# 	'subject': 'Verify your email',
-		# 	'email': serializer.instance.email,
-		# 	'body': email_body
-		# }
+		current_site = get_current_site(request).domain
+		relative_link = reverse('email_verification')
+		absurl = f'http://{current_site}{relative_link}?token={str(token)}'
+		email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
+		data = {
+			'domain': absurl,
+			'subject': 'Verify your email',
+			'email': serializer.instance.email,
+			'body': email_body
+		}
 
-		# Utils.send_verification_email(data)
+		Utils.send_verification_email(data)
 
 		return Response ({
 			'success': 'User registered successfully, check your email for verification',
@@ -101,28 +98,13 @@ class Authentication42View(APIView):
 		last_name = user['last_name']
 		username = user['login']
 		email = user['email']
-		avatar = requests.get(user['image']['link']).content
-
-		path = f"{settings.MEDIA_ROOT}{username}.jpg"
-		full_path = request.build_absolute_uri(path.replace(settings.MEDIA_ROOT, ''))
-		print(full_path)
-
-		print(path)
-
-		with open(path, 'wb') as f:
-			f.write(avatar)
-
-		# return Response({
-		# 	'success': 'User retrieved successfully',
-		# 	'output': user,
-		# })
+		avatar = user['image']['link']
 
 		serializer = RegistrationSerializer(data={
 			'username': username,
 			'first_name': first_name,
 			'last_name': last_name,
 			'email': email,
-			"avatar": path,
 			"gender": "M",
 		})
 
@@ -217,11 +199,11 @@ class LoginConfirmationView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
-		# if not user.is_verified:
-		# 	return Response({
-		# 		'error': 'User is not verified, check your email',
-		# 	},
-		# 	status=status.HTTP_401_UNAUTHORIZED)
+		if not user.is_verified:
+			return Response({
+				'error': 'User is not verified, check your email',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
 		
 		if not user.two_fa:
 			response = Response({

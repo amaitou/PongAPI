@@ -31,14 +31,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
 			user.save()
 			return user
 
-		if validated_data['avatar'] is None:
-			if validated_data['gender'] == 'M':
-				validated_data['avatar'] = "avatars/man.png"
-			elif validated_data["gender"] == 'F':
-				validated_data['avatar'] = "avatars/woman.png"
-			else:
-				validated_data['avatar'] = "avatars/unknown.png"
-
 		password = validated_data.pop('password')
 		email = validated_data.pop('email')
 		user = UserInfo(**validated_data)
