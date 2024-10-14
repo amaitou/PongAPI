@@ -17,6 +17,7 @@ from ..models import UserInfo
 from ..utils import Utils
 import requests
 import jwt
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class RegisterView(APIView):
@@ -100,16 +101,20 @@ class Authentication42View(APIView):
 		email = user['email']
 		avatar = user['image']['link']
 
+		requested_avatar = requests.get(avatar)
+		avatar_name = avatar.split('/')[-1]
+		avatar = SimpleUploadedFile(avatar_name, requested_avatar.content, content_type='image/jpg')
+
 		serializer = RegistrationSerializer(data={
 			'username': username,
 			'first_name': first_name,
 			'last_name': last_name,
 			'email': email,
 			"gender": "M",
+			"avatar": avatar,
 		})
 
-		if serializer.is_valid(raise_exception=True):
-			print("serializer is valid")
+		if serializer.is_valid():
 			serializer.save()
 
 			response = Response({
@@ -250,6 +255,12 @@ class TwoFactorAuthenticationView(APIView):
 	permission_classes = [AllowAny]
 
 	def post(self, request: Request) -> Response:
+
+		if request.user.is_authenticated:
+			return Response({
+				'success': 'User already logged in',
+			},
+			status=status.HTTP_200_OK)
 
 		otp_code = request.data.get('otp_code')
 		verification_token = request.COOKIES.get('verification_token')

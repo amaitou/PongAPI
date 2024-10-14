@@ -30,6 +30,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
 			user = UserInfo(**validated_data)
 			user.save()
 			return user
+		
+		if 'avatar' in validated_data:
+			print("Yes")
+		else:
+			print("No")
 
 		password = validated_data.pop('password')
 		email = validated_data.pop('email')
@@ -52,7 +57,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = UserInfo
-		fields = ['first_name', 'last_name', 'email', 'gender', 'username', 'two_fa']
+		fields = ['first_name', 'last_name', 'email', 'gender', 'username', 'two_fa', 'avatar']
 
 	def validate_email(self, value):
 		user = self.context['request'].user

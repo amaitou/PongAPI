@@ -10,7 +10,7 @@ class UserInfo(AbstractUser):
         ('N', 'N'),
     ]
 
-    avatar = models.URLField(max_length = 200, null = True, blank = True)
+    avatar = models.ImageField(upload_to = 'avatars/', null = True, blank = True)
     gender = models.CharField(max_length=2, choices = user_GENDER, null = True, default = 'N')
     is_verified = models.BooleanField(default = False, null = False)
     two_fa = models.BooleanField(default = False, null = False)

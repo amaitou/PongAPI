@@ -2,6 +2,8 @@ from django.urls import path
 from .views.auth_view import *
 from .views.password_views import *
 from .views.profile_views import *
+from django.conf.urls.static import static
+from django.conf import settings
 
 
 
