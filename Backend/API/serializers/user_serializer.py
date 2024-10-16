@@ -23,24 +23,38 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 	def create(self, validated_data):
 
+		password_exists = 'password' in validated_data
+		email_exists = 'email' in validated_data
+
 		if 're_password' in validated_data:
 			validated_data.pop('re_password')
 
-		if 'password' not in validated_data:
+		if not password_exists:
 			user = UserInfo(**validated_data)
 			user.save()
 			return user
 		
-		if 'avatar' in validated_data:
-			print("Yes")
-		else:
-			print("No")
+		if not 'avatar' in validated_data:
+			if validated_data["gender"] == "M":
+				validated_data["avatar"] = "/media/avatars/man.png"
+			elif validated_data["gender"] == "f":
+				validated_data["avatar"] = "/media/avatar/woman.png"
+			else:
+				validated_data["avatar"] = "/media/avatars/unknown.png"
 
-		password = validated_data.pop('password')
-		email = validated_data.pop('email')
+		if password_exists:
+			password = validated_data.pop('password')
+		
+		if "email" in validated_data:
+			email = validated_data.pop('email')
+
 		user = UserInfo(**validated_data)
-		user.set_password(password)
-		user.email = email.strip().lower()
+
+		if password_exists:
+			user.set_password(password)
+		
+		if email_exists:
+			user.email = email.strip().lower()
 		user.save()
 
 		return user

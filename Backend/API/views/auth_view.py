@@ -160,9 +160,7 @@ class Authentication42View(APIView):
 			status=status.HTTP_200_OK)
 		
 		self.code = self.__get_code(request)
-		print("code: ", self.code)
 		self.__set_code_in_data(self.code)
-		print("data: ", self.data)
 
 		if not self.code:
 			return Response({
@@ -171,7 +169,6 @@ class Authentication42View(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		access_token = self.__get_token()
-		print("access_token: ", access_token)
 
 		if not access_token:
 			return Response({
