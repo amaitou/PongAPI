@@ -2,7 +2,9 @@
 from rest_framework import serializers
 from ..models import UserInfo
 from ..utils import Utils
-from django.core.files.base import ContentFile
+import glob
+from django.conf import settings
+import os
 
 class RegistrationSerializer(serializers.ModelSerializer):
 	
@@ -98,6 +100,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 		instance.email = validated_data.get('email', instance.email)
 		instance.username = validated_data.get('username', instance.username)
 		instance.two_fa = validated_data.get('two_fa', instance.two_fa)
+
 		instance.save()
 
 		return instance
