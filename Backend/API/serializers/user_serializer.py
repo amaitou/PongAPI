@@ -2,9 +2,6 @@
 from rest_framework import serializers
 from ..models import UserInfo
 from ..utils import Utils
-import glob
-from django.conf import settings
-import os
 
 class RegistrationSerializer(serializers.ModelSerializer):
 	
