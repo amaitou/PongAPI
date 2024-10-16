@@ -16,6 +16,7 @@ class UserInfo(AbstractUser):
     two_fa = models.BooleanField(default = False, null = False)
     otp_code = models.CharField(max_length = 6, null = True, blank = True)
     otp_time = models.DateTimeField(blank = True, null = True)
+    password = models.CharField(max_length = 128, null = True, blank = True)
 
     class Meta:
         
