@@ -1,6 +1,7 @@
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from ..serializers.user_serializer import RegistrationSerializer
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.sites.shortcuts import get_current_site
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -17,7 +18,6 @@ from ..models import UserInfo
 from ..utils import Utils
 import requests
 import jwt
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class RegisterView(APIView):
