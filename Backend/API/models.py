@@ -86,9 +86,10 @@ class GameResults(models.Model):
 class FriendRequests(models.Model):
 
     REQUEST_STATUS = {
-        ('Pending', 'Pending'),
-        ('Accepted', 'Accepted'),
-        ('Declined', 'Declined'),
+        ('P', 'P'),
+        ('A', 'A'),
+        ('D', 'D'),
+        ('U', 'U'),
     }
 
     sender_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_sender')
@@ -102,7 +103,7 @@ class FriendRequests(models.Model):
             db_table = 'FriendRequests'
             verbose_name = 'FriendRequests'
             verbose_name_plural = 'FriendRequests'
-            unique_together = ('sender_id', 'receiver_id')
+            # unique_together = ('sender_id', 'receiver_id')
 
             indexes = [
                 models.Index(fields = ['sender_id', 'receiver_id'])
@@ -125,7 +126,6 @@ class FriendshipLists(models.Model):
         verbose_name_plural = 'FriendshipList'
         unique_together = ('user_id', 'friend_id')
 
-        unique_together = ('user_id', 'friend_id')
         indexes = [
             models.Index(fields = ['user_id', 'friend_id'])
         ]

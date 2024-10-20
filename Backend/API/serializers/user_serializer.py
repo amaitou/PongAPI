@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from ..models import UserInfo
+from ..models import UserInfo, FriendRequests
 from ..utils import Utils
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -101,3 +101,67 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 		instance.save()
 
 		return instance
+	
+class FriendshipSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = FriendRequests
+		fields = ['sender_id', 'receiver_id', 'request_status']
+
+	def validate_request_status(self, value):
+		if not value in ['P', 'A', 'D', 'U']:
+			raise serializers.ValidationError({"request_status": "Invalid value"})
+		return value
+	
+	def validate(self, attrs):
+		
+		if attrs['sender_id'] == attrs['receiver_id']:
+			raise serializers.ValidationError({"error": "You cannot send a friend request to yourself"})
+		return attrs
+	
+	def create(self, validated_data):
+
+		request_status = validated_data['request_status']
+		sender = validated_data['sender_id']
+		receiver = validated_data['receiver_id']
+
+		if request_status == 'P':
+
+			if FriendRequests.objects.filter(sender_id=sender, receiver_id=receiver).exists() or \
+				FriendRequests.objects.filter(sender_id=receiver, receiver_id=sender).exists():
+				raise serializers.ValidationError({"error": "Friend request already exists"})
+
+			friend_request = FriendRequests(sender_id=sender, receiver_id=receiver, request_status="P")
+			friend_request.save()
+
+		elif request_status == 'A':
+
+			friend_request = FriendRequests.objects.filter(sender_id=receiver, receiver_id=sender, request_status="P").first()
+
+			if not friend_request:
+				raise serializers.ValidationError({"error": "Friend request does not exist"})
+
+			friend_request.request_status = "A"
+			friend_request.save()
+		
+		elif request_status == 'D':
+
+			friend_request = FriendRequests.objects.filter(sender_id=receiver, receiver_id=sender, request_status="P").first()
+
+			if not friend_request:
+				raise serializers.ValidationError({"error": "Friend request does not exist"})
+
+			friend_request.request_status = "D"
+			friend_request.save()
+		
+		elif request_status == 'U':
+
+			friend_request = FriendRequests.objects.filter(sender_id=receiver, receiver_id=sender, request_status="A").first()
+
+			if not friend_request:
+				raise serializers.ValidationError({"error": "Friend request does not exist"})
+
+			friend_request.delete()
+		
+		return validated_data
+

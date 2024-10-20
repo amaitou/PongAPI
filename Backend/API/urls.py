@@ -22,4 +22,5 @@ urlpatterns = [
     path("password_r/", PasswordResetView.as_view(), name="password_reset"),
     path("password_v/", PasswordVerify.as_view(), name="password_verification"),
     path("password_c/", PasswordConfirmationView.as_view(), name="password_confirmation"),
+    path("friendship/", FriendshipView.as_view(), name="friendship"),
 ]
