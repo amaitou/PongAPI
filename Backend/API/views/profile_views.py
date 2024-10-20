@@ -122,8 +122,8 @@ class FriendshipView(APIView):
 			status=status.HTTP_404_NOT_FOUND)
 		
 		serializer = FriendshipSerializer(data={
-			'sender_id': sender.pk,
-			'receiver_id': receiver.pk,
+			'sender': sender.pk,
+			'receiver': receiver.pk,
 			'request_status': request_status
 		})
 

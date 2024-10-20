@@ -92,8 +92,8 @@ class FriendRequests(models.Model):
         ('U', 'U'),
     }
 
-    sender_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_sender')
-    receiver_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_receiver')
+    sender = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_sender')
+    receiver = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_receiver')
     request_status = models.CharField(max_length = 20, choices = REQUEST_STATUS, default = 'Pending', null = False)
     friend_request_id = models.AutoField(primary_key = True)
     request_date = models.DateTimeField(auto_now_add = True)
@@ -103,19 +103,18 @@ class FriendRequests(models.Model):
             db_table = 'FriendRequests'
             verbose_name = 'FriendRequests'
             verbose_name_plural = 'FriendRequests'
-            # unique_together = ('sender_id', 'receiver_id')
 
             indexes = [
-                models.Index(fields = ['sender_id', 'receiver_id'])
+                models.Index(fields = ['sender', 'receiver'])
             ]
     
     def __str__(self) -> str:
-        return f"{self.sender_id.username}, {self.receiver_id.username}"
+        return f"{self.sender.username}, {self.receiver.username}"
 
 class FriendshipLists(models.Model):
 
-    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user')
-    friend_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friend')
+    user = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user')
+    friend = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friend')
     friendship_date = models.DateTimeField(auto_now_add = True)
     friendship_id = models.AutoField(primary_key = True)
 
@@ -124,14 +123,14 @@ class FriendshipLists(models.Model):
         db_table = 'FriendshipList'
         verbose_name = 'FriendshipList'
         verbose_name_plural = 'FriendshipList'
-        unique_together = ('user_id', 'friend_id')
+        unique_together = ('user', 'friend')
 
         indexes = [
-            models.Index(fields = ['user_id', 'friend_id'])
+            models.Index(fields = ['user', 'friend'])
         ]
     
     def __str__(self):
-        return f"{self.user_id.username}, {self.friend_id.username}"
+        return f"{self.user.username}, {self.friend.username}"
 
 class BlockLists(models.Model):
 
