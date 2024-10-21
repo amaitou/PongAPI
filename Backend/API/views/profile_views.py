@@ -4,11 +4,13 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from ..models import UserInfo
-from ..serializers.user_serializer import UserSerializer, ProfileUpdateSerializer, FriendshipSerializer
+from ..models import *
+from ..serializers.user_serializer import *
 from ..utils import Utils
 from django.conf import settings
 from rest_framework import serializers
+from django.db.models import Q
+
 
 class AllUsersView(APIView):
 
@@ -87,7 +89,7 @@ class ProfileUpdateView(APIView):
 		},
 		status=status.HTTP_200_OK)
 	
-class FriendshipView(APIView):
+class FriendOperationsView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -96,8 +98,6 @@ class FriendshipView(APIView):
 		sender = request.data.get('sender')
 		receiver = request.data.get('receiver')
 		request_status = request.data.get('request_status')
-
-		print(sender, receiver, request_status)
 
 		if not sender or not receiver or not request_status:
 			return Response({
@@ -121,7 +121,7 @@ class FriendshipView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
-		serializer = FriendshipSerializer(data={
+		serializer = FriendOperationsSerializer(data={
 			'sender': sender.pk,
 			'receiver': receiver.pk,
 			'request_status': request_status
@@ -139,5 +139,53 @@ class FriendshipView(APIView):
 
 		return Response({
 			'success': 'Friendship was handled successfully',
+		},
+		status=status.HTTP_200_OK)
+
+class FriendListView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def get(self, request: Request) -> Response:
+
+		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
+		user = Utils.get_user_from_jwt(access_token, 'access')
+
+		print(user.username)
+
+		if not user:
+			return Response({
+				'error': 'Couldn\'t find the user',
+			},
+			status=status.HTTP_404_NOT_FOUND)
+
+		friendships = FriendshipLists.objects.filter(Q(user=user))
+
+		return Response({
+			'success': 'Friendships were retrieved successfully',
+			'output': FriendListSerializer(friendships, many=True).data
+		},
+		status=status.HTTP_200_OK)
+
+class FriendRequestView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def get(self, request: Request) -> Response:
+
+		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
+		user = Utils.get_user_from_jwt(access_token, 'access')
+
+		if not user:
+			return Response({
+				'error': 'Couldn\'t find the user',
+			},
+			status=status.HTTP_404_NOT_FOUND)
+
+		friend_requests = FriendRequests.objects.filter(receiver=user)
+
+		return Response({
+			'success': 'Friend requests were retrieved successfully',
+			'output': FriendRequestSerializer(friend_requests, many=True).data
 		},
 		status=status.HTTP_200_OK)

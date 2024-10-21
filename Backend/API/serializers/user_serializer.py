@@ -102,7 +102,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
 		return instance
 	
-class FriendshipSerializer(serializers.ModelSerializer):
+class FriendOperationsSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = FriendRequests
@@ -140,9 +140,17 @@ class FriendshipSerializer(serializers.ModelSerializer):
 
 			if not friend_request:
 				raise serializers.ValidationError({"error": "No friend request found to be accepted"})
+			friend_request.delete()
 
-			friend_request.request_status = "A"
-			friend_request.save()
+			if FriendshipLists.objects.filter(user=sender, friend=receiver).exists() or \
+				FriendshipLists.objects.filter(user=receiver, friend=sender).exists():
+				raise serializers.ValidationError({"error": "Friendship already exists"})
+		
+			first_friendship = FriendshipLists(user=sender, friend=receiver)
+			second_friendship = FriendshipLists(user=receiver, friend=sender)
+			first_friendship.save()
+			second_friendship.save()
+
 		
 		elif request_status == 'D':
 
@@ -155,12 +163,30 @@ class FriendshipSerializer(serializers.ModelSerializer):
 		
 		elif request_status == 'U':
 
-			friend_request = FriendRequests.objects.filter(sender=receiver, receiver=sender, request_status="A").first()
+			left_friendship = FriendshipLists.objects.filter(user=sender, friend=receiver)
 
-			if not friend_request:
+			if not left_friendship:
 				raise serializers.ValidationError({"error": "No friendship found to be unfriended"})
 
-			friend_request.delete()
+			left_friendship.delete()
+			right_friendship = FriendshipLists.objects.filter(user=receiver, friend=sender)
+
+			right_friendship.delete()
 		
 		return validated_data
 
+class FriendListSerializer(serializers.ModelSerializer):
+
+	friend = UserSerializer(required=True)
+
+	class Meta:
+		model = FriendshipLists
+		fields = ['friendship_date', 'friend']
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+
+	sender = UserSerializer(required=True)
+
+	class Meta:
+		model = FriendRequests
+		fields = ['request_date', 'sender']

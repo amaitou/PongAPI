@@ -118,3 +118,10 @@ class Utils:
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
         return token
+    
+    @staticmethod
+    def get_current_time():
+        """
+        This method returns the current time.
+        """
+        return timezone.now()
