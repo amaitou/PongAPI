@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
-class RecordGameResultsView(APIView):
+class GameResultRecording(APIView):
 
     permission_classes = [IsAuthenticated]
 

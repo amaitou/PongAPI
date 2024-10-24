@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from ..models import *
 from ..serializers.user_serializer import *
 from ..utils import Utils
@@ -12,7 +12,7 @@ from rest_framework import serializers
 from django.db.models import Q
 
 
-class AllUsersView(APIView):
+class GetAllUsersView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -21,11 +21,11 @@ class AllUsersView(APIView):
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
 			'success': 'Users was retrieved successfully',
-			'output': UserSerializer(users, many=True, context = {'request': request}).data
+			'output': GetProfileView(users, many=True, context = {'request': request}).data
 		},
 		status=status.HTTP_200_OK)
 
-class ProfileView(APIView):
+class GetProfileView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -43,13 +43,13 @@ class ProfileView(APIView):
 			if user.username == username:
 				return Response({
 					'success': 'User was retrieved successfully',
-					'output': UserSerializer(user,  context = {'request': request}).data
+					'output': GetProfileView(user,  context = {'request': request}).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
 				return Response({
 					'success': 'User retrieved successfully',
-					'output': UserSerializer(user,  context = {'request': request}).data
+					'output': GetProfileView(user,  context = {'request': request}).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
@@ -59,18 +59,18 @@ class ProfileView(APIView):
 		else:
 			return Response({
 				'success': 'User retrieved successfully',
-				'output': UserSerializer(user,  context = {'request': request}).data
+				'output': GetProfileView(user,  context = {'request': request}).data
 			},
 			status=status.HTTP_200_OK)
 
 
-class ProfileUpdateView(APIView):
+class ProfileUpdatingView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
 	def put(self, request: Request) -> Response:
 
-		serializer = ProfileUpdateSerializer(instance=request.user,
+		serializer = ProfileUpdatingSerializer(instance=request.user,
 					data=request.data,
 					context={'request': request},
 					partial=True)
@@ -154,7 +154,7 @@ class FriendOperationsView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-class FriendListView(APIView):
+class FriendshipListView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -175,11 +175,11 @@ class FriendListView(APIView):
 
 		return Response({
 			'success': 'Friendships were retrieved successfully',
-			'output': FriendListSerializer(friendships, many=True).data
+			'output': GetFriendshipListSerializer(friendships, many=True).data
 		},
 		status=status.HTTP_200_OK)
 
-class FriendRequestView(APIView):
+class FriendRequestsView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
@@ -198,6 +198,6 @@ class FriendRequestView(APIView):
 
 		return Response({
 			'success': 'Friend requests were retrieved successfully',
-			'output': FriendRequestSerializer(friend_requests, many=True).data
+			'output': GetFriendRequestsListView(friend_requests, many=True).data
 		},
 		status=status.HTTP_200_OK)

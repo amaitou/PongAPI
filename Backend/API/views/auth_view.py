@@ -20,7 +20,7 @@ import requests
 import jwt
 
 
-class RegisterView(APIView):
+class RegistrationView(APIView):
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
@@ -361,7 +361,7 @@ class LogoutView(APIView):
 
 		return response
 
-class EmailVerifyView(APIView):
+class EmailVerificationView(APIView):
 
 	permission_classes = [AllowAny]
 	authentication_classes = []

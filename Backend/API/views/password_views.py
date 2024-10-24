@@ -1,7 +1,7 @@
-from ..serializers.password_serializer import PasswordUpdateSerializer, ResetPasswordSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+from ..serializers.password_serializer import *
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
@@ -11,13 +11,13 @@ from ..models import UserInfo
 from ..utils import Utils
 
 
-class PasswordUpdateView(APIView):
+class PasswordUpdatingView(APIView):
 
 	permission_classes = [IsAuthenticated]
 
 	def put(self, request: Request) -> Response:
 
-		serializer = PasswordUpdateSerializer(instance=request.user,
+		serializer = PasswordUpdatingView(instance=request.user,
 					data=request.data,
 					context={'request': request})
 
@@ -36,7 +36,7 @@ class PasswordUpdateView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-class PasswordResetView(APIView):
+class PasswordResettingView(APIView):
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
@@ -77,7 +77,7 @@ class PasswordResetView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-class PasswordVerify(APIView):
+class PasswordVerificationView(APIView):
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
@@ -145,7 +145,7 @@ class PasswordConfirmationView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		serializer = ResetPasswordSerializer(instance=user, data=request.data)
+		serializer = PasswordResettingView(instance=user, data=request.data)
 		try:
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:

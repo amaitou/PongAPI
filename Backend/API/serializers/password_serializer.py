@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from ..models import UserInfo
 
-class PasswordUpdateSerializer(serializers.ModelSerializer):
+class PasswordUpdatingSerializer(serializers.ModelSerializer):
 	
 	old_password = serializers.CharField(write_only=True, required=True)
 	new_password = serializers.CharField(write_only=True, required=True)
@@ -29,7 +29,7 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
 		instance.save()
 		return instance
 
-class ResetPasswordSerializer(serializers.ModelSerializer):
+class PasswordResettingSerializer(serializers.ModelSerializer):
 	
 	new_password = serializers.CharField(write_only=True, required=True)
 	re_new_password = serializers.CharField(write_only=True, required=True)
