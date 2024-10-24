@@ -113,6 +113,18 @@ class FriendOperationsView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
+		if sender != Utils.get_user_from_jwt(str(request.COOKIES.get(settings.ACCESS_TOKEN)), 'access'):
+			return Response({
+				'error': 'You are not authorized to perform this action',
+			},
+			status=status.HTTP_403_FORBIDDEN)
+		
+		if sender == receiver:
+			return Response({
+				'error': 'You cannot send a friend request to yourself',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
 		try:
 			receiver = UserInfo.objects.get(username=receiver)
 		except UserInfo.DoesNotExist:
