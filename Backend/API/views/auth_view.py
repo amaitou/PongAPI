@@ -117,6 +117,10 @@ class Authentication42View(APIView):
 		if serializer.is_valid():
 			serializer.save()
 
+			# set verified and save
+			serializer.instance.is_verified = True
+			serializer.instance.save()
+
 			response = Response({
 				'success': 'User registered successfully',
 				'output': serializer.data,

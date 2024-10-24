@@ -64,10 +64,10 @@ class UserGameStats(models.Model):
 
 class GameResults(models.Model):
 
-    user_1_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'winner')
-    user_2_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'loser')
-    user_1_score = models.IntegerField(default = 0, null = False)
-    user_2_score = models.IntegerField(default = 0, null = False)
+    winner = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'winner')
+    loser = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'loser')
+    winner_score = models.IntegerField(default = 0, null = False)
+    loser_score = models.IntegerField(default = 0, null = False)
     game_date = models.DateTimeField(auto_now_add = True)
     game_id = models.AutoField(primary_key = True)
 
@@ -77,7 +77,7 @@ class GameResults(models.Model):
         verbose_name = 'GameResults'
         verbose_name_plural = 'GameResults'
         indexes = [
-            models.Index(fields = ['user_1_id', 'user_2_id'])
+            models.Index(fields = ['winner', 'loser'])
         ]
     
     def __str__(self) -> str:
