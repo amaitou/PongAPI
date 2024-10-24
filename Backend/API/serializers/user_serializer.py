@@ -190,3 +190,11 @@ class FriendRequestSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = FriendRequests
 		fields = ['request_date', 'sender']
+
+class FriendReuestListSerializer(serializers.ModelSerializer):
+
+	receiver = UserSerializer(required=True)
+
+	class Meta:
+		model = FriendRequests
+		fields = ['request_date', 'receiver']
