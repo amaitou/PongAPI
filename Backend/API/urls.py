@@ -25,4 +25,5 @@ urlpatterns = [
     path("friend_o/", FriendOperationsView.as_view(), name="friendship"),
     path("friend_l/", FriendListView.as_view(), name="friendship_list"),
     path("friend_r/", FriendRequestView.as_view(), name="friendship_request"),
+    path("f_requests/", FriendRequestListView.as_view(), name="friendship_requests"),
 ]
