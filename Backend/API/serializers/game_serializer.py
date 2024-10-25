@@ -6,7 +6,7 @@ class GameStatsSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = UserGameStats
-		fields = "__all__"
+		exclude = ['user_id', 'id']
 
 class GameResultRecordingSerializer(serializers.ModelSerializer):
 	
