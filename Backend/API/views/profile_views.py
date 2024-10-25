@@ -113,12 +113,6 @@ class FriendOperationsView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
-		if sender != request.user.username:
-			return Response({
-				'error': 'You are not authorized to perform this action',
-			},
-			status=status.HTTP_403_FORBIDDEN)
-		
 		if sender == receiver:
 			return Response({
 				'error': 'You cannot send a friend request to yourself',
@@ -129,7 +123,7 @@ class FriendOperationsView(APIView):
 			receiver = UserInfo.objects.get(username=receiver)
 		except UserInfo.DoesNotExist:
 			return Response({
-				'error': 'Receiver not found',
+				'message': 'Receiver not found',
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		

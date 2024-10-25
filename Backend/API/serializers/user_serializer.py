@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .game_serializer import GameStatsSerializer
 from ..models import *
 from ..utils import Utils
+from django.db.models import Q
 
 class RegistrationSerializer(serializers.ModelSerializer):
 	
@@ -133,6 +134,12 @@ class FriendOperationsSerializer(serializers.ModelSerializer):
 			if FriendRequests.objects.filter(sender=sender, receiver=receiver).exists() or \
 				FriendRequests.objects.filter(sender=receiver, receiver=sender).exists():
 				raise serializers.ValidationError({"error": "Friend request already exists"})
+			
+			try:
+				__request = FriendshipLists.objects.get(Q(user=sender) & Q(friend=receiver))
+				raise serializers.ValidationError({"error": "Already friends"})
+			except FriendshipLists.DoesNotExist:
+				pass
 
 			friend_request = FriendRequests(sender=sender, receiver=receiver, request_status="P")
 			friend_request.save()
