@@ -31,7 +31,7 @@ class GetProfileView(APIView):
 
 	def get(self, request: Request, username = None) -> Response:
 
-		user = Utils.get_user_from_jwt(str(request.COOKIES.get(settings.ACCESS_TOKEN)), 'access')
+		user = request.user
 
 		if not user:
 			return Response({
@@ -113,7 +113,7 @@ class FriendOperationsView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 		
-		if sender != Utils.get_user_from_jwt(str(request.COOKIES.get(settings.ACCESS_TOKEN)), 'access'):
+		if sender != request.user.username:
 			return Response({
 				'error': 'You are not authorized to perform this action',
 			},
@@ -160,8 +160,7 @@ class FriendshipListView(APIView):
 
 	def get(self, request: Request) -> Response:
 
-		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
-		user = Utils.get_user_from_jwt(access_token, 'access')
+		user = request.user
 
 		print(user.username)
 
@@ -185,8 +184,7 @@ class FriendRequestsView(APIView):
 
 	def get(self, request: Request) -> Response:
 
-		access_token = request.COOKIES.get(settings.ACCESS_TOKEN)
-		user = Utils.get_user_from_jwt(access_token, 'access')
+		user = request.user
 
 		if not user:
 			return Response({
