@@ -1,6 +1,7 @@
 
 from rest_framework import serializers
-from ..models import UserInfo, FriendRequests, FriendshipLists
+from .game_serializer import GameStatsSerializer
+from ..models import *
 from ..utils import Utils
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -60,9 +61,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 class GetUserSerializer(serializers.ModelSerializer):
 
+	user_game_stats = GameStatsSerializer(many=True)
+
 	class Meta:
 		model = UserInfo
-		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'avatar', 'gender']
+		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'avatar', 'gender', 'user_game_stats']
 
 class ProfileUpdatingSerializer(serializers.ModelSerializer):
 	

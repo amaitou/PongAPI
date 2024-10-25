@@ -18,6 +18,7 @@ from ..models import UserInfo
 from ..utils import Utils
 import requests
 import jwt
+from ..models import UserGameStats
 
 
 class RegistrationView(APIView):
@@ -39,20 +40,23 @@ class RegistrationView(APIView):
 
 		serializer.save()
 
+		ugs = UserGameStats.objects.create(user_id = serializer.instance)
+		ugs.save()
+
 		token = Utils.create_one_time_jwt(serializer.instance)
 
-		current_site = get_current_site(request).domain
-		relative_link = reverse('email_verification')
-		absurl = f'http://{current_site}{relative_link}?token={str(token)}'
-		email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
-		data = {
-			'domain': absurl,
-			'subject': 'Verify your email',
-			'email': serializer.instance.email,
-			'body': email_body
-		}
+		# current_site = get_current_site(request).domain
+		# relative_link = reverse('email_verification')
+		# absurl = f'http://{current_site}{relative_link}?token={str(token)}'
+		# email_body = f'Hi {serializer.instance.username},\n\nPlease use the link below to verify your email address:\n{absurl}'
+		# data = {
+		# 	'domain': absurl,
+		# 	'subject': 'Verify your email',
+		# 	'email': serializer.instance.email,
+		# 	'body': email_body
+		# }
 
-		Utils.send_verification_email(data)
+		# Utils.send_verification_email(data)
 
 		return Response ({
 			'success': 'User registered successfully, check your email for verification',
@@ -117,9 +121,11 @@ class Authentication42View(APIView):
 		if serializer.is_valid():
 			serializer.save()
 
-			# set verified and save
 			serializer.instance.is_verified = True
 			serializer.instance.save()
+
+			ugs = UserGameStats.objects.create(user_id = serializer.instance)
+			ugs.save()
 
 			response = Response({
 				'success': 'User registered successfully',
@@ -205,11 +211,11 @@ class LoginConfirmationView(APIView):
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
-		if not user.is_verified:
-			return Response({
-				'error': 'User is not verified, check your email',
-			},
-			status=status.HTTP_401_UNAUTHORIZED)
+		# if not user.is_verified:
+		# 	return Response({
+		# 		'error': 'User is not verified, check your email',
+		# 	},
+		# 	status=status.HTTP_401_UNAUTHORIZED)
 		
 		if not user.two_fa:
 			response = Response({
@@ -227,8 +233,6 @@ class LoginConfirmationView(APIView):
 		user.otp_code = Utils.generate_otp_code()
 		user.otp_time = Utils.generate_otp_expiration()
 
-		user.save()
-
 		absurl = f''
 		email_body = f'Hi {user.username},\n\nPlease use the code below to verify your login:\n{user.otp_code}'	
 		data = {
@@ -239,6 +243,8 @@ class LoginConfirmationView(APIView):
 		}
 
 		Utils.send_verification_email(data)
+
+		user.save()
 
 		token = Utils.create_one_time_jwt(user)
 

@@ -2,6 +2,7 @@ from django.urls import path
 from .views.auth_view import *
 from .views.password_views import *
 from .views.profile_views import *
+from .views.game_views import *
 
 urlpatterns = [
     path('register/', RegistrationView.as_view(), name='registration'),
@@ -21,4 +22,5 @@ urlpatterns = [
     path("friend_o/", FriendOperationsView.as_view(), name="friendship"),
     path("friend_r/", FriendRequestsView.as_view(), name="friendship_request"),
     path("friendships/", FriendshipListView.as_view(), name="friendship_list"),
+    path("game_r/", GameResultRecordingView.as_view(), name="game_result"),
 ]

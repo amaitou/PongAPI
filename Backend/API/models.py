@@ -42,7 +42,7 @@ class UserGameStats(models.Model):
         ('Ultimate', 'Ultimate'),
     ]
 
-    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_gme_stats')
+    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_game_stats')
     level = models.IntegerField(default = 0, null = False)
     rank = models.CharField(max_length = 20, choices = RANK_CHOICES, default = 'Beginner', null = False)
     won_games = models.IntegerField(default = 0, null = False)
@@ -64,11 +64,12 @@ class UserGameStats(models.Model):
 
 class GameResults(models.Model):
 
-    winner = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'winner')
-    loser = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'loser')
-    winner_score = models.IntegerField(default = 0, null = False)
-    loser_score = models.IntegerField(default = 0, null = False)
+    player_1 = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'winner')
+    player_2 = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'loser')
+    score_1 = models.IntegerField(default = 0, null = False)
+    score_2 = models.IntegerField(default = 0, null = False)
     game_date = models.DateTimeField(auto_now_add = True)
+    is_draw = models.BooleanField(default = False, null = False)
     game_id = models.AutoField(primary_key = True)
 
     class Meta:
@@ -77,11 +78,11 @@ class GameResults(models.Model):
         verbose_name = 'GameResults'
         verbose_name_plural = 'GameResults'
         indexes = [
-            models.Index(fields = ['winner', 'loser'])
+            models.Index(fields = ['player_1', 'player_2'])
         ]
     
     def __str__(self) -> str:
-        return f"{self.user_1_id.username}, {self.user_2_id.username}"
+        return f"{self.player_1.username}, {self.player_2.username}"
 
 class FriendRequests(models.Model):
 
