@@ -21,7 +21,7 @@ class GetAllUsersView(APIView):
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
 			'success': 'Users was retrieved successfully',
-			'output': GetFullUserSerializer(users, many=True, context = {'request': request}).data
+			'output': GetUserFullData(users, many=True, context = {'request': request}).data
 		},
 		status=status.HTTP_200_OK)
 
@@ -43,13 +43,13 @@ class GetProfileView(APIView):
 			if user.username == username:
 				return Response({
 					'success': 'User was retrieved successfully',
-					'output': GetFullUserSerializer(user,  context = {'request': request}).data
+					'output': GetUserFullData(user,  context = {'request': request}).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
 				return Response({
 					'success': 'User retrieved successfully',
-					'output': GetFullUserSerializer(user,  context = {'request': request}).data
+					'output': GetUserFullData(user,  context = {'request': request}).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
@@ -59,7 +59,7 @@ class GetProfileView(APIView):
 		else:
 			return Response({
 				'success': 'User retrieved successfully',
-				'output': GetFullUserSerializer(user,  context = {'request': request}).data
+				'output': GetUserFullData(user,  context = {'request': request}).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -164,7 +164,10 @@ class FriendshipListView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		friendships = FriendshipLists.objects.filter(Q(user=user))
+		friendships = FriendshipLists.objects.filter(friend=user)
+
+		for i in friendships:
+			print(i.friend.username)
 
 		return Response({
 			'success': 'Friendships were retrieved successfully',

@@ -1,9 +1,9 @@
 
 from rest_framework import serializers
-from .game_serializer import GameStatsSerializer
 from ..models import *
 from ..utils import Utils
 from django.db.models import Q
+from ..serializers.game_serializer import GameStatsSerializer
 
 class RegistrationSerializer(serializers.ModelSerializer):
 	
@@ -177,8 +177,8 @@ class FriendOperationsSerializer(serializers.ModelSerializer):
 		
 		return validated_data
 
-class GetFullUserSerializer(serializers.ModelSerializer):
-
+class GetBasicUserInfoSerializer(serializers.ModelSerializer):
+	
 	class Meta:
 		model = UserInfo
 		fields = ['id', 'username', 'first_name', 'last_name',
@@ -186,12 +186,26 @@ class GetFullUserSerializer(serializers.ModelSerializer):
 
 class GetFriendshipListSerializer(serializers.ModelSerializer):
 
+	user = GetBasicUserInfoSerializer()
+
 	class Meta:
 		model = FriendshipLists
-		fields = ["__all__"]
+		fields = ['user', 'friendship_date']
 
 class GetFriendRequestsSerializer(serializers.ModelSerializer):
 
+	sender = GetBasicUserInfoSerializer()
+
 	class Meta:
 		model = FriendRequests
-		fields = ["__all__"]
+		fields = ["sender", "request_date"]
+
+class GetUserFullData(serializers.ModelSerializer):
+
+	game_stats = GameStatsSerializer(many=True)
+	friend_requests = GetFriendRequestsSerializer(many=True)
+	friendships = GetFriendshipListSerializer(many=True)
+
+	class Meta:
+		model = UserInfo
+		fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'is_verified', 'two_fa', 'email', 'date_joined','game_stats', 'friend_requests', 'friendships']

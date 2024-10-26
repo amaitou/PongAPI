@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from time import timezone
 
 class UserInfo(AbstractUser):
 
@@ -93,8 +92,8 @@ class FriendRequests(models.Model):
         ('U', 'U'),
     }
 
-    sender = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_sender')
-    receiver = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'request_receiver')
+    sender = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'sender')
+    receiver = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friend_requests')
     request_status = models.CharField(max_length = 20, choices = REQUEST_STATUS, default = 'Pending', null = False)
     friend_request_id = models.AutoField(primary_key = True)
     request_date = models.DateTimeField(auto_now_add = True)
@@ -115,7 +114,7 @@ class FriendRequests(models.Model):
 class FriendshipLists(models.Model):
 
     user = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user')
-    friend = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friend')
+    friend = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friendships')
     friendship_date = models.DateTimeField(auto_now_add = True)
     friendship_id = models.AutoField(primary_key = True)
 
