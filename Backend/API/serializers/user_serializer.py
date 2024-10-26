@@ -60,14 +60,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 		return user
 
-class GetUserSerializer(serializers.ModelSerializer):
-
-	user_game_stats = GameStatsSerializer(many=True)
-
-	class Meta:
-		model = UserInfo
-		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'avatar', 'gender', 'user_game_stats']
-
 class ProfileUpdatingSerializer(serializers.ModelSerializer):
 	
 	email = serializers.EmailField(required=True)
@@ -185,26 +177,21 @@ class FriendOperationsSerializer(serializers.ModelSerializer):
 		
 		return validated_data
 
-class GetFriendshipListSerializer(serializers.ModelSerializer):
+class GetFullUserSerializer(serializers.ModelSerializer):
 
-	friend = GetUserSerializer(required=True)
+	class Meta:
+		model = UserInfo
+		fields = ['id', 'username', 'first_name', 'last_name',
+			'email', 'date_joined', 'avatar', 'gender']
+
+class GetFriendshipListSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = FriendshipLists
-		fields = ['friendship_date', 'friend']
+		fields = ["__all__"]
 
-class FriendRequestsSerializer(serializers.ModelSerializer):
-
-	sender = GetUserSerializer(required=True)
+class GetFriendRequestsSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = FriendRequests
-		fields = ['request_date', 'sender']
-
-class GetFriendRequestsListView(serializers.ModelSerializer):
-
-	receiver = GetUserSerializer(required=True)
-
-	class Meta:
-		model = FriendRequests
-		fields = ['request_date', 'receiver']
+		fields = ["__all__"]

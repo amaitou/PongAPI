@@ -42,7 +42,7 @@ class UserGameStats(models.Model):
         ('Ultimate', 'Ultimate'),
     ]
 
-    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user_game_stats')
+    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'game_stats')
     level = models.IntegerField(default = 0, null = False)
     rank = models.CharField(max_length = 20, choices = RANK_CHOICES, default = 'Beginner', null = False)
     won_games = models.IntegerField(default = 0, null = False)

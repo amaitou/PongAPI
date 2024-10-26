@@ -21,7 +21,7 @@ class GetAllUsersView(APIView):
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
 			'success': 'Users was retrieved successfully',
-			'output': GetUserSerializer(users, many=True, context = {'request': request}).data
+			'output': GetFullUserSerializer(users, many=True, context = {'request': request}).data
 		},
 		status=status.HTTP_200_OK)
 
@@ -43,13 +43,13 @@ class GetProfileView(APIView):
 			if user.username == username:
 				return Response({
 					'success': 'User was retrieved successfully',
-					'output': GetUserSerializer(user,  context = {'request': request}).data
+					'output': GetFullUserSerializer(user,  context = {'request': request}).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
 				return Response({
 					'success': 'User retrieved successfully',
-					'output': GetUserSerializer(user,  context = {'request': request}).data
+					'output': GetFullUserSerializer(user,  context = {'request': request}).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
@@ -59,7 +59,7 @@ class GetProfileView(APIView):
 		else:
 			return Response({
 				'success': 'User retrieved successfully',
-				'output': GetUserSerializer(user,  context = {'request': request}).data
+				'output': GetFullUserSerializer(user,  context = {'request': request}).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -190,6 +190,6 @@ class FriendRequestsView(APIView):
 
 		return Response({
 			'success': 'Friend requests were retrieved successfully',
-			'output': GetFriendRequestsListView(friend_requests, many=True).data
+			'output': GetFriendRequestsSerializer(friend_requests, many=True).data
 		},
 		status=status.HTTP_200_OK)
