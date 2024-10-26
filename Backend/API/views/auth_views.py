@@ -168,6 +168,7 @@ class Authentication42View(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
+				'output': GetUserFullData(request.user).data
 			},
 			status=status.HTTP_200_OK)
 		
