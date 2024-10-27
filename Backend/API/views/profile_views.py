@@ -19,9 +19,11 @@ class GetAllUsersView(APIView):
 	def get(self, request: Request) -> Response:
 
 		users = UserInfo.objects.exclude(is_superuser=True)
+		total_users = users.count()
 		return Response({
 			'success': 'Users was retrieved successfully',
-			'output': GetUsersListSerializer(users, many=True, context = {'request': request}).data
+			'total_users': total_users,
+			'users': GetUsersListSerializer(users, many=True, context = {'request': request}).data
 		},
 		status=status.HTTP_200_OK)
 
@@ -165,12 +167,14 @@ class FriendshipListView(APIView):
 			status=status.HTTP_404_NOT_FOUND)
 
 		friendships = FriendshipLists.objects.filter(user=user)
+		total_friendships = friendships.count()
 
 		for i in friendships:
 			print(i.friend.username)
 
 		return Response({
 			'success': 'Friendships were retrieved successfully',
+			'total_friendships': total_friendships,
 			'output': GetFriendshipListSerializer(friendships, many=True).data
 		},
 		status=status.HTTP_200_OK)
@@ -190,9 +194,11 @@ class FriendRequestsView(APIView):
 			status=status.HTTP_404_NOT_FOUND)
 
 		friend_requests = FriendRequests.objects.filter(receiver=user)
+		total_requests = friend_requests.count()
 
 		return Response({
 			'success': 'Friend requests were retrieved successfully',
-			'output': GetFriendRequestsSerializer(friend_requests, many=True).data
+			'total_requests': total_requests,
+			'friend_requests': GetFriendRequestsSerializer(friend_requests, many=True).data
 		},
 		status=status.HTTP_200_OK)

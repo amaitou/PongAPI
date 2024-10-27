@@ -128,9 +128,6 @@ class FriendRequests(models.Model):
     
     def __str__(self) -> str:
         return f"{self.sender.username}, {self.receiver.username}"
-    
-    def get_the_number_of_pending_requests(self, user_id: int) -> int:
-        return FriendRequests.objects.filter(receiver = user_id, request_status = 'Pending').count()
 
 class FriendshipLists(models.Model):
 
@@ -152,9 +149,6 @@ class FriendshipLists(models.Model):
     
     def __str__(self):
         return f"{self.user.username}, {self.friend.username}"
-    
-    def get_number_of_friends(self, user_id: int) -> int:
-        return FriendshipLists.objects.filter(user = user_id).count()
 
 class BlockLists(models.Model):
 
