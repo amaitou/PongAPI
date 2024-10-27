@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from ..serializers.game_serializer import GameResultRecordingSerializer, GameHistorySerializer
+from ..serializers.game_serializer import GameResultRecordingSerializer, UserGameHistorySerializer
 from rest_framework import status
 from ..models import UserInfo, UserGameStats, GameResults
 from rest_framework.serializers import ValidationError
@@ -70,7 +70,7 @@ class GameStatsView(APIView):
         status = status.HTTP_200_OK)
     
 
-class GameHistoryView(APIView):
+class UserGameHistoryView(APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -87,7 +87,30 @@ class GameHistoryView(APIView):
                 'message': 'No game history found'
             }, status = status.HTTP_404_NOT_FOUND)
 
-        serializer = GameHistorySerializer(game_history, many = True)
+        serializer = UserGameHistorySerializer(game_history, many = True)
+        return Response({
+            'message': 'Game history retrieved successfully',
+            'game_history': serializer.data
+        }, status = status.HTTP_200_OK)
+
+class GameHistoryView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+
+        try:
+            game_history = GameResults.objects.all()
+            for i in game_history:
+                print(i.player_1)
+            if not game_history:
+                raise GameResults.DoesNotExist
+        except GameResults.DoesNotExist:
+            return Response({
+                'message': 'No game history found'
+            }, status = status.HTTP_404_NOT_FOUND)
+        
+        serializer = UserGameHistorySerializer(game_history, many = True)
         return Response({
             'message': 'Game history retrieved successfully',
             'game_history': serializer.data

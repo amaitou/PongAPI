@@ -62,7 +62,7 @@ class GameResultRecordingSerializer(serializers.ModelSerializer):
 		game.save()
 		return game
 
-class GameHistorySerializer(serializers.ModelSerializer):
+class UserGameHistorySerializer(serializers.ModelSerializer):
 
 	player_1 = serializers.SerializerMethodField()
 	player_2 = serializers.SerializerMethodField()
