@@ -174,8 +174,6 @@ class FriendshipListView(APIView):
 
 		user = request.user
 
-		print(user.username)
-
 		if not user:
 			return Response({
 				'error': 'Couldn\'t find the user',
@@ -184,9 +182,6 @@ class FriendshipListView(APIView):
 
 		friendships = FriendshipLists.objects.filter(user=user)
 		total_friends = friendships.count()
-
-		for i in friendships:
-			print(i.friend.username)
 
 		return Response({
 			'success': 'Friendships were retrieved successfully',

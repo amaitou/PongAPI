@@ -3,11 +3,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from ..serializers.game_serializer import GameResultRecordingSerializer
+from ..serializers.game_serializer import GameResultRecordingSerializer, GameHistorySerializer
 from rest_framework import status
-from ..models import UserInfo, UserGameStats
+from ..models import UserInfo, UserGameStats, GameResults
 from rest_framework.serializers import ValidationError
 from ..serializers.game_serializer import GameStatsSerializer
+from django.db.models import Q
 
 
 class GameResultRecordingView(APIView):
@@ -67,3 +68,27 @@ class GameStatsView(APIView):
             'states': serializer.data
         },
         status = status.HTTP_200_OK)
+    
+
+class GameHistoryView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+
+        user = request.user
+
+        try:
+            game_history = GameResults.objects.filter(Q(player_1 = user) | Q(player_2 = user)).order_by('-game_date')[:5]
+            if not game_history:
+                raise GameResults.DoesNotExist
+        except GameResults.DoesNotExist:
+            return Response({
+                'message': 'No game history found'
+            }, status = status.HTTP_404_NOT_FOUND)
+
+        serializer = GameHistorySerializer(game_history, many = True)
+        return Response({
+            'message': 'Game history retrieved successfully',
+            'game_history': serializer.data
+        }, status = status.HTTP_200_OK)

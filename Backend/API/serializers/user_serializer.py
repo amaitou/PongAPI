@@ -3,7 +3,7 @@ from rest_framework import serializers
 from ..models import *
 from ..utils import Utils
 from django.db.models import Q
-from ..serializers.game_serializer import GameStatsSerializer
+from .game_serializer import GameStatsSerializer
 
 class RegistrationSerializer(serializers.ModelSerializer):
 	

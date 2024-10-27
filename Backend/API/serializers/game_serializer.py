@@ -61,3 +61,18 @@ class GameResultRecordingSerializer(serializers.ModelSerializer):
 		game = GameResults.objects.create(player_1 = winner, player_2 = loser, score_1 = winner_score, score_2 = loser_score, is_draw = is_draw)
 		game.save()
 		return game
+
+class GameHistorySerializer(serializers.ModelSerializer):
+
+	player_1 = serializers.SerializerMethodField()
+	player_2 = serializers.SerializerMethodField()
+
+	class Meta:
+		model = GameResults
+		fields = ['player_1', 'player_2', 'score_1', 'score_2', 'game_date', 'is_draw']
+	
+	def get_player_1(self, obj):
+		return obj.player_1.username
+	
+	def get_player_2(self, obj):
+		return obj.player_2.username
