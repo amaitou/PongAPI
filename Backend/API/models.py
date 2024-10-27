@@ -77,6 +77,9 @@ class UserGameStats(models.Model):
         if total_games == 0:
             return 0
         return format((self.lost_games / total_games) * 100, '.2f')
+    
+    def total_games_played(self) -> int:
+        return self.won_games + self.lost_games + self.draw_games
 
 
 class GameResults(models.Model):

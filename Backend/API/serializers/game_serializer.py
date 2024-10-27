@@ -7,10 +7,13 @@ class GameStatsSerializer(serializers.ModelSerializer):
 	win_rate = serializers.SerializerMethodField()
 	draw_rate = serializers.SerializerMethodField()
 	loss_rate = serializers.SerializerMethodField()
+	total_games = serializers.SerializerMethodField()
 
 	class Meta:
 		model = UserGameStats
-		fields = "__all__"
+		fields = ['level', 'total_games', 'won_games', 'lost_games', 'draw_games',
+			'won_tournaments', 'total_tournaments', 'experience_points',
+			'win_rate', 'draw_rate', 'loss_rate', 'rank']
 	
 	def get_win_rate(self, obj):
 		return obj.get_win_rate()
@@ -20,6 +23,8 @@ class GameStatsSerializer(serializers.ModelSerializer):
 	
 	def get_loss_rate(self, obj):
 		return obj.get_loss_rate()
+	def get_total_games(self, obj):
+		return obj.total_games_played()
 
 class GameResultRecordingSerializer(serializers.ModelSerializer):
 	

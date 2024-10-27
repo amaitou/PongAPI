@@ -64,6 +64,6 @@ class GameStatsView(APIView):
         serializer = GameStatsSerializer(stats)
         return Response({
             'message': 'Game stats retrieved successfully',
-            'output': serializer.data
+            'states': serializer.data
         },
         status = status.HTTP_200_OK)
