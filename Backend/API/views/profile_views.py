@@ -164,7 +164,7 @@ class FriendshipListView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		friendships = FriendshipLists.objects.filter(friend=user)
+		friendships = FriendshipLists.objects.filter(user=user)
 
 		for i in friendships:
 			print(i.friend.username)

@@ -186,19 +186,27 @@ class GetBasicUserInfoSerializer(serializers.ModelSerializer):
 
 class GetFriendshipListSerializer(serializers.ModelSerializer):
 
-	user = GetBasicUserInfoSerializer()
+	friend = GetBasicUserInfoSerializer()
+	number_of_friends = serializers.SerializerMethodField()
 
 	class Meta:
 		model = FriendshipLists
-		fields = ['user']
+		fields = ['number_of_friends', 'friend']
+	
+	def get_number_of_friends(self, obj):
+		return obj.get_number_of_friends(obj.user.pk)
 
 class GetFriendRequestsSerializer(serializers.ModelSerializer):
 
 	sender = GetBasicUserInfoSerializer()
+	number_of_pending_requests = serializers.SerializerMethodField()
 
 	class Meta:
 		model = FriendRequests
 		fields = ["sender"]
+	
+	def get_number_of_pending_requests(self, obj):
+		return obj.get_the_number_of_pending_requests(obj.receiver.id)
 
 class GetUserFullData(serializers.ModelSerializer):
 
