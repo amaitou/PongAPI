@@ -61,7 +61,7 @@ class RegistrationView(APIView):
 
 		return Response ({
 			'success': 'User registered successfully, check your email for verification',
-			'output': serializer.data,
+			'user': serializer.data,
 		},
 		status=status.HTTP_201_CREATED)
 
@@ -130,7 +130,7 @@ class Authentication42View(APIView):
 
 			response = Response({
 				'success': 'User registered successfully',
-				'output': serializer.data,
+				'user': serializer.data,
 			},
 			status=status.HTTP_201_CREATED)
 
@@ -152,7 +152,7 @@ class Authentication42View(APIView):
 			
 			response = Response({
 				'success': 'Login successful',
-				'output': GetBasicUserInfoSerializer(user).data
+				'user': GetBasicUserInfoSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -168,7 +168,7 @@ class Authentication42View(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'output': GetBasicUserInfoSerializer(request.user).data
+				'user': GetBasicUserInfoSerializer(request.user).data
 			},
 			status=status.HTTP_200_OK)
 		
@@ -200,7 +200,7 @@ class LoginConfirmationView(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'output': GetBasicUserInfoSerializer(request.user).data
+				'user': GetBasicUserInfoSerializer(request.user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -224,6 +224,7 @@ class LoginConfirmationView(APIView):
 		if not user.two_fa:
 			response = Response({
 				'success': 'Login successful',
+				'user': GetBasicUserInfoSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -270,7 +271,7 @@ class TwoFactorAuthenticationView(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'output': GetBasicUserInfoSerializer(request.user).data
+				'user': GetBasicUserInfoSerializer(request.user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -328,7 +329,7 @@ class TwoFactorAuthenticationView(APIView):
 
 		response = Response({
 			'success': 'Login successful',
-			'output': GetBasicUserInfoSerializer(user).data
+			'user': GetBasicUserInfoSerializer(user).data
 		},
 		status=status.HTTP_200_OK)
 

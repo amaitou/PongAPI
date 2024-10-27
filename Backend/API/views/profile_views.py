@@ -45,13 +45,13 @@ class GetProfileView(APIView):
 			if user.username == username:
 				return Response({
 					'success': 'User was retrieved successfully',
-					'output': GetUserFullData(user,  context = {'request': request}).data
+					'user': GetUserFullData(user,  context = {'request': request}).data
 				})
 			try:
 				user = UserInfo.objects.get(username=username)
 				return Response({
 					'success': 'User retrieved successfully',
-					'output': GetUserFullData(user,  context = {'request': request}).data
+					'user': GetUserFullData(user,  context = {'request': request}).data
 				})
 			except UserInfo.DoesNotExist:
 				return Response({
@@ -61,7 +61,7 @@ class GetProfileView(APIView):
 		else:
 			return Response({
 				'success': 'User retrieved successfully',
-				'output': GetUserFullData(user,  context = {'request': request}).data
+				'user': GetUserFullData(user,  context = {'request': request}).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -145,10 +145,26 @@ class FriendOperationsView(APIView):
 		
 		serializer.save()
 
-		return Response({
-			'success': 'Friendship was handled successfully',
-		},
-		status=status.HTTP_200_OK)
+		if request_status == 'A':
+			return Response({
+				'success': 'Friend request was accepted successfully',
+			},
+			status=status.HTTP_200_OK)
+		elif request_status == 'P':
+			return Response({
+				'success': 'Friend request was sent successfully',
+			},
+			status=status.HTTP_200_OK)
+		elif request_status == 'D':
+			return Response({
+				'success': 'Friend request was declined successfully',
+			},
+			status=status.HTTP_200_OK)
+		else:
+			return Response({
+				'success': 'Friend request was deleted successfully',
+			},
+			status=status.HTTP_200_OK)
 
 class FriendshipListView(APIView):
 
@@ -167,15 +183,15 @@ class FriendshipListView(APIView):
 			status=status.HTTP_404_NOT_FOUND)
 
 		friendships = FriendshipLists.objects.filter(user=user)
-		total_friendships = friendships.count()
+		total_friends = friendships.count()
 
 		for i in friendships:
 			print(i.friend.username)
 
 		return Response({
 			'success': 'Friendships were retrieved successfully',
-			'total_friendships': total_friendships,
-			'output': GetFriendshipListSerializer(friendships, many=True).data
+			'total_friends': total_friends,
+			'friends': GetFriendshipListSerializer(friendships, many=True).data
 		},
 		status=status.HTTP_200_OK)
 
@@ -199,6 +215,6 @@ class FriendRequestsView(APIView):
 		return Response({
 			'success': 'Friend requests were retrieved successfully',
 			'total_requests': total_requests,
-			'friend_requests': GetFriendRequestsSerializer(friend_requests, many=True).data
+			'requests': GetFriendRequestsSerializer(friend_requests, many=True).data
 		},
 		status=status.HTTP_200_OK)
