@@ -23,4 +23,5 @@ urlpatterns = [
     path("friend_r/", FriendRequestsView.as_view(), name="friendship_request"),
     path("friendships/", FriendshipListView.as_view(), name="friendship_list"),
     path("game_r/", GameResultRecordingView.as_view(), name="game_result"),
+    path("game_s/", GameStatsView.as_view(), name="game_stats"),
 ]

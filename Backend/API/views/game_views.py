@@ -5,8 +5,9 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from ..serializers.game_serializer import GameResultRecordingSerializer
 from rest_framework import status
-from ..models import UserInfo
+from ..models import UserInfo, UserGameStats
 from rest_framework.serializers import ValidationError
+from ..serializers.game_serializer import GameStatsSerializer
 
 
 class GameResultRecordingView(APIView):
@@ -44,4 +45,25 @@ class GameResultRecordingView(APIView):
         return Response({
             'message': 'Game result was recorded successfully'
         }, status = status.HTTP_200_OK)
+
+class GameStatsView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+
+        user = request.user
         
+        try:
+            stats = UserGameStats.objects.get(user_id = user)
+        except UserGameStats.DoesNotExist:
+            return Response({
+                'message': 'No game stats found'
+            }, status = status.HTTP_404_NOT_FOUND)
+
+        serializer = GameStatsSerializer(stats)
+        return Response({
+            'message': 'Game stats retrieved successfully',
+            'output': serializer.data
+        },
+        status = status.HTTP_200_OK)

@@ -182,7 +182,7 @@ class GetBasicUserInfoSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = UserInfo
 		fields = ['id', 'username', 'first_name', 'last_name',
-			'email', 'date_joined', 'avatar', 'gender']
+			'email', 'avatar', 'gender']
 
 class GetFriendshipListSerializer(serializers.ModelSerializer):
 
@@ -190,7 +190,7 @@ class GetFriendshipListSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = FriendshipLists
-		fields = ['user', 'friendship_date']
+		fields = ['user']
 
 class GetFriendRequestsSerializer(serializers.ModelSerializer):
 
@@ -198,7 +198,7 @@ class GetFriendRequestsSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = FriendRequests
-		fields = ["sender", "request_date"]
+		fields = ["sender"]
 
 class GetUserFullData(serializers.ModelSerializer):
 
@@ -208,4 +208,14 @@ class GetUserFullData(serializers.ModelSerializer):
 
 	class Meta:
 		model = UserInfo
-		fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'is_verified', 'two_fa', 'email', 'date_joined','game_stats', 'friend_requests', 'friendships']
+		fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'is_verified',
+			'two_fa', 'email', 'game_stats', 'friend_requests', 'friendships']
+
+class GetUsersListSerializer(serializers.ModelSerializer):
+
+	game_stats = GameStatsSerializer(many=True)
+
+	class Meta:
+		model = UserInfo
+		fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'is_verified',
+			'two_fa', 'email', 'game_stats']

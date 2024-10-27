@@ -21,7 +21,7 @@ class GetAllUsersView(APIView):
 		users = UserInfo.objects.exclude(is_superuser=True)
 		return Response({
 			'success': 'Users was retrieved successfully',
-			'output': GetUserFullData(users, many=True, context = {'request': request}).data
+			'output': GetUsersListSerializer(users, many=True, context = {'request': request}).data
 		},
 		status=status.HTTP_200_OK)
 
