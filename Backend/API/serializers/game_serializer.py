@@ -4,9 +4,22 @@ from ..models import UserGameStats, GameResults
 
 class GameStatsSerializer(serializers.ModelSerializer):
 
+	win_rate = serializers.SerializerMethodField()
+	draw_rate = serializers.SerializerMethodField()
+	loss_rate = serializers.SerializerMethodField()
+
 	class Meta:
 		model = UserGameStats
 		fields = "__all__"
+	
+	def get_win_rate(self, obj):
+		return obj.get_win_rate()
+
+	def get_draw_rate(self, obj):
+		return obj.get_draw_rate()
+	
+	def get_loss_rate(self, obj):
+		return obj.get_loss_rate()
 
 class GameResultRecordingSerializer(serializers.ModelSerializer):
 	

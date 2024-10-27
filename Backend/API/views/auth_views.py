@@ -19,7 +19,7 @@ from ..utils import Utils
 import requests
 import jwt
 from ..models import UserGameStats
-from ..serializers.user_serializer import GetUserFullData
+from ..serializers.user_serializer import GetBasicUserInfoSerializer
 
 
 class RegistrationView(APIView):
@@ -152,7 +152,7 @@ class Authentication42View(APIView):
 			
 			response = Response({
 				'success': 'Login successful',
-				'output': GetUserFullData(user).data
+				'output': GetBasicUserInfoSerializer(user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -168,7 +168,7 @@ class Authentication42View(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'output': GetUserFullData(request.user).data
+				'output': GetBasicUserInfoSerializer(request.user).data
 			},
 			status=status.HTTP_200_OK)
 		
@@ -200,7 +200,7 @@ class LoginConfirmationView(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'output': GetUserFullData(request.user).data
+				'output': GetBasicUserInfoSerializer(request.user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -270,6 +270,7 @@ class TwoFactorAuthenticationView(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
+				'output': GetBasicUserInfoSerializer(request.user).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -327,7 +328,7 @@ class TwoFactorAuthenticationView(APIView):
 
 		response = Response({
 			'success': 'Login successful',
-			'output': GetUserFullData(user).data
+			'output': GetBasicUserInfoSerializer(user).data
 		},
 		status=status.HTTP_200_OK)
 

@@ -59,6 +59,24 @@ class UserGameStats(models.Model):
     
     def __str__(self) -> str:
         return f"{self.user_id.username}"
+    
+    def get_win_rate(self) -> float:
+        total_games = self.won_games + self.lost_games + self.draw_games
+        if total_games == 0:
+            return 0
+        return format((self.won_games / total_games) * 100, '.2f')
+    
+    def get_draw_rate(self) -> float:
+        total_games = self.won_games + self.lost_games + self.draw_games
+        if total_games == 0:
+            return 0
+        return format((self.draw_games / total_games) * 100, '.2f')
+    
+    def get_loss_rate(self) -> float:
+        total_games = self.won_games + self.lost_games + self.draw_games
+        if total_games == 0:
+            return 0
+        return format((self.lost_games / total_games) * 100, '.2f')
 
 
 class GameResults(models.Model):
