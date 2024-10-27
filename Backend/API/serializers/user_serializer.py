@@ -214,8 +214,16 @@ class GetUserFullData(serializers.ModelSerializer):
 class GetUsersListSerializer(serializers.ModelSerializer):
 
 	game_stats = GameStatsSerializer(many=True)
+	full_name = serializers.SerializerMethodField()
+	total_friends = serializers.SerializerMethodField()
 
 	class Meta:
 		model = UserInfo
-		fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'is_verified',
-			'two_fa', 'email', 'game_stats']
+		fields = ['id', 'full_name', 'username', 'first_name', 'last_name',
+			'avatar', 'gender', 'is_verified', 'email', 'game_stats', 'total_friends']
+	
+	def get_full_name(self, obj):
+		return obj.get_full_name()
+	
+	def get_total_friends(self, obj):
+		return obj.get_total_friends()

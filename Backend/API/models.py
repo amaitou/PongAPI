@@ -28,6 +28,12 @@ class UserInfo(AbstractUser):
     
     def __str__(self) -> str:
         return f"{self.username}"
+    
+    def get_full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+    
+    def get_total_friends(self) -> int:
+        return FriendshipLists.objects.filter(user = self).count()
 
 class UserGameStats(models.Model):
 
@@ -78,7 +84,7 @@ class UserGameStats(models.Model):
             return 0
         return format((self.lost_games / total_games) * 100, '.2f')
     
-    def total_games_played(self) -> int:
+    def get_total_games_played(self) -> int:
         return self.won_games + self.lost_games + self.draw_games
 
 

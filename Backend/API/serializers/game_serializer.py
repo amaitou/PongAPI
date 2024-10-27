@@ -24,7 +24,7 @@ class GameStatsSerializer(serializers.ModelSerializer):
 	def get_loss_rate(self, obj):
 		return obj.get_loss_rate()
 	def get_total_games(self, obj):
-		return obj.total_games_played()
+		return obj.get_total_games_played()
 
 class GameResultRecordingSerializer(serializers.ModelSerializer):
 	
