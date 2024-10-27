@@ -159,27 +159,6 @@ class FriendshipLists(models.Model):
     def __str__(self):
         return f"{self.user.username}, {self.friend.username}"
 
-class BlockLists(models.Model):
-
-    user_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'blocker')
-    blocked_id = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'blocked')
-    block_id = models.AutoField(primary_key = True)
-    time_of_block = models.DateTimeField(auto_now_add = True)
-
-    class Meta:
-        
-        db_table = 'BlockList'
-        verbose_name = 'BlockList'
-        verbose_name_plural = 'BlockList'
-        unique_together = ('user_id', 'blocked_id')
-
-        indexes = [
-            models.Index(fields = ['user_id', 'blocked_id'])
-        ]
-    
-    def __str__(self) -> str:
-        return f"b{self.user_id.username}, {self.blocked_id.username}"
-
 class Chats(models.Model):
 
     CHAT_STATUS = [
