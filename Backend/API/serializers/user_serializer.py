@@ -1,9 +1,9 @@
 
-from rest_framework import serializers
-from ..models import *
-from ..utils import Utils
-from django.db.models import Q
 from .game_serializer import GameStatsSerializer
+from rest_framework import serializers
+from django.db.models import Q
+from ..utils import Utils
+from ..models import *
 
 class RegistrationSerializer(serializers.ModelSerializer):
 	

@@ -1,6 +1,6 @@
 
-from rest_framework import serializers
 from ..models import UserGameStats, GameResults
+from rest_framework import serializers
 
 class GameStatsSerializer(serializers.ModelSerializer):
 

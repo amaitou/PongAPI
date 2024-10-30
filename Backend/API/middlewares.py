@@ -1,5 +1,3 @@
-from rest_framework.response import Response
-from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.conf import settings
 from .utils import Utils

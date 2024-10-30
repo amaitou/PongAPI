@@ -1,8 +1,8 @@
-from django.urls import path
-from .views.auth_views import *
 from .views.password_views import *
 from .views.profile_views import *
+from .views.auth_views import *
 from .views.game_views import *
+from django.urls import path
 
 urlpatterns = [
     path('register/', RegistrationView.as_view(), name='registration'),

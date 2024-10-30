@@ -1,4 +1,5 @@
 
+from ..serializers.user_serializer import GetBasicUserInfoSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from ..serializers.user_serializer import RegistrationSerializer
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -10,16 +11,15 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework import serializers
+from ..models import UserGameStats
 from django.utils import timezone
 from rest_framework import status
-from django.urls import reverse
 from django.conf import settings
+from django.urls import reverse
 from ..models import UserInfo
 from ..utils import Utils
 import requests
 import jwt
-from ..models import UserGameStats
-from ..serializers.user_serializer import GetBasicUserInfoSerializer
 
 
 class RegistrationView(APIView):
