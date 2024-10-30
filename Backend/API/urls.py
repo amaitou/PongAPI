@@ -10,8 +10,8 @@ urlpatterns = [
     path('login/', LoginConfirmationView.as_view(), name='login'),
     path('2fa/', TwoFactorAuthenticationView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('get_users/', GetAllUsersView.as_view(), name='all_users'),
-    path('get_profile/', GetProfileView.as_view(), name='profile_owner'),
+    path('users/', GetAllUsersView.as_view(), name='all_users'),
+    path('profile/', GetProfileView.as_view(), name='profile_owner'),
     path('profile/<str:username>/', GetProfileView.as_view(), name='user_profile'),
     path("password_updating/", PasswordUpdatingView.as_view(), name="password_update"),
     path("profile_updating/", ProfileUpdatingView.as_view(), name="profile_update"),
@@ -26,4 +26,5 @@ urlpatterns = [
     path("game_stats/", GameStatsView.as_view(), name="game_stats"),
     path("user_games_history/", UserGameHistoryView.as_view(), name="game_history"),
     path("games_history/", UserGameHistoryView.as_view(), name="user_game_history"),
+    path("game_stats_updating/", GameStateUpdatingView.as_view(), name="game_state"),
 ]

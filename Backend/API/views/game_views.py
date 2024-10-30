@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from ..serializers.game_serializer import GameResultRecordingSerializer, UserGameHistorySerializer
+from ..serializers.game_serializer import *
 from rest_framework import status
 from ..models import UserInfo, UserGameStats, GameResults
 from rest_framework.serializers import ValidationError
@@ -114,4 +114,36 @@ class GameHistoryView(APIView):
         return Response({
             'message': 'Game history retrieved successfully',
             'game_history': serializer.data
+        }, status = status.HTTP_200_OK)
+
+class GameStateUpdatingView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+
+        user = request.user
+
+        try:
+            stats = UserGameStats.objects.get(user_id = user)
+        except UserGameStats.DoesNotExist:
+            return Response({
+                'message': 'No game stats found'
+            }, status = status.HTTP_404_NOT_FOUND)
+
+        serializer = GameStateUpdatingSerializer(stats, data = request.data, partial = True)
+
+        try:
+            serializer.is_valid(raise_exception = True)
+        except ValidationError as e:
+            return Response({
+                'error': e.detail
+            },
+            status = status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+
+        return Response({
+            'message': 'Game stats updated successfully',
+            'states': serializer.data
         }, status = status.HTTP_200_OK)

@@ -76,3 +76,52 @@ class UserGameHistorySerializer(serializers.ModelSerializer):
 	
 	def get_player_2(self, obj):
 		return obj.player_2.username
+
+class GameStateUpdatingSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = UserGameStats
+		fields = "__all__"
+	
+	def validate_non_negative(self, value, message = "Value cannot be negative"):
+		if value < 0:
+			raise serializers.ValidationError(message)
+		return value
+	
+	def validate_level(self, value):
+		return self.validate_non_negative(value)
+
+	def validate_rank(self, value):
+		if not value in ['Beginner', "Amateur", "Semi-Pro", "Pro", "World Class", "Legendary", "Ultimate"]:
+			raise serializers.ValidationError("Invalid rank")
+		return value
+
+	def validate_won_games(self, value):
+		return self.validate_non_negative(value, "Won games cannot be negative")
+	
+	def validate_lost_games(self, value):
+		return self.validate_non_negative(value, "Lost games cannot be negative")
+	
+	def validate_draw_games(self, value):
+		return self.validate_non_negative(value, "Draw games cannot be negative")
+	
+	def validate_won_tournaments(self, value):
+		return self.validate_non_negative(value, "Won tournaments cannot be negative")
+	
+	def validate_total_tournaments(self, value):
+		return self.validate_non_negative(value, "Total tournaments cannot be negative")
+
+	def validate_experience_points(self, value):
+		return self.validate_non_negative(value, "Experience points cannot be negative")
+	
+	def update(self, instance, validated_data):
+		instance.level = validated_data.get('level', instance.level)
+		instance.rank = validated_data.get('rank', instance.rank)
+		instance.won_games = validated_data.get('won_games', instance.won_games)
+		instance.lost_games = validated_data.get('lost_games', instance.lost_games)
+		instance.draw_games = validated_data.get('draw_games', instance.draw_games)
+		instance.won_tournaments = validated_data.get('won_tournaments', instance.won_tournaments)
+		instance.total_tournaments = validated_data.get('total_tournaments', instance.total_tournaments)
+		instance.experience_points = validated_data.get('experience_points', instance.experience_points)
+		instance.save()
+		return instance
