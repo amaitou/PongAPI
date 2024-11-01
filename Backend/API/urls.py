@@ -27,4 +27,5 @@ urlpatterns = [
     path("user_games_history/", UserGameHistoryView.as_view(), name="game_history"),
     path("games_history/", UserGameHistoryView.as_view(), name="user_game_history"),
     path("game_stats_updating/", GameStateUpdatingView.as_view(), name="game_state"),
+    path("sent_requests/", SentRequestsView.as_view(), name="sent_requests"),
 ]
