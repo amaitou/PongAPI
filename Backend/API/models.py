@@ -119,7 +119,7 @@ class FriendRequests(models.Model):
         ('U', 'U'),
     }
 
-    sender = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'sender')
+    sender = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'sent_requests')
     receiver = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friend_requests')
     request_status = models.CharField(max_length = 20, choices = REQUEST_STATUS, default = 'Pending', null = False)
     friend_request_id = models.AutoField(primary_key = True)
