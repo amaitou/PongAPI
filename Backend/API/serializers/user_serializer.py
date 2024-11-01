@@ -200,16 +200,25 @@ class GetFriendRequestsSerializer(serializers.ModelSerializer):
 		model = FriendRequests
 		fields = ["sender"]
 
+class SentRequestsSerializer(serializers.ModelSerializer):
+
+	receiver = GetBasicUserInfoSerializer()
+
+	class Meta:
+		model = FriendRequests
+		fields = ['receiver']
+
 class GetUserFullData(serializers.ModelSerializer):
 
 	game_stats = GameStatsSerializer(many=True)
 	friend_requests = GetFriendRequestsSerializer(many=True)
 	friendships = GetFriendshipListSerializer(many=True)
+	sent_requests = SentRequestsSerializer(many=True)
 
 	class Meta:
 		model = UserInfo
 		fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'gender', 'is_verified',
-			'two_fa', 'email', 'game_stats', 'friend_requests', 'friendships']
+			'two_fa', 'email', 'game_stats', 'friend_requests', 'friendships', 'sent_requests']
 
 class GetUsersListSerializer(serializers.ModelSerializer):
 
