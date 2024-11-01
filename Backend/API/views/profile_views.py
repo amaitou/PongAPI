@@ -213,3 +213,27 @@ class FriendRequestsView(APIView):
 			'requests': GetFriendRequestsSerializer(friend_requests, many=True).data
 		},
 		status=status.HTTP_200_OK)
+
+class SentRequestsView(APIView):
+
+	permission_classes = [IsAuthenticated]
+
+	def get(self, request: Request) -> Response:
+
+		user = request.user
+
+		if not user:
+			return Response({
+				'error': 'Couldn\'t find the user',
+			},
+			status=status.HTTP_404_NOT_FOUND)
+		
+		sent_requests = FriendRequests.objects.filter(sender=user)
+		total_requests = sent_requests.count()
+
+		return Response({
+			'success': 'Sent requests were retrieved successfully',
+			'total_requests': total_requests,
+			'requests': SentRequestsSerializer(sent_requests, many=True).data
+		},
+		status=status.HTTP_200_OK)
