@@ -140,7 +140,7 @@ class FriendRequests(models.Model):
 
 class FriendshipLists(models.Model):
 
-    user = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'user')
+    user = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friend_creator')
     friend = models.ForeignKey(UserInfo, on_delete = models.CASCADE, null = False, related_name = 'friendships')
     friendship_date = models.DateTimeField(auto_now_add = True)
     friendship_id = models.AutoField(primary_key = True)
