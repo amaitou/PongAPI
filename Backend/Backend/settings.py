@@ -21,8 +21,6 @@ if not DEBUG:
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
-    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,11 +33,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'Chat',
-    'RealTimeNotifications',
-    'django_prometheus',
-    'tournament',
-    'django_extensions',
 ]
 
 REST_FRAMEWORK = {
@@ -61,7 +54,6 @@ SIMPLE_JWT = {
 }
 
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -74,8 +66,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 
@@ -96,29 +86,6 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'Backend.wsgi.application'
-ASGI_APPLICATION = 'Backend.asgi.application'
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-
-#-----------------config postgres-------------------#
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': "djangodb",
-        'USER': "solix",
-        'PASSWORD': "1337",
-        'HOST': 'postgres',
-        'PORT': '5432',
-    }
-}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -144,19 +111,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-#     },
-# }
-
-CHANNEL_LAYERS = {
+DATABASES = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('redis', 6379)],
-        },
-    },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 
@@ -187,12 +146,3 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # SSL Certificates
 os.environ['SSL_CERT_FILE'] = certifi.where()
-
-
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://redis:6379/1',
-    }
-}
