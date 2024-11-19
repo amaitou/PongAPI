@@ -27,3 +27,13 @@ makemigrations:
 flush:
 	@echo "Flushing..."
 	@python3 Backend/manage.py flush --no-input
+
+createsuperuser:
+	@echo "Creating superuser..."
+	@python3 Backend/superuser_creation.py
+
+remove_migrations:
+	@echo "Removing migrations..."
+	@find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+	@find . -path "*/migrations/*.pyc"  -delete
+	@rm -rf Backend/db.sqlite3
