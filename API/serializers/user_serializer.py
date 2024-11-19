@@ -37,11 +37,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
 		
 		if not 'avatar' in validated_data:
 			if validated_data["gender"] == "M":
-				validated_data["avatar"] = "/media/avatars/man.png"
+				validated_data["avatar"] = "avatars/man.png"
 			elif validated_data["gender"] == "f":
-				validated_data["avatar"] = "/media/avatar/woman.png"
+				validated_data["avatar"] = "avatar/woman.png"
 			else:
-				validated_data["avatar"] = "/media/avatars/unknown.png"
+				validated_data["avatar"] = "avatars/unknown.png"
 
 		if password_exists:
 			password = validated_data.pop('password')
@@ -178,11 +178,14 @@ class FriendOperationsSerializer(serializers.ModelSerializer):
 		return validated_data
 
 class GetBasicUserInfoSerializer(serializers.ModelSerializer):
+
+	game_stats = GameStatsSerializer(many=True)
 	
 	class Meta:
 		model = UserInfo
 		fields = ['id', 'username', 'first_name', 'last_name',
-			'email', 'avatar', 'gender']
+			'email', 'avatar', 'gender', 'game_stats']
+
 
 class GetFriendshipListSerializer(serializers.ModelSerializer):
 

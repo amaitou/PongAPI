@@ -17,7 +17,7 @@ class PasswordUpdatingView(APIView):
 
 	def put(self, request: Request) -> Response:
 
-		serializer = PasswordUpdatingView(instance=request.user,
+		serializer = PasswordUpdatingSerializer(instance=request.user,
 					data=request.data,
 					context={'request': request})
 
@@ -145,7 +145,7 @@ class PasswordConfirmationView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		serializer = PasswordResettingView(instance=user, data=request.data)
+		serializer = PasswordResettingSerializer(instance=user, data=request.data)
 		try:
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:

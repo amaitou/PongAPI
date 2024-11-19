@@ -117,7 +117,7 @@ class Authentication42View(APIView):
 			'email': email,
 			"gender": "M",
 			"avatar": avatar,
-		})
+		}, context={'request': request})
 
 		if serializer.is_valid():
 			serializer.save()
@@ -152,7 +152,7 @@ class Authentication42View(APIView):
 			
 			response = Response({
 				'success': 'Login successful',
-				'user': GetBasicUserInfoSerializer(user).data
+				'user': GetBasicUserInfoSerializer(user, context = {'request': request}).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -200,7 +200,7 @@ class LoginConfirmationView(APIView):
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
-				'user': GetBasicUserInfoSerializer(request.user).data
+				'user': GetBasicUserInfoSerializer(request.user, context = {'request': request}).data,
 			},
 			status=status.HTTP_200_OK)
 
@@ -224,7 +224,7 @@ class LoginConfirmationView(APIView):
 		if not user.two_fa:
 			response = Response({
 				'success': 'Login successful',
-				'user': GetBasicUserInfoSerializer(user).data
+				'user': GetBasicUserInfoSerializer(user, context = {'request': request}).data
 			},
 			status=status.HTTP_200_OK)
 
@@ -239,7 +239,7 @@ class LoginConfirmationView(APIView):
 		user.otp_time = Utils.generate_otp_expiration()
 
 		absurl = f''
-		email_body = f'Hi {user.username},\n\nPlease use the code below to verify your login:\n{user.otp_code}'	
+		email_body = f'Hi {user.username},\n\nPlease use the code below to verify your login:\n{user.otp_code}'
 		data = {
 			'domain': absurl,
 			'subject': 'Verification code',
