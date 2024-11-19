@@ -1,4 +1,8 @@
 
+venv:
+	@echo "creating the virtual_env mode"
+	@python3 -m venv venv
+
 
 remove_pycache:
 	@echo "Removing __pycache__ directories..."
