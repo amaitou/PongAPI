@@ -15,7 +15,7 @@ class Utils:
     """
 
     @staticmethod
-    def send_verification_email(data):
+    def send_verification_email(data) -> None:
         """
         This method sends a verification email to a user.
         The email's subject, body, and recipient are specified in the 'data' dictionary.
@@ -71,7 +71,7 @@ class Utils:
                 return None
 
     @staticmethod
-    def password_validation(password):
+    def password_validation(password) -> None:
         """
         This method validates a password according to certain criteria.
         If the password does not meet these criteria, it raises a ValidationError with a list of errors.
@@ -93,7 +93,7 @@ class Utils:
             raise ValidationError(errors)
     
     @staticmethod
-    def generate_otp_code():
+    def generate_otp_code() -> str:
         """
         This method generates a random 6-digit OTP code.
         """
@@ -107,20 +107,21 @@ class Utils:
         return timezone.now() + timedelta(minutes=15)
     
     @staticmethod
-    def create_one_time_jwt(user):
+    def create_one_time_jwt(user, purpose: str) -> str:
         """
         This method creates a one-time JWT for a given user.
         It returns a dictionary containing the access and refresh tokens.
         """
         payload = {
             'user_id': user.id,
+            'purpose'
             'exp': timezone.now() + timedelta(minutes=5)
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
         return token
     
     @staticmethod
-    def get_current_time():
+    def get_current_time() -> timezone:
         """
         This method returns the current time.
         """
