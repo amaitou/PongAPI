@@ -1,6 +1,7 @@
 
 __pycache__
 lib64
+Backend/API/migration
 venv/
 db.sqlite3
 .env
