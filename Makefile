@@ -26,7 +26,7 @@ remove_migrations:
 clean: remove_pycache remove_pyc
 	@echo "Cleaning done!"
 
-fclean: clean flush remove_migrations
+fclean: clean remove_migrations
 	@echo "Full cleaning done!"
 
 runserver:
