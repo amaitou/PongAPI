@@ -84,7 +84,7 @@ class PasswordVerificationView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		token = request.GET.get('refresh_token')
+		token = request.GET.get('token')
 
 		if not token:
 			return Response({
