@@ -84,7 +84,7 @@ class PasswordVerificationView(APIView):
 	permission_classes = [AllowAny]
 	authentication_classes = []
 
-	def post(self, request: Request) -> Response:
+	def get(self, request: Request) -> Response:
 
 		verification_token = request.GET.get('token')
 
