@@ -114,8 +114,8 @@ class Utils:
         """
         payload = {
             'user_id': user.id,
-            'purpose'
-            'exp': timezone.now() + timedelta(minutes=5)
+            'purpose': purpose,
+            'exp': timezone.now() + timedelta(minutes=10)
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
         return token

@@ -57,11 +57,11 @@ class PasswordResettingView(APIView):
 			user = UserInfo.objects.get(email=email)
 		except UserInfo.DoesNotExist:
 			return Response({
-				'error': 'Couldn\'t find the email',
+				'error': 'If the email exists, a reset email has been sent.',
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		verification_token = Utils.create_one_time_jwt(user)
+		verification_token = Utils.create_one_time_jwt(user, 'password_resetting')
 		absurl = f'http://127.0.0.1:3000/password-reset/?token={verification_token}'
 
 		email_body = f'Hi {user.username},\n\nPlease use the link below to reset your password:\n{absurl}'
@@ -101,9 +101,16 @@ class PasswordVerificationView(APIView):
 				'error': 'Token is expired',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
+
 		except jwt.InvalidTokenError:
 			return Response({
 				'error': 'Token is invalid',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		if token['purpose'] != 'password_resetting':
+			return Response({
+				'error': 'Invalid token purpose',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
@@ -147,7 +154,12 @@ class PasswordConfirmationView(APIView):
 				'error': 'Token is invalid',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
-	
+		
+		if token['purpose'] != 'password_resetting':
+			return Response({
+				'error': 'Invalid token purpose',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 
 		try:
 			user = UserInfo.objects.get(id=token['user_id'])

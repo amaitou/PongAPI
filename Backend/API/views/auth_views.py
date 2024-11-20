@@ -44,7 +44,7 @@ class RegistrationView(APIView):
 		ugs = UserGameStats.objects.create(user_id = serializer.instance)
 		ugs.save()
 
-		token = Utils.create_one_time_jwt(serializer.instance)
+		token = Utils.create_one_time_jwt(serializer.instance, "email_verification")
 
 		# current_site = get_current_site(request).domain
 		# relative_link = reverse('email_verification')
@@ -399,6 +399,12 @@ class EmailVerificationView(APIView):
 		except jwt.InvalidTokenError:
 			return Response({
 				'error': 'Token is invalid',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		if token['purpose'] != 'email_verification':
+			return Response({
+				'error': 'Invalid token purpose',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
