@@ -100,12 +100,19 @@ class FriendOperationsView(APIView):
 		sender = request.data.get('sender')
 		receiver = request.data.get('receiver')
 		request_status = request.data.get('request_status')
+		user = request.user
 
 		if not sender or not receiver or not request_status:
 			return Response({
 				'error': 'Please provide all the required fields',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
+	
+		if request.user.username != sender:
+			return Response({
+				'error': 'You are not authorized to send this request',
+			},
+			status=status.HTTP_401_UNAUTHORIZED)
 		
 		try:
 			sender = UserInfo.objects.get(username=sender)
