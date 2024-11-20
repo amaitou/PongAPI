@@ -17,12 +17,6 @@ remove_pyc:
 	@echo "Removing .pyc files..."
 	@find . -name '*.pyc' -exec rm -f {} +
 
-remove_migrations:
-	@echo "Removing migrations..."
-	@find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-	@find . -path "*/migrations/*.pyc"  -delete
-	@rm -rf Backend/db.sqlite3
-
 clean: remove_pycache remove_pyc
 	@echo "Cleaning done!"
 
@@ -33,7 +27,7 @@ runserver:
 	@echo "Running server..."
 	@python3 Backend/manage.py runserver
 
-python_shell:
+shell:
 	@echo "Running python shell..."
 	@python3 Backend/manage.py shell
 
