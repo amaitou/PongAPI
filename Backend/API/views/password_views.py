@@ -7,8 +7,10 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework import status
+from django.conf import settings
 from ..models import UserInfo
 from ..utils import Utils
+import jwt
 
 
 class PasswordUpdatingView(APIView):
@@ -59,8 +61,8 @@ class PasswordResettingView(APIView):
 			},
 			status=status.HTTP_404_NOT_FOUND)
 
-		tokens = Utils.create_jwt_for_user(user)
-		absurl = f'http://127.0.0.1:3000/password-reset/?token={str(tokens["refresh_token"])}'
+		verification_token = Utils.create_one_time_jwt(user)
+		absurl = f'http://127.0.0.1:3000/password-reset/?token={verification_token}'
 
 		email_body = f'Hi {user.username},\n\nPlease use the link below to reset your password:\n{absurl}'
 		data = {
@@ -84,21 +86,26 @@ class PasswordVerificationView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		token = request.GET.get('token')
+		verification_token = request.GET.get('token')
 
-		if not token:
+		if not verification_token:
 			return Response({
 				'error': 'No token provided',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
-			token = RefreshToken(token)
-		except TokenError:
+			token = jwt.decode(verification_token, settings.SECRET_KEY, algorithms=['HS256'])
+		except jwt.ExpiredSignatureError:
 			return Response({
-				'error': 'Refresh token is invalid, expired or blacklisted',
+				'error': 'Token is expired',
 			},
-			status=status.HTTP_401_UNAUTHORIZED)
+			status=status.HTTP_400_BAD_REQUEST)
+		except jwt.InvalidTokenError:
+			return Response({
+				'error': 'Token is invalid',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
 			user = UserInfo.objects.get(id=token['user_id'])
@@ -120,21 +127,26 @@ class PasswordConfirmationView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		token = request.GET.get('token')
+		verification_token = request.GET.get('token')
 
-		if not token:
+		if not verification_token:
 			return Response({
 				'error': 'No token provided',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
 		try:
-			token = RefreshToken(token)
-		except TokenError:
+			token = jwt.decode(verification_token, settings.SECRET_KEY, algorithms=['HS256'])
+		except jwt.ExpiredSignatureError:
 			return Response({
-				'error': 'Refresh token is invalid, expired or blacklisted',
+				'error': 'Token is expired',
 			},
-			status=status.HTTP_401_UNAUTHORIZED)
+			status=status.HTTP_400_BAD_REQUEST)
+		except jwt.InvalidTokenError:
+			return Response({
+				'error': 'Token is invalid',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 	
 
 		try:
@@ -155,7 +167,6 @@ class PasswordConfirmationView(APIView):
 			status=status.HTTP_400_BAD_REQUEST)
 
 		serializer.save()
-		token.blacklist()
 
 		return Response({
 			'success': 'Password reset successfully',
