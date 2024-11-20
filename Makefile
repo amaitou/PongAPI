@@ -17,6 +17,18 @@ remove_pyc:
 	@echo "Removing .pyc files..."
 	@find . -name '*.pyc' -exec rm -f {} +
 
+remove_migrations:
+	@echo "Removing migrations..."
+	@find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+	@find . -path "*/migrations/*.pyc"  -delete
+	@rm -rf Backend/db.sqlite3
+
+clean: remove_pycache remove_pyc
+	@echo "Cleaning done!"
+
+fclean: clean flush remove_migrations
+	@echo "Full cleaning done!"
+
 runserver:
 	@echo "Running server..."
 	@python3 Backend/manage.py runserver
@@ -41,8 +53,3 @@ createsuperuser:
 	@echo "Creating superuser..."
 	@python3 Backend/superuser_creation.py
 
-remove_migrations:
-	@echo "Removing migrations..."
-	@find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-	@find . -path "*/migrations/*.pyc"  -delete
-	@rm -rf Backend/db.sqlite3
