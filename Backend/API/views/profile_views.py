@@ -45,12 +45,6 @@ class GetProfileView(APIView):
 	def get(self, request: Request, username = None) -> Response:
 
 		user = request.user
-
-		if not user:
-			return Response({
-				'error': 'Couldn\'t find the user',
-			},
-			status=status.HTTP_404_NOT_FOUND)
 		
 		if username:
 			if user.username == username:
@@ -207,12 +201,6 @@ class FriendshipListView(APIView):
 
 		user = request.user
 
-		if not user:
-			return Response({
-				'error': 'Couldn\'t find the user',
-			},
-			status=status.HTTP_404_NOT_FOUND)
-
 		friendships = FriendshipLists.objects.filter(user=user)
 		total_friends = friendships.count()
 
@@ -235,12 +223,6 @@ class FriendRequestsView(APIView):
 
 		user = request.user
 
-		if not user:
-			return Response({
-				'error': 'Couldn\'t find the user',
-			},
-			status=status.HTTP_404_NOT_FOUND)
-
 		friend_requests = FriendRequests.objects.filter(receiver=user)
 		total_requests = friend_requests.count()
 
@@ -262,12 +244,6 @@ class SentRequestsView(APIView):
 	def get(self, request: Request) -> Response:
 
 		user = request.user
-
-		if not user:
-			return Response({
-				'error': 'Couldn\'t find the user',
-			},
-			status=status.HTTP_404_NOT_FOUND)
 		
 		sent_requests = FriendRequests.objects.filter(sender=user)
 		total_requests = sent_requests.count()

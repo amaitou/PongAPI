@@ -25,7 +25,9 @@ class PasswordUpdatingView(APIView):
 
 	def put(self, request: Request) -> Response:
 
-		serializer = PasswordUpdatingSerializer(instance=request.user,
+		user = request.user
+
+		serializer = PasswordUpdatingSerializer(instance=user,
 					data=request.data,
 					context={'request': request})
 
