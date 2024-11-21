@@ -302,6 +302,12 @@ class TwoFactorAuthenticationView(APIView):
 				'error': 'Token is invalid',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
+	
+		if token['purpose'] != 'login_verification':
+			return Response({
+				'error': 'Invalid token purpose',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
 		
 		try:
 			user = UserInfo.objects.get(id=token['user_id'])
@@ -399,6 +405,12 @@ class EmailVerificationView(APIView):
 		except jwt.InvalidTokenError:
 			return Response({
 				'error': 'Token is invalid',
+			},
+			status=status.HTTP_400_BAD_REQUEST)
+		
+		if token['purpose'] != 'email_verification':
+			return Response({
+				'error': 'Invalid token purpose',
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 		
