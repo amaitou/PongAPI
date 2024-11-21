@@ -21,6 +21,7 @@ class PasswordUpdatingSerializer(serializers.ModelSerializer):
         """
         Validates that the new password and re-entered password match.
         """
+
         if data['new_password'] != data['re_new_password']:
             raise serializers.ValidationError({'new_password': 'Passwords do not match'})
         return data
@@ -36,9 +37,11 @@ class PasswordUpdatingSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
+
         """
         Updates the user's password to the new password provided.
         """
+
         instance.set_password(validated_data['new_password'])
         instance.save()
         return instance
@@ -61,6 +64,7 @@ class PasswordResettingSerializer(serializers.ModelSerializer):
         """
         Validates that the new password and re-entered password match.
         """
+
         if data['new_password'] != data['re_new_password']:
             raise serializers.ValidationError({'new_password': 'Passwords do not match'})
         return data
@@ -70,6 +74,7 @@ class PasswordResettingSerializer(serializers.ModelSerializer):
         """
         Updates the user's password to the new password provided, typically after a reset process.
         """
+
         instance.set_password(validated_data['new_password'])
         instance.save()
         return instance
