@@ -22,12 +22,19 @@ class GameResultRecordingView(APIView):
 
     def post(self, request: Request) -> Response:
 
+        user = request.user
+
         try:
             player_1 = UserInfo.objects.get(username = request.data['winner'])
             player_2 = UserInfo.objects.get(username = request.data['loser'])
         except UserInfo.DoesNotExist:
             return Response({
                 'message': 'One or more players do not exist'
+            }, status = status.HTTP_400_BAD_REQUEST)
+        
+        if user.username != request.data['winner']:
+            return Response({
+                'message': 'You can only record games that you have won'
             }, status = status.HTTP_400_BAD_REQUEST)
 
         data = {
@@ -120,8 +127,6 @@ class GameHistoryView(APIView):
 
         try:
             game_history = GameResults.objects.all()
-            for i in game_history:
-                print(i.player_1)
             if not game_history:
                 raise GameResults.DoesNotExist
         except GameResults.DoesNotExist:
