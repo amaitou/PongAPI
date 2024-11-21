@@ -1,8 +1,7 @@
 
 venv:
 	@echo "creating the virtual_env mode"
-	@python3 -m venv venv \
-		&& /Users/amait-ou/Desktop/Transcendence/venv/bin/python3 -m pip install --upgrade pip
+	@python3 -m venv venv
 
 requirements:
 	@echo "Requirements are being installed ..."
