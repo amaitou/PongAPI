@@ -10,12 +10,14 @@ import jwt
 from django.conf import settings
 
 class Utils:
+
     """
     This class contains utility methods used throughout the application.
     """
 
     @staticmethod
     def send_verification_email(data) -> None:
+
         """
         This method sends a verification email to a user.
         The email's subject, body, and recipient are specified in the 'data' dictionary.
@@ -25,6 +27,7 @@ class Utils:
 
     @staticmethod
     def create_jwt_for_user(user) -> dict:
+
         """
         This method creates a JWT (JSON Web Token) for a given user.
         It returns a dictionary containing the access and refresh tokens.
@@ -42,6 +45,7 @@ class Utils:
 
     @staticmethod
     def get_user_from_jwt(token, __type) -> UserInfo:
+
         """
         This method retrieves a user from a given JWT.
         The type of token ('access' or 'refresh') is specified by '__type'.
@@ -72,6 +76,7 @@ class Utils:
 
     @staticmethod
     def password_validation(password) -> None:
+
         """
         This method validates a password according to certain criteria.
         If the password does not meet these criteria, it raises a ValidationError with a list of errors.
@@ -94,6 +99,7 @@ class Utils:
     
     @staticmethod
     def generate_otp_code() -> str:
+
         """
         This method generates a random 6-digit OTP code.
         """
@@ -101,6 +107,7 @@ class Utils:
 
     @staticmethod
     def generate_otp_expiration():
+
         """
         This method generates a time for the OTP code.
         """
@@ -108,6 +115,7 @@ class Utils:
     
     @staticmethod
     def create_one_time_jwt(user, purpose: str) -> str:
+
         """
         This method creates a one-time JWT for a given user.
         It returns a dictionary containing the access and refresh tokens.
@@ -122,6 +130,7 @@ class Utils:
     
     @staticmethod
     def get_current_time() -> timezone:
+
         """
         This method returns the current time.
         """

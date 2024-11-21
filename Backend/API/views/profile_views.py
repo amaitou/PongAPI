@@ -14,6 +14,11 @@ from ..models import *
 
 class GetAllUsersView(APIView):
 
+	"""
+    View to retrieve all users excluding superusers.
+    This endpoint is accessible only to authenticated users.
+    """
+
 	permission_classes = [IsAuthenticated]
 
 	def get(self, request: Request) -> Response:
@@ -28,6 +33,12 @@ class GetAllUsersView(APIView):
 		status=status.HTTP_200_OK)
 
 class GetProfileView(APIView):
+
+	"""
+    View to retrieve the profile details of a user.
+    It allows fetching the profile of the currently logged-in user,
+    or any other user by specifying their username in the URL.
+    """
 
 	permission_classes = [IsAuthenticated]
 
@@ -68,6 +79,11 @@ class GetProfileView(APIView):
 
 class ProfileUpdatingView(APIView):
 
+	"""
+    View to update the profile information of the currently authenticated user.
+    This supports partial updates and only requires the fields provided in the request.
+    """
+
 	permission_classes = [IsAuthenticated]
 
 	def put(self, request: Request) -> Response:
@@ -92,6 +108,11 @@ class ProfileUpdatingView(APIView):
 		status=status.HTTP_200_OK)
 	
 class FriendOperationsView(APIView):
+
+	"""
+    View to handle friend request operations such as sending, accepting, declining, and deleting requests.
+    The sender and receiver must be specified, and the operation type must be provided in the request.
+    """
 
 	permission_classes = [IsAuthenticated]
 
@@ -175,6 +196,11 @@ class FriendOperationsView(APIView):
 
 class FriendshipListView(APIView):
 
+	"""
+    View to retrieve a list of friends of the currently authenticated user.
+    This endpoint will return all the friendships where the user is involved.
+    """
+
 	permission_classes = [IsAuthenticated]
 
 	def get(self, request: Request) -> Response:
@@ -199,6 +225,10 @@ class FriendshipListView(APIView):
 
 class FriendRequestsView(APIView):
 
+	"""
+    View to retrieve all the friend requests that have been received by the currently authenticated user.
+    """
+
 	permission_classes = [IsAuthenticated]
 
 	def get(self, request: Request) -> Response:
@@ -222,6 +252,10 @@ class FriendRequestsView(APIView):
 		status=status.HTTP_200_OK)
 
 class SentRequestsView(APIView):
+
+	"""
+    View to retrieve all the friend requests that have been sent by the currently authenticated user.
+    """
 
 	permission_classes = [IsAuthenticated]
 

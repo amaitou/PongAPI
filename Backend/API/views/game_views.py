@@ -13,6 +13,11 @@ from django.db.models import Q
 
 class GameResultRecordingView(APIView):
 
+    """
+    View for recording the results of a game. It validates and saves the game result 
+    using the provided player usernames, scores, and related data.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request: Request) -> Response:
@@ -49,6 +54,10 @@ class GameResultRecordingView(APIView):
 
 class GameStatsView(APIView):
 
+    """
+    View for retrieving game statistics for the authenticated user.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request: Request) -> Response:
@@ -71,6 +80,11 @@ class GameStatsView(APIView):
     
 
 class UserGameHistoryView(APIView):
+
+    """
+    View for retrieving the game history of the authenticated user. Returns the latest 
+    5 games played by the user, if available.
+    """
 
     permission_classes = [IsAuthenticated]
 
@@ -95,6 +109,11 @@ class UserGameHistoryView(APIView):
 
 class GameHistoryView(APIView):
 
+    """
+    View for retrieving the complete game history. This includes all game results 
+    recorded in the system.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request: Request) -> Response:
@@ -117,6 +136,11 @@ class GameHistoryView(APIView):
         }, status = status.HTTP_200_OK)
 
 class GameStateUpdatingView(APIView):
+
+    """
+    View for updating game statistics for the authenticated user. The update is 
+    partially applied to the user's game stats.
+    """
 
     permission_classes = [IsAuthenticated]
 

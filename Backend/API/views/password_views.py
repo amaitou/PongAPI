@@ -15,6 +15,12 @@ import jwt
 
 class PasswordUpdatingView(APIView):
 
+	"""
+	This view allows the authenticated user to update their password. The user
+    must provide the old password and the new password for validation. If the
+    password is updated successfully, a success message is returned.
+	"""
+
 	permission_classes = [IsAuthenticated]
 
 	def put(self, request: Request) -> Response:
@@ -39,6 +45,12 @@ class PasswordUpdatingView(APIView):
 		status=status.HTTP_200_OK)
 
 class PasswordResettingView(APIView):
+
+	"""
+	This view allows a user to initiate the password reset process by providing
+    their email address. A reset email with a one-time token is sent if the email
+    is valid. If the email does not exist, a message is returned.
+	"""
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
@@ -80,6 +92,12 @@ class PasswordResettingView(APIView):
 		status=status.HTTP_200_OK)
 
 class PasswordVerificationView(APIView):
+
+	"""
+	This view verifies the validity of a password reset token sent via email.
+    The token must be valid, not expired, and have the correct purpose. If the
+    token is valid, it confirms the token; otherwise, an error message is returned.
+	"""
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
@@ -128,6 +146,12 @@ class PasswordVerificationView(APIView):
 		status=status.HTTP_200_OK)
 
 class PasswordConfirmationView(APIView):
+
+	"""
+	This view allows the user to confirm the password reset by providing a valid
+    verification token and the new password. If the token is valid and matches the
+    purpose of password resetting, the user's password is updated.
+	"""
 
 	permission_classes = [AllowAny]
 	authentication_classes = []

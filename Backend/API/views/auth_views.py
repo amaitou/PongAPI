@@ -24,6 +24,13 @@ import jwt
 
 class RegistrationView(APIView):
 
+	"""
+    This view handles user registration by accepting user data via a POST request, 
+    validating it using the RegistrationSerializer, and saving the user details. 
+    After registration, it creates associated game statistics for the user and sends 
+    an email verification link containing a one-time JWT for account confirmation.
+    """
+
 	permission_classes = [AllowAny]
 	authentication_classes = []
 
@@ -66,6 +73,13 @@ class RegistrationView(APIView):
 		status=status.HTTP_201_CREATED)
 
 class Authentication42View(APIView):
+
+	"""
+    This view manages authentication via the 42 API using OAuth2. It processes access tokens 
+    and user data retrieved from the API to handle user login or registration. If the user 
+    does not exist, it registers them; otherwise, it logs them in. On successful login or 
+    registration, the view sets access and refresh tokens in cookies for the user session.
+    """
 
 	permission_classes = [AllowAny]
 
@@ -194,6 +208,13 @@ class Authentication42View(APIView):
 
 class LoginConfirmationView(APIView):
 
+	"""
+    This view handles user login by accepting a username and password via a POST request. 
+    It authenticates the user and generates JWT tokens. If two-factor authentication (2FA) 
+    is enabled for the user, it sends a one-time password (OTP) to their email. If 2FA is 
+    not enabled, the view completes the login process and sets tokens in cookies.
+    """
+
 	permission_classes = [AllowAny]
 
 	def post(self, request: Request) -> Response:
@@ -263,6 +284,13 @@ class LoginConfirmationView(APIView):
 		return response
 
 class TwoFactorAuthenticationView(APIView):
+
+	"""
+    This view handles two-factor authentication (2FA) verification during login. It accepts 
+    an OTP and a verification token via a POST request, verifies the provided credentials, 
+    and completes the login process upon successful verification. Once verified, JWT tokens 
+    are set in cookies for the authenticated user.
+    """
 
 	permission_classes = [AllowAny]
 
@@ -349,6 +377,13 @@ class TwoFactorAuthenticationView(APIView):
 
 class LogoutView(APIView):
 
+	"""
+    This view handles user logout by accepting a POST request. It retrieves the refresh 
+    token from cookies, validates it, and blacklists it to prevent further use. If the 
+    token is invalid, expired, or not provided, the view returns an appropriate error 
+    response. Upon successful logout, the access and refresh tokens are removed from cookies.
+    """
+
 	permission_classes = [IsAuthenticated]
 
 	def post(self, request: Request) -> Response:
@@ -381,6 +416,15 @@ class LogoutView(APIView):
 		return response
 
 class EmailVerificationView(APIView):
+
+	"""
+    This view manages email verification via a GET request containing a verification 
+    token as a query parameter. It decodes and validates the token, checking its purpose 
+    and expiration status. If valid, it retrieves the user associated with the token, 
+    verifies their email, and updates their verification status in the database. 
+    Appropriate error responses are returned for missing, invalid, or expired tokens, 
+    as well as if the user cannot be found.
+    """
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
