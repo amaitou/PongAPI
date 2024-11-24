@@ -42,7 +42,7 @@ class RegistrationView(APIView):
 			serializer.is_valid(raise_exception=True)
 		except serializers.ValidationError as e:
 			return Response({
-				'error': e.detail
+				'error': e.detail[Utils.retrieve_key_from_serializer_error(e)],
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 
@@ -272,7 +272,7 @@ class LoginConfirmationView(APIView):
 
 		user.save()
 
-		token = Utils.create_one_time_jwt(user)
+		token = Utils.create_one_time_jwt(user, "login_verification")
 
 		response = Response({
 			'success': "check your email for verification code",

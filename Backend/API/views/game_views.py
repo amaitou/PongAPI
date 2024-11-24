@@ -9,6 +9,7 @@ from ..serializers.game_serializer import *
 from rest_framework.views import APIView
 from rest_framework import status
 from django.db.models import Q
+from ..utils import Utils
 
 
 class GameResultRecordingView(APIView):
@@ -49,7 +50,7 @@ class GameResultRecordingView(APIView):
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
             return Response({
-                'error': e.detail
+                'error': e.detail[Utils.retrieve_key_from_serializer_error(e)],
             },
             status = status.HTTP_400_BAD_REQUEST)
         
@@ -166,7 +167,7 @@ class GameStateUpdatingView(APIView):
             serializer.is_valid(raise_exception = True)
         except ValidationError as e:
             return Response({
-                'error': e.detail
+                'error': e.detail[Utils.retrieve_key_from_serializer_error(e)],
             },
             status = status.HTTP_400_BAD_REQUEST)
         
