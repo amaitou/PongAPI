@@ -1,4 +1,8 @@
 
+runserver:
+	@echo "Running server..."
+	@python3 Backend/manage.py runserver
+
 venv:
 	@echo "creating the virtual_env mode"
 	@python3 -m venv venv
@@ -21,10 +25,6 @@ clean: remove_pycache remove_pyc
 
 fclean: clean remove_migrations
 	@echo "Full cleaning done!"
-
-runserver:
-	@echo "Running server..."
-	@python3 Backend/manage.py runserver
 
 shell:
 	@echo "Running python shell..."
