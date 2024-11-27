@@ -44,6 +44,59 @@ before we dive into the project, I would like to extend my sincere thanks to the
 
 ---
 
+# Project Structure
+
+```Markdown
+├── .env
+├── .gitignore
+├── Backend
+│  ├── API
+│  │  ├── __init__.py
+│  │  ├── admin.py
+│  │  ├── apps.py
+│  │  ├── authentication.py
+│  │  ├── middlewares.py
+│  │  ├── migrations
+│  │  │  ├── 0001_initial.py
+│  │  │  ├── __init__.py
+│  │  ├── models.py
+│  │  ├── serializers
+│  │  │  ├── __init__.py
+│  │  │  ├── game_serializer.py
+│  │  │  ├── password_serializer.py
+│  │  │  ├── user_serializer.py
+│  │  ├── tests.py
+│  │  ├── urls.py
+│  │  ├── utils.py
+│  │  ├── views
+│  │  │  ├── __init__.py
+│  │  │  ├── auth_views.py
+│  │  │  ├── game_views.py
+│  │  │  ├── password_views.py
+│  │  │  ├── profile_views.py
+│  ├── Backend
+│  │  ├── __init__.py
+│  │  ├── asgi.py
+│  │  ├── settings.py
+│  │  ├── urls.py
+│  │  ├── wsgi.py
+│  ├── db.sqlite3
+│  ├── manage.py
+│  ├── media
+│  │  ├── avatars
+│  │  │  ├── girl.png
+│  │  │  ├── man.png
+│  │  │  ├── unknown.png
+│  │  │  ├── woman.png
+│  ├── superuser_creation.py
+├── LICENSE
+├── Makefile
+├── README.md
+├── requirements.txt
+```
+
+---
+
 # Features
 
 - ### User Authentication & Authorization
