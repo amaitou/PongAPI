@@ -1,4 +1,10 @@
 
+---
+![5-new-things-rest-specification](https://github.com/user-attachments/assets/b38326de-b4c8-406a-9279-6f61c47c0c4b)
+
+
+---
+
 # Overview
 
 The Pong Game **API** provides backend services for managing users, handling authentication, and tracking game statistics for the Pong Game. It was created as part of the Transcendence project under the 42 project initiative.
@@ -30,7 +36,7 @@ before we dive into the project, I would like to extend my sincere thanks to the
 - ### User Authentication & Authorization
 
     - JWT-based authentication with secure access and refresh tokens.
-    - Two-Factor Authentication (2FA) for added security.
+    - Two-factor authentication (2FA) for added security.
     - Email verification and account management.
 
     ---
@@ -83,7 +89,7 @@ make requirements
 - Configure environment variables
 
 ```sh
-# 42 Authentication Criedantials
+# 42 Authentication Credentials
 CLIENT_ID = "your 42 client id"
 CLIENT_SECRET = "your 42 client secret"
 REDIRECT = "http://127.0.0.1:8000/api/callback"
@@ -92,7 +98,7 @@ TOKEN_URL = "https://api.intra.42.fr/oauth/token"
 USER_INFO_URL = "https://api.intra.42.fr/v2/me"
 
 # Secret Key
-SECRET_KEY = 'your secret django from django settings'
+SECRET_KEY = 'your secret Django from Django settings'
 
 # Short Names
 ACCESS_TOKEN = "access_token"
@@ -120,7 +126,7 @@ make migrate
 
 - (Optional) Create a superuser
 
-change this credentials inside **superuser_creation.py**
+change these credentials inside **superuser_creation.py**
 
 ```python
 if not User.objects.filter(username='admin').exists():
