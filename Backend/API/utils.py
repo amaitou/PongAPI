@@ -52,6 +52,7 @@ class Utils:
         The type of token ('access' or 'refresh') is specified by '__type'.
         If the user does not exist or an error occurs, it returns None.
         """
+
         if __type == 'refresh':
             try:
                 refresh_token = RefreshToken(token)
