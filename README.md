@@ -2,8 +2,19 @@
 ---
 ![5-new-things-rest-specification](https://github.com/user-attachments/assets/b38326de-b4c8-406a-9279-6f61c47c0c4b)
 
-
 ---
+
+# Table of content
+
+- [Overview](https://github.com/amaitou/PongAPI/blob/master/README.md#overview)
+- [Acknowledgments](https://github.com/amaitou/PongAPI/blob/master/README.md#acknowledgments)
+- [Features](https://github.com/amaitou/PongAPI/blob/master/README.md#features)
+    - [User Authentication & Authorization](https://github.com/amaitou/PongAPI/blob/master/README.md#user-authentication--authorization)
+    - [User Management](https://github.com/amaitou/PongAPI/blob/master/README.md#user-management)
+    - [Security Measures](https://github.com/amaitou/PongAPI/blob/master/README.md#security-measures)
+- [Installation](https://github.com/amaitou/PongAPI/blob/master/README.md#installation)
+- [Security](https://github.com/amaitou/PongAPI/blob/master/README.md#security)
+- [License](https://github.com/amaitou/PongAPI/blob/master/README.md#license)
 
 # Overview
 
@@ -57,7 +68,7 @@ before we dive into the project, I would like to extend my sincere thanks to the
 
     ---
 
-- ### Installation
+#  Installation
 
 if you want to dive deep into this PongAPI you can follow these instructions to run it properly:
 
