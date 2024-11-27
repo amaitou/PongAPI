@@ -40,6 +40,8 @@ before we dive into the project, I would like to extend my sincere thanks to the
 
 **[Ali El Amine](https://github.com/Root-07)**: Designed and implemented the tournament logic, enabling users to participate in competitive tournaments. His work added a critical social and competitive layer to the project, making it more engaging for users.
 
+**[Mourad Bouyahyaoui](https://github.com/mbouyahy)**: Created the online TicTacToe game with all its aspects inside the ft_transcendence project. His contribution added a fun and interactive side game to the project, enhancing its overall appeal.
+
 > We made many projects together, and we have grown up professionally together." 🌱
 
 ---
