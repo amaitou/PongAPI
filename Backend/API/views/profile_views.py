@@ -123,7 +123,7 @@ class FriendOperationsView(APIView):
 			},
 			status=status.HTTP_400_BAD_REQUEST)
 	
-		if request.user.username != sender:
+		if user.username != sender:
 			return Response({
 				'error': 'You are not authorized to send this request',
 			},

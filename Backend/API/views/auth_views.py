@@ -484,7 +484,7 @@ class EmailVerificationView(APIView):
 
 	def get(self, request: Request) -> Response:
 
-		token = request.GET.get('token')
+		token = request.query_params.get('token')
 
 		if not token:
 			return Response({

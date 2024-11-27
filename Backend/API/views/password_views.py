@@ -106,7 +106,7 @@ class PasswordVerificationView(APIView):
 
 	def get(self, request: Request) -> Response:
 
-		verification_token = request.GET.get('token')
+		verification_token = request.query_params.get('token')
 
 		if not verification_token:
 			return Response({
@@ -160,7 +160,7 @@ class PasswordConfirmationView(APIView):
 
 	def post(self, request: Request) -> Response:
 
-		verification_token = request.GET.get('token')
+		verification_token = request.query_params.get('token')
 
 		if not verification_token:
 			return Response({
