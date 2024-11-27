@@ -16,6 +16,8 @@
 - [Security](https://github.com/amaitou/PongAPI/blob/master/README.md#security)
 - [License](https://github.com/amaitou/PongAPI/blob/master/README.md#license)
 
+---
+
 # Overview
 
 The Pong Game **API** provides backend services for managing users, handling authentication, and tracking game statistics for the Pong Game. It was created as part of the Transcendence project under the 42 project initiative.
