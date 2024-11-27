@@ -146,3 +146,8 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # SSL Certificates
 os.environ['SSL_CERT_FILE'] = certifi.where()
+
+
+# Default protocol for API
+
+HTTPS_ENABLED = True

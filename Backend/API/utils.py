@@ -8,6 +8,7 @@ from datetime import timedelta
 from django.utils import timezone
 import jwt
 from django.conf import settings
+from typing import Union
 
 class Utils:
 
@@ -143,3 +144,19 @@ class Utils:
         This method retrieves the key from a serializer error.
         """
         return list(e.detail.keys())[0]
+
+    @staticmethod
+    def set_protocol() -> bool:
+
+        """
+        This method checks if the request is using HTTPS.
+        """
+        return settings.HTTPS_ENABLED
+    
+    @staticmethod
+    def set_cross_origin_value() -> Union[str, None]:
+
+        """
+        This method sets the cross-origin value
+        """
+        return 'None' if Utils.set_protocol() else None

@@ -21,7 +21,6 @@ from ..utils import Utils
 import requests
 import jwt
 
-
 class RegistrationView(APIView):
 
 	"""
@@ -150,8 +149,17 @@ class Authentication42View(APIView):
 
 			__jwt = Utils.create_jwt_for_user(serializer.instance)
 
-			response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
-			response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
+			response.set_cookie(settings.ACCESS_TOKEN,
+					__jwt['access_token'],
+					httponly=True,
+					secure= Utils.set_protocol(),
+					samesite=Utils.set_cross_origin_value())
+
+			response.set_cookie(settings.REFRESH_TOKEN,
+					__jwt['refresh_token'],
+					httponly=True,
+					secure= Utils.set_protocol(),
+					samesite=Utils.set_cross_origin_value())
 
 			return response
 
@@ -172,8 +180,17 @@ class Authentication42View(APIView):
 
 			__jwt = Utils.create_jwt_for_user(user)
 
-			response.set_cookie(settings.ACCESS_TOKEN, __jwt['access_token'], httponly=False)
-			response.set_cookie(settings.REFRESH_TOKEN, __jwt['refresh_token'], httponly=True)
+			response.set_cookie(settings.ACCESS_TOKEN,
+					__jwt['access_token'],
+					httponly=True,
+					secure= Utils.set_protocol(),
+					samesite=Utils.set_cross_origin_value())
+
+			response.set_cookie(settings.REFRESH_TOKEN,
+					__jwt['refresh_token'],
+					httponly=True,
+					secure= Utils.set_protocol(),
+					samesite=Utils.set_cross_origin_value())
 
 			return response
 
@@ -251,8 +268,17 @@ class LoginConfirmationView(APIView):
 
 			__jwt = Utils.create_jwt_for_user(user)
 
-			response.set_cookie(settings.ACCESS_TOKEN, __jwt[settings.ACCESS_TOKEN], httponly=False)
-			response.set_cookie(settings.REFRESH_TOKEN, __jwt[settings.REFRESH_TOKEN], httponly=True)
+			response.set_cookie(settings.ACCESS_TOKEN,
+					__jwt['access_token'],
+					httponly=True,
+					secure= Utils.set_protocol(),
+					samesite=Utils.set_cross_origin_value())
+
+			response.set_cookie(settings.REFRESH_TOKEN,
+					__jwt['refresh_token'],
+					httponly=True,
+					secure= Utils.set_protocol(),
+					samesite=Utils.set_cross_origin_value())
 
 			return response
 		
@@ -369,8 +395,18 @@ class TwoFactorAuthenticationView(APIView):
 
 		__jwt = Utils.create_jwt_for_user(user)
 
-		response.set_cookie(settings.ACCESS_TOKEN, __jwt[settings.ACCESS_TOKEN], httponly=False)
-		response.set_cookie(settings.REFRESH_TOKEN, __jwt[settings.REFRESH_TOKEN], httponly=True)
+		response.set_cookie(settings.ACCESS_TOKEN,
+					__jwt['access_token'],
+					httponly=True,
+					secure= Utils.set_protocol(),
+					samesite=Utils.set_cross_origin_value())
+
+		response.set_cookie(settings.REFRESH_TOKEN,
+				__jwt['refresh_token'],
+				httponly=True,
+				secure= Utils.set_protocol(),
+				samesite=Utils.set_cross_origin_value())
+
 		response.delete_cookie('verification_token')
 
 		return response
