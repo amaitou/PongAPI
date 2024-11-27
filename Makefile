@@ -30,7 +30,7 @@ shell:
 	@echo "Running python shell..."
 	@python3 Backend/manage.py shell
 
-migrate:
+migrate: makemigrations
 	@echo "Migrating..."
 	@python3 Backend/manage.py migrate
 
