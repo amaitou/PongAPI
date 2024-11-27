@@ -23,7 +23,7 @@ remove_pyc:
 clean: remove_pycache remove_pyc
 	@echo "Cleaning done!"
 
-fclean: clean remove_migrations
+fclean: clean
 	@echo "Full cleaning done!"
 
 shell:
