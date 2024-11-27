@@ -16,6 +16,9 @@ class UserInfo(AbstractUser):
     otp_code = models.CharField(max_length = 6, null = True, blank = True)
     otp_time = models.DateTimeField(blank = True, null = True)
     password = models.CharField(max_length = 128, null = True, blank = True)
+    email = models.EmailField(unique = True,
+                null = False,
+                error_messages = {'unique': 'A user with that email already exists.'})
 
     class Meta:
         
@@ -23,8 +26,9 @@ class UserInfo(AbstractUser):
         verbose_name = 'UserInfo'
         verbose_name_plural = 'UserInfo'
     
-    USERNAME_FIELD = 'username'
-    read_only_fields = ['id']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
     
     def __str__(self) -> str:
         return f"{self.username}"
