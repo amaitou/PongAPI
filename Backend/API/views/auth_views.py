@@ -8,6 +8,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
+from django.http import HttpResponseRedirect
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework import serializers
@@ -24,18 +25,37 @@ import jwt
 class RegistrationView(APIView):
 
 	"""
-    This view handles user registration by accepting user data via a POST request, 
-    validating it using the RegistrationSerializer, and saving the user details. 
-    After registration, it creates associated game statistics for the user and sends 
-    an email verification link containing a one-time JWT for account confirmation.
-    """
+	This view handles user registration by accepting user data via a POST request, 
+	validating it using the RegistrationSerializer, and saving the user details. 
+	After registration, it creates associated game statistics for the user and sends 
+	an email verification link containing a one-time JWT for account confirmation.
+	"""
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
 
+	def create_unique_username(self, original_username):
+		"""
+		This method creates a unique username by appending a counter to the original username.
+		"""
+		base_username = original_username
+		counter = 1
+		while UserInfo.objects.filter(username=original_username).exists():
+			original_username = f"{base_username}_{counter}"
+			counter += 1
+		
+		return original_username
+
 	def post(self, request: Request) -> Response:
 
-		serializer = RegistrationSerializer(data=request.data, context={'request': request})
+		registration_data = request.data.copy()
+		current_username = registration_data.get('username')
+
+		if current_username and UserInfo.objects.filter(username=current_username).exists():
+			registration_data['username'] = self.create_unique_username(current_username)
+
+		serializer = RegistrationSerializer(data=registration_data,
+				context={'request': request})
 
 		try:
 			serializer.is_valid(raise_exception=True)
@@ -47,8 +67,8 @@ class RegistrationView(APIView):
 
 		serializer.save()
 
-		ugs = UserGameStats.objects.create(user_id = serializer.instance)
-		ugs.save()
+		user_game_stats = UserGameStats.objects.create(user_id = serializer.instance)
+		user_game_stats.save()
 
 		token = Utils.create_one_time_jwt(serializer.instance, "email_verification")
 
@@ -74,12 +94,9 @@ class RegistrationView(APIView):
 class Authentication42View(APIView):
 
 	"""
-    This view manages authentication via the 42 API using OAuth2. It processes access tokens 
-    and user data retrieved from the API to handle user login or registration. If the user 
-    does not exist, it registers them; otherwise, it logs them in. On successful login or 
-    registration, the view sets access and refresh tokens in cookies for the user session.
-    """
-
+	The Authentication42View is a Django REST Framework view that handles OAuth authentication with 42's authentication service.
+	It provides a streamlined process for user registration and login using 42's OAuth credentials.
+	"""
 	permission_classes = [AllowAny]
 
 	def __init__(self):
@@ -97,10 +114,10 @@ class Authentication42View(APIView):
 		return self.code
 	
 	def __get_token(self) -> str:
-		__token = requests.post("https://api.intra.42.fr/oauth/token/", data=self.data)
-		if not "access_token" in __token.json():
+		token = requests.post("https://api.intra.42.fr/oauth/token/", data=self.data)
+		if not "access_token" in token.json():
 			return None
-		return __token.json()['access_token']
+		return token.json()['access_token']
 
 	def __get_user(self, access_token: str) -> dict:
 		user = requests.get("https://api.intra.42.fr/v2/me", headers={
@@ -111,91 +128,88 @@ class Authentication42View(APIView):
 	def __set_code_in_data(self, code: str) -> None:
 		self.data['code'] = code.encode('utf-8')
 
-	def __register_user(self, user: dict, request: Request) -> None:
+	def __generate_unique_username(self, base_username: str) -> str:
+		"""Generate a unique username by appending numbers if the base username exists."""
+		username = base_username
+		counter = 1
+		
+		while UserInfo.objects.filter(username=username).exists():
+			username = f"{base_username}{counter}"
+			counter += 1
+			
+		return username
 
+	def __process_avatar(self, avatar_url: str) -> SimpleUploadedFile:
+		"""Process and return avatar file from URL."""
+		requested_avatar = requests.get(avatar_url)
+		avatar_name = avatar_url.split('/')[-1]
+		return SimpleUploadedFile(avatar_name, requested_avatar.content, content_type='image/jpg')
+
+	def __create_response(self, user: UserInfo) -> HttpResponseRedirect:
+		"""Create HTTP response with JWT tokens."""
+		response = HttpResponseRedirect('https://127.0.0.1/')
+		jwt = Utils.create_jwt_for_user(user)
+		
+		response.set_cookie(
+			settings.ACCESS_TOKEN, 
+			jwt['access_token'], 
+			httponly=False, 
+			secure=True, 
+			samesite='None'
+		)
+		response.set_cookie(
+			settings.REFRESH_TOKEN, 
+			jwt['refresh_token'], 
+			httponly=True, 
+			secure=True, 
+			samesite='None'
+		)
+		
+		return response
+
+	def __register_user(self, user: dict, request: Request) -> HttpResponseRedirect:
 		first_name = user['first_name']
 		last_name = user['last_name']
-		username = user['login']
+		base_username = user['login']
 		email = user['email']
-		avatar = user['image']['link']
+		avatar_url = user['image']['link']
 
-		requested_avatar = requests.get(avatar)
-		avatar_name = avatar.split('/')[-1]
-		avatar = SimpleUploadedFile(avatar_name, requested_avatar.content, content_type='image/jpg')
+		existing_user = UserInfo.objects.filter(email=email).first()
+		if existing_user:
+			return self.__create_response(existing_user)
 
-		serializer = RegistrationSerializer(data={
+		username = self.__generate_unique_username(base_username)
+		avatar = self.__process_avatar(avatar_url)
+
+		user_data = {
 			'username': username,
 			'first_name': first_name,
 			'last_name': last_name,
 			'email': email,
-			"gender": "M",
-			"avatar": avatar,
-		}, context={'request': request})
+			'gender': 'M',
+			'avatar': avatar,
+		}
+
+		serializer = RegistrationSerializer(
+			data=user_data, 
+			context={'request': request}
+		)
 
 		if serializer.is_valid():
-			serializer.save()
+			user = serializer.save()
+			user.is_verified = True
+			user.save()
 
-			serializer.instance.is_verified = True
-			serializer.instance.save()
+			UserGameStats.objects.create(user_id=user)
 
-			ugs = UserGameStats.objects.create(user_id = serializer.instance)
-			ugs.save()
-
-			response = Response({
-				'success': 'User registered successfully',
-				'user': serializer.data,
-			},
-			status=status.HTTP_201_CREATED)
-
-			__jwt = Utils.create_jwt_for_user(serializer.instance)
-
-			response.set_cookie(settings.ACCESS_TOKEN,
-					__jwt['access_token'],
-					httponly=True,
-					secure= Utils.set_protocol(),
-					samesite=Utils.set_cross_origin_value())
-
-			response.set_cookie(settings.REFRESH_TOKEN,
-					__jwt['refresh_token'],
-					httponly=True,
-					secure= Utils.set_protocol(),
-					samesite=Utils.set_cross_origin_value())
-
-			return response
-
-		else:
-			try:
-				user = UserInfo.objects.get(username=username)
-			except UserInfo.DoesNotExist:
-				return Response({
-					'error': 'failed to authenticate',
-				},
-				status=status.HTTP_400_BAD_REQUEST)
-			
-			response = Response({
-				'success': 'Login successful',
-				'user': GetBasicUserInfoSerializer(user, context = {'request': request}).data
-			},
-			status=status.HTTP_200_OK)
-
-			__jwt = Utils.create_jwt_for_user(user)
-
-			response.set_cookie(settings.ACCESS_TOKEN,
-					__jwt['access_token'],
-					httponly=True,
-					secure= Utils.set_protocol(),
-					samesite=Utils.set_cross_origin_value())
-
-			response.set_cookie(settings.REFRESH_TOKEN,
-					__jwt['refresh_token'],
-					httponly=True,
-					secure= Utils.set_protocol(),
-					samesite=Utils.set_cross_origin_value())
-
-			return response
+			return self.__create_response(user)
+		
+		return Response(
+			{'error': 'Failed to register user', 'details': serializer.errors},
+			status=status.HTTP_400_BAD_REQUEST
+		)
 
 	def get(self, request: Request) -> Response:
-
 		if request.user.is_authenticated:
 			return Response({
 				'success': 'User already logged in',
@@ -226,11 +240,11 @@ class Authentication42View(APIView):
 class LoginConfirmationView(APIView):
 
 	"""
-    This view handles user login by accepting a username and password via a POST request. 
-    It authenticates the user and generates JWT tokens. If two-factor authentication (2FA) 
-    is enabled for the user, it sends a one-time password (OTP) to their email. If 2FA is 
-    not enabled, the view completes the login process and sets tokens in cookies.
-    """
+	This view handles user login by accepting a username and password via a POST request. 
+	It authenticates the user and generates JWT tokens. If two-factor authentication (2FA) 
+	is enabled for the user, it sends a one-time password (OTP) to their email. If 2FA is 
+	not enabled, the view completes the login process and sets tokens in cookies.
+	"""
 
 	permission_classes = [AllowAny]
 
@@ -242,14 +256,14 @@ class LoginConfirmationView(APIView):
 			},
 			status=status.HTTP_200_OK)
 
-		username = request.data.get("username")
+		email = request.data.get("email")
 		password = request.data.get("password")
 
-		user = authenticate(request, username=username, password=password)
+		user = authenticate(request, email=email, password=password)
 
 		if not user:
 			return Response({
-				'error': 'Invalid username or password',
+				'error': 'Invalid email or password',
 			},
 			status=status.HTTP_401_UNAUTHORIZED)
 		
@@ -305,18 +319,21 @@ class LoginConfirmationView(APIView):
 		},
 		status=status.HTTP_200_OK)
 
-		response.set_cookie("verification_token", str(token), httponly=False)
+		response.set_cookie("verification_token", str(token),
+				httponly=True,
+				secure=Utils.set_protocol(),
+				samesite=Utils.set_cross_origin_value())
 
 		return response
 
 class TwoFactorAuthenticationView(APIView):
 
 	"""
-    This view handles two-factor authentication (2FA) verification during login. It accepts 
-    an OTP and a verification token via a POST request, verifies the provided credentials, 
-    and completes the login process upon successful verification. Once verified, JWT tokens 
-    are set in cookies for the authenticated user.
-    """
+	This view handles two-factor authentication (2FA) verification during login. It accepts 
+	an OTP and a verification token via a POST request, verifies the provided credentials, 
+	and completes the login process upon successful verification. Once verified, JWT tokens 
+	are set in cookies for the authenticated user.
+	"""
 
 	permission_classes = [AllowAny]
 
@@ -414,11 +431,11 @@ class TwoFactorAuthenticationView(APIView):
 class LogoutView(APIView):
 
 	"""
-    This view handles user logout by accepting a POST request. It retrieves the refresh 
-    token from cookies, validates it, and blacklists it to prevent further use. If the 
-    token is invalid, expired, or not provided, the view returns an appropriate error 
-    response. Upon successful logout, the access and refresh tokens are removed from cookies.
-    """
+	This view handles user logout by accepting a POST request. It retrieves the refresh 
+	token from cookies, validates it, and blacklists it to prevent further use. If the 
+	token is invalid, expired, or not provided, the view returns an appropriate error 
+	response. Upon successful logout, the access and refresh tokens are removed from cookies.
+	"""
 
 	permission_classes = [IsAuthenticated]
 
@@ -454,13 +471,13 @@ class LogoutView(APIView):
 class EmailVerificationView(APIView):
 
 	"""
-    This view manages email verification via a GET request containing a verification 
-    token as a query parameter. It decodes and validates the token, checking its purpose 
-    and expiration status. If valid, it retrieves the user associated with the token, 
-    verifies their email, and updates their verification status in the database. 
-    Appropriate error responses are returned for missing, invalid, or expired tokens, 
-    as well as if the user cannot be found.
-    """
+	This view manages email verification via a GET request containing a verification 
+	token as a query parameter. It decodes and validates the token, checking its purpose 
+	and expiration status. If valid, it retrieves the user associated with the token, 
+	verifies their email, and updates their verification status in the database. 
+	Appropriate error responses are returned for missing, invalid, or expired tokens, 
+	as well as if the user cannot be found.
+	"""
 
 	permission_classes = [AllowAny]
 	authentication_classes = []
